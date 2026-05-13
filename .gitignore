@@ -1,0 +1,17 @@
+# ──────────────────────────────────────────────────
+# Root .gitignore
+# ──────────────────────────────────────────────────
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+.vercel
+.env
+.env.*
+.env*.local
