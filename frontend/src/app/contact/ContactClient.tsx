@@ -141,21 +141,6 @@ export default function ContactClient() {
               })}
             </StaggerContainer>
 
-            {/* Google Map */}
-            <MotionWrapper variant="fade-up">
-              <div className="rounded-2xl overflow-hidden border border-gray-100 shadow-md">
-                <iframe
-                  src={MAP_EMBED_SRC}
-                  width="100%"
-                  height="260"
-                  style={{ border: 0 }}
-                  allowFullScreen
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                  title="Get Tours Nepal Location"
-                />
-              </div>
-            </MotionWrapper>
           </div>
 
           {/* Contact Form */}
