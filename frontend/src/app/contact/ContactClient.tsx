@@ -1,11 +1,41 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import MotionWrapper, { StaggerContainer, StaggerItem } from "@/components/shared/MotionWrapper";
 import PageHero from "@/components/sections/PageHero";
-import { submitContact } from "@/lib/api";
+import { submitContact, getSiteConfig, type SiteConfig } from "@/lib/api";
 import { sectionImages } from "@/lib/sectionImages";
+
+/**
+ * Convert any user-supplied Google Maps URL into an embeddable iframe src.
+ * Accepts:
+ *  - Already-embed URLs (https://www.google.com/maps/embed?pb=...)
+ *  - Share links (https://maps.app.goo.gl/..., https://goo.gl/maps/...)
+ *  - Place / search URLs (https://www.google.com/maps/place/..., /search/...)
+ *  - Plain text address (used as q= parameter)
+ */
+function toEmbedSrc(raw: string | null | undefined, fallbackQuery: string): string {
+  const value = (raw || "").trim();
+  if (!value) {
+    return `https://www.google.com/maps?q=${encodeURIComponent(fallbackQuery)}&z=15&output=embed`;
+  }
+  // Already an embed URL
+  if (/google\.[^/]+\/maps\/embed/i.test(value)) {
+    return value;
+  }
+  // Plain google.com/maps URL — append output=embed
+  if (/^https?:\/\/(www\.)?google\.[^/]+\/maps/i.test(value)) {
+    const sep = value.includes("?") ? "&" : "?";
+    return `${value}${sep}output=embed`;
+  }
+  // Short share link or any other URL — fall back to wrapping it in q=
+  if (/^https?:\/\//i.test(value)) {
+    return `https://www.google.com/maps?q=${encodeURIComponent(value)}&output=embed`;
+  }
+  // Plain text address
+  return `https://www.google.com/maps?q=${encodeURIComponent(value)}&z=15&output=embed`;
+}
 
 export default function ContactClient() {
   const [formData, setFormData] = useState({
@@ -18,6 +48,13 @@ export default function ContactClient() {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
+  const [config, setConfig] = useState<Partial<SiteConfig>>({});
+
+  useEffect(() => {
+    getSiteConfig()
+      .then((c) => setConfig(c || {}))
+      .catch(() => {});
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,6 +70,42 @@ export default function ContactClient() {
       setSubmitting(false);
     }
   };
+
+  const phone = (config.phone || "").trim();
+  const email = (config.email || "").trim();
+  const address = (config.address || "").trim();
+  const mapUrl = (config.google_map_url || "").trim();
+
+  const addressLines = useMemo(() => address.split(/\r?\n|,\s*/).map((l) => l.trim()).filter(Boolean), [address]);
+  const phoneLines = useMemo(() => phone.split(/\r?\n|,\s*/).map((l) => l.trim()).filter(Boolean), [phone]);
+  const emailLines = useMemo(() => email.split(/\r?\n|,\s*/).map((l) => l.trim()).filter(Boolean), [email]);
+
+  const mapEmbedSrc = toEmbedSrc(mapUrl, address || "Thamel, Kathmandu, Nepal");
+  const mapOpenUrl = mapUrl && /^https?:\/\//i.test(mapUrl)
+    ? mapUrl
+    : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address || "Thamel, Kathmandu, Nepal")}`;
+
+  const infoCards = [
+    {
+      icon: "M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z",
+      icon2: "M15 11a3 3 0 11-6 0 3 3 0 016 0z",
+      title: "Visit Us",
+      lines: addressLines.length > 0 ? addressLines : ["Address not set yet."],
+      href: address ? mapOpenUrl : null,
+    },
+    {
+      icon: "M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z",
+      title: "Email Us",
+      lines: emailLines.length > 0 ? emailLines : ["Email not set yet."],
+      href: emailLines[0] ? `mailto:${emailLines[0]}` : null,
+    },
+    {
+      icon: "M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z",
+      title: "Call Us",
+      lines: phoneLines.length > 0 ? phoneLines : ["Phone not set yet."],
+      href: phoneLines[0] ? `tel:${phoneLines[0].replace(/\s+/g, "")}` : null,
+    },
+  ];
 
   return (
     <div className="flex flex-col overflow-x-hidden">
@@ -69,43 +142,35 @@ export default function ContactClient() {
 
             {/* Info Cards */}
             <StaggerContainer className="space-y-4" staggerDelay={0.1}>
-              {[
-                {
-                  icon: "M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z",
-                  icon2: "M15 11a3 3 0 11-6 0 3 3 0 016 0z",
-                  title: "Visit Us",
-                  lines: ["Thamel, Kathmandu", "Nepal 44600"],
-                },
-                {
-                  icon: "M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z",
-                  title: "Email Us",
-                  lines: ["info@gettours.com.np", "bookings@gettours.com.np"],
-                },
-                {
-                  icon: "M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z",
-                  title: "Call Us",
-                  lines: ["Available on request", "Visit us or email for details"],
-                },
-              ].map((info) => (
-                <StaggerItem key={info.title}>
+              {infoCards.map((info) => {
+                const cardInner = (
                   <div
                     className="flex items-start gap-3 sm:gap-4 p-5 sm:p-6 rounded-2xl bg-white/90 backdrop-blur-xl hover:bg-white hover:shadow-[0_12px_32px_-8px_rgba(0,0,0,0.1)] transition-all duration-500 border border-gray-100/50 hover:-translate-y-1"
                   >
-                  <div className="w-12 h-12 bg-brand-navy/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <svg className="w-6 h-6 text-brand-navy" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d={info.icon} />
-                      {info.icon2 && <path strokeLinecap="round" strokeLinejoin="round" d={info.icon2} />}
-                    </svg>
+                    <div className="w-12 h-12 bg-brand-navy/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <svg className="w-6 h-6 text-brand-navy" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d={info.icon} />
+                        {info.icon2 && <path strokeLinecap="round" strokeLinejoin="round" d={info.icon2} />}
+                      </svg>
+                    </div>
+                    <div className="min-w-0">
+                      <h3 className="font-bold text-brand-navy mb-1">{info.title}</h3>
+                      {info.lines.map((line) => (
+                        <p key={line} className="text-gray-700 text-sm break-words">{line}</p>
+                      ))}
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="font-bold text-brand-navy mb-1">{info.title}</h3>
-                    {info.lines.map((line) => (
-                      <p key={line} className="text-gray-700 text-sm">{line}</p>
-                    ))}
-                  </div>
-                  </div>
-                </StaggerItem>
-              ))}
+                );
+                return (
+                  <StaggerItem key={info.title}>
+                    {info.href ? (
+                      <a href={info.href} target={info.href.startsWith("http") ? "_blank" : undefined} rel={info.href.startsWith("http") ? "noopener noreferrer" : undefined} className="block">
+                        {cardInner}
+                      </a>
+                    ) : cardInner}
+                  </StaggerItem>
+                );
+              })}
             </StaggerContainer>
 
             {/* Google Map */}
@@ -221,17 +286,17 @@ export default function ContactClient() {
               <div className="w-3 h-3 rounded-full bg-brand-orange" />
               <div className="w-3 h-3 rounded-full bg-brand-green" />
             </div>
-            <p className="text-white/70 text-sm font-medium ml-2">📍 Get Tours Nepal — Thamel, Kathmandu, Nepal</p>
+            <p className="text-white/70 text-sm font-medium ml-2">📍 {address || "Get Tours Nepal — Thamel, Kathmandu, Nepal"}</p>
           </div>
           <iframe
-            src="https://www.google.com/maps?q=Thamel,+Kathmandu,+Nepal+44600&z=15&output=embed"
+            src={mapEmbedSrc}
             width="100%"
             height="400"
             style={{ border: 0 }}
             allowFullScreen
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
-            title="Get Tours Nepal — Thamel, Kathmandu"
+            title={`Get Tours Nepal — ${address || "Thamel, Kathmandu"}`}
             className="w-full"
           />
         </div>

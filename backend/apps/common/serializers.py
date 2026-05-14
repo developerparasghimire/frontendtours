@@ -26,7 +26,7 @@ class SiteConfigSerializer(serializers.ModelSerializer):
             'site_name', 'site_tagline', 'site_description',
             'logo', 'logo_dark', 'footer_logo',
             'logo_upload', 'logo_dark_upload', 'footer_logo_upload',
-            'footer_text', 'phone', 'email', 'address',
+            'footer_text', 'phone', 'email', 'address', 'google_map_url',
             'facebook_url', 'twitter_url', 'instagram_url',
             'linkedin_url', 'youtube_url', 'tiktok_url',
             'home_portfolio_link_label', 'home_portfolio_link_url',
@@ -105,7 +105,7 @@ class LeaderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Leader
-        fields = ['id', 'name', 'role', 'bio', 'image', 'image_file', 'order']
+        fields = ['id', 'name', 'role', 'bio', 'image', 'image_file', 'category', 'order']
 
     def get_image(self, obj):
         if obj.image:

@@ -42,7 +42,7 @@ export default function AdminSettingsPage() {
     const textFields: (keyof SiteConfig)[] = [
       "site_name", "site_tagline", "site_description",
       "home_portfolio_link_label", "home_portfolio_link_url",
-      "footer_text", "phone", "email", "address",
+      "footer_text", "phone", "email", "address", "google_map_url",
       "facebook_url", "twitter_url", "instagram_url",
       "linkedin_url", "youtube_url", "tiktok_url",
       "privacy_policy_url", "terms_of_service_url",
@@ -212,6 +212,17 @@ export default function AdminSettingsPage() {
                       placeholder="Thamel, Kathmandu, Nepal 44600"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-navy focus:border-transparent outline-none text-sm"
                     />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Google Map URL</label>
+                    <textarea
+                      rows={2}
+                      value={config.google_map_url || ""}
+                      onChange={(e) => setField("google_map_url", e.target.value)}
+                      placeholder="https://www.google.com/maps/embed?pb=...   or   https://maps.app.goo.gl/..."
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-navy focus:border-transparent outline-none text-sm font-mono"
+                    />
+                    <p className="text-xs text-gray-400 mt-1">Paste the Google Maps share link or the iframe embed URL (the value of <code>src="..."</code> when you click <strong>Share &rarr; Embed a map</strong>). Used on the Contact page.</p>
                   </div>
                 </>
               )}

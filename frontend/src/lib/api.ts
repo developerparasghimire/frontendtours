@@ -826,6 +826,7 @@ export interface SiteConfig {
   phone: string;
   email: string;
   address: string;
+  google_map_url: string;
   facebook_url: string;
   twitter_url: string;
   instagram_url: string;
@@ -950,6 +951,7 @@ export interface APILeader {
   role: string;
   bio: string;
   image: string | null;
+  category: "guide" | "team";
   order: number;
 }
 

@@ -195,7 +195,7 @@ function LeadersSection({ token }: { token: string | null }) {
   const [items, setItems] = useState<APILeader[]>([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<APILeader | null>(null);
-  const [form, setForm] = useState({ name: "", role: "", bio: "", order: 0 });
+  const [form, setForm] = useState<{ name: string; role: string; bio: string; order: number; category: "guide" | "team" }>({ name: "", role: "", bio: "", order: 0, category: "guide" });
   const [imageFile, setImageFile] = useState<File | null>(null);
 
   const load = useCallback(() => {
@@ -211,6 +211,7 @@ function LeadersSection({ token }: { token: string | null }) {
     fd.append("name", form.name);
     fd.append("role", form.role);
     fd.append("bio", form.bio);
+    fd.append("category", form.category);
     fd.append("order", String(form.order));
     if (imageFile) fd.append("image_file", imageFile);
 
@@ -220,7 +221,7 @@ function LeadersSection({ token }: { token: string | null }) {
       await createLeader(fd, token);
     }
     setEditing(null);
-    setForm({ name: "", role: "", bio: "", order: 0 });
+    setForm({ name: "", role: "", bio: "", order: 0, category: "guide" });
     setImageFile(null);
     load();
   };
@@ -234,26 +235,30 @@ function LeadersSection({ token }: { token: string | null }) {
   return (
     <div>
       <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
-        <h3 className="text-lg font-bold text-brand-navy mb-4">{editing ? "Edit Leader" : "Add Leader"}</h3>
+        <h3 className="text-lg font-bold text-brand-navy mb-4">{editing ? "Edit Member" : "Add Member"}</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <input placeholder="Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="px-3 py-2 border rounded-lg text-sm" />
           <input placeholder="Role" value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} className="px-3 py-2 border rounded-lg text-sm" />
-          <textarea placeholder="Bio" value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} className="px-3 py-2 border rounded-lg text-sm sm:col-span-2" rows={3} />
+          <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value as "guide" | "team" })} className="px-3 py-2 border rounded-lg text-sm bg-white">
+            <option value="guide">Trail Leader / Guide</option>
+            <option value="team">Office Team (CEO / Staff)</option>
+          </select>
           <input type="number" placeholder="Order" value={form.order} onChange={(e) => setForm({ ...form, order: Number(e.target.value) })} className="px-3 py-2 border rounded-lg text-sm" />
-          <div>
+          <textarea placeholder="Bio" value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} className="px-3 py-2 border rounded-lg text-sm sm:col-span-2" rows={3} />
+          <div className="sm:col-span-2">
             <label className="block text-sm text-gray-600 mb-1">Photo</label>
             <input type="file" accept="image/*" onChange={(e) => setImageFile(e.target.files?.[0] || null)} className="text-sm" />
           </div>
         </div>
         <div className="flex gap-2 mt-4">
           <button onClick={handleSave} className="px-5 py-2 bg-brand-navy text-white text-sm font-semibold rounded-lg hover:bg-brand-blue transition-colors">{editing ? "Update" : "Add"}</button>
-          {editing && <CancelButton onClick={() => { setEditing(null); setForm({ name: "", role: "", bio: "", order: 0 }); setImageFile(null); }} />}
+          {editing && <CancelButton onClick={() => { setEditing(null); setForm({ name: "", role: "", bio: "", order: 0, category: "guide" }); setImageFile(null); }} />}
         </div>
       </div>
       {loading ? (
         <p className="text-gray-400 text-center py-8">Loading...</p>
       ) : items.length === 0 ? (
-        <p className="text-gray-400 text-center py-8">No leaders yet. Add one above.</p>
+        <p className="text-gray-400 text-center py-8">No members yet. Add one above.</p>
       ) : (
         <div className="grid gap-3">
           {items.sort((a, b) => a.order - b.order).map((l) => (
@@ -264,9 +269,12 @@ function LeadersSection({ token }: { token: string | null }) {
               <div className="flex-1 min-w-0">
                 <span className="font-bold text-brand-navy mr-2">{l.name}</span>
                 <span className="text-gray-500 text-sm">{l.role}</span>
+                <span className={`ml-2 inline-block text-[0.65rem] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${(l.category || "guide") === "team" ? "bg-brand-orange/10 text-brand-orange" : "bg-brand-blue/10 text-brand-blue"}`}>
+                  {(l.category || "guide") === "team" ? "Office Team" : "Guide"}
+                </span>
               </div>
               <div className="flex gap-2 flex-shrink-0">
-                <EditButton onClick={() => { setEditing(l); setForm({ name: l.name, role: l.role, bio: l.bio, order: l.order }); setImageFile(null); }} />
+                <EditButton onClick={() => { setEditing(l); setForm({ name: l.name, role: l.role, bio: l.bio, order: l.order, category: (l.category || "guide") as "guide" | "team" }); setImageFile(null); }} />
                 <DeleteButton onClick={() => handleDelete(l.id)} />
               </div>
             </div>

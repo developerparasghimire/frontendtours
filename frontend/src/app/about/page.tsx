@@ -80,6 +80,8 @@ export default async function AboutPage() {
   ]);
 
   const heroStats = statsData;
+  const guides = leaders.filter((l) => (l.category || "guide") === "guide");
+  const teamMembers = leaders.filter((l) => l.category === "team");
 
   return (
     <div className="flex flex-col overflow-x-hidden">
@@ -316,7 +318,7 @@ export default async function AboutPage() {
      
 
       {/* ═══════════════════════ TEAM ═══════════════════════ */}
-      {leaders.length > 0 && (
+      {guides.length > 0 && (
       <section className="relative py-20 sm:py-28 bg-white overflow-hidden">
         <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-brand-red/[0.03] rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-brand-blue/[0.03] rounded-full translate-y-1/2 -translate-x-1/2 pointer-events-none" />
@@ -337,7 +339,7 @@ export default async function AboutPage() {
           </MotionWrapper>
 
           <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" staggerDelay={0.08}>
-            {leaders.map((t) => (
+            {guides.map((t) => (
               <StaggerItem key={t.name || t.id}>
                 <div className="group relative bg-white rounded-[2rem] overflow-hidden shadow-[0_8px_32px_-8px_rgba(15,23,42,0.1)] hover:shadow-[0_24px_60px_-16px_rgba(15,23,42,0.2)] transition-all duration-500 border border-slate-100 hover:-translate-y-2">
                   {/* Photo */}
@@ -373,6 +375,71 @@ export default async function AboutPage() {
                     <div className="w-9 h-9 rounded-full bg-brand-red/8 flex items-center justify-center group-hover:bg-brand-red transition-all duration-300 shrink-0">
                       <svg className="w-4 h-4 text-brand-red group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              </StaggerItem>
+            ))}
+          </StaggerContainer>
+        </div>
+      </section>
+      )}
+
+      {/* ═══════════════════════ MEET OUR TEAM (Office / CEO / Staff) ═══════════════════════ */}
+      {teamMembers.length > 0 && (
+      <section className="relative py-20 sm:py-28 overflow-hidden bg-slate-50">
+        <div className="absolute top-0 left-0 w-[400px] h-[400px] bg-brand-orange/[0.04] rounded-full -translate-y-1/2 -translate-x-1/2 pointer-events-none" />
+        <div className="absolute bottom-0 right-0 w-[360px] h-[360px] bg-brand-blue/[0.04] rounded-full translate-y-1/2 translate-x-1/2 pointer-events-none" />
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <MotionWrapper className="text-center mb-14">
+            <p className="inline-flex items-center gap-2 text-brand-orange text-[0.68rem] font-black tracking-[0.28em] uppercase mb-4">
+              <span className="w-5 h-px bg-brand-orange inline-block" />
+              The Office Crew
+              <span className="w-5 h-px bg-brand-orange inline-block" />
+            </p>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-brand-navy tracking-[-0.04em]">
+              Meet Our Team
+            </h2>
+            <p className="text-slate-500 mt-4 max-w-xl mx-auto text-sm sm:text-base">
+              The people behind every booking, itinerary, and Himalayan story — leadership and staff working from our Thamel office.
+            </p>
+          </MotionWrapper>
+
+          <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" staggerDelay={0.08}>
+            {teamMembers.map((t) => (
+              <StaggerItem key={t.name || t.id}>
+                <div className="group relative bg-white rounded-[2rem] overflow-hidden shadow-[0_8px_32px_-8px_rgba(15,23,42,0.1)] hover:shadow-[0_24px_60px_-16px_rgba(15,23,42,0.2)] transition-all duration-500 border border-slate-100 hover:-translate-y-2">
+                  <div className="relative h-72 overflow-hidden">
+                    <Image
+                      src={t.image || "/img/landscape_background_small.jpg"}
+                      alt={t.name}
+                      fill
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                      className="object-cover group-hover:scale-105 transition-transform duration-700"
+                      unoptimized={shouldUseUnoptimizedImage(t.image)}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/5 to-transparent" />
+
+                    <div className="absolute inset-x-0 bottom-0 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out bg-brand-navy/96 px-6 py-5">
+                      <p className="text-white/65 text-xs leading-relaxed">{t.bio || "Member of our office team."}</p>
+                    </div>
+
+                    <div className="absolute bottom-0 inset-x-0 px-5 pb-4 group-hover:opacity-0 transition-opacity duration-200">
+                      <h3 className="text-white font-bold text-base leading-tight">{t.name}</h3>
+                      <p className="text-brand-orange text-xs font-semibold mt-0.5">{t.role}</p>
+                    </div>
+                  </div>
+
+                  <div className="px-5 py-4 flex items-center justify-between bg-white">
+                    <div>
+                      <h3 className="font-bold text-brand-navy text-sm leading-tight">{t.name}</h3>
+                      <p className="text-slate-400 text-xs mt-0.5">{t.role}</p>
+                    </div>
+                    <div className="w-9 h-9 rounded-full bg-brand-orange/10 flex items-center justify-center group-hover:bg-brand-orange transition-all duration-300 shrink-0">
+                      <svg className="w-4 h-4 text-brand-orange group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-5.13a4 4 0 11-8 0 4 4 0 018 0zm6 4a3 3 0 11-6 0 3 3 0 016 0z" />
                       </svg>
                     </div>
                   </div>

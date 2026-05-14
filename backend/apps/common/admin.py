@@ -30,7 +30,7 @@ class SiteConfigAdmin(admin.ModelAdmin):
             "fields": ("footer_text",)
         }),
         ("Contact Information", {
-            "fields": ("phone", "email", "address")
+            "fields": ("phone", "email", "address", "google_map_url")
         }),
         ("Social Media", {
             "fields": ("facebook_url", "twitter_url", "instagram_url", "linkedin_url", "youtube_url", "tiktok_url")
@@ -92,9 +92,9 @@ class ValueAdmin(admin.ModelAdmin):
 
 @admin.register(Leader)
 class LeaderAdmin(admin.ModelAdmin):
-    list_display = ('name', 'role', 'order', 'is_active')
-    list_filter = ('is_active',)
-    ordering = ('order',)
+    list_display = ('name', 'role', 'category', 'order', 'is_active')
+    list_filter = ('is_active', 'category')
+    ordering = ('category', 'order')
 
 
 @admin.register(Milestone)

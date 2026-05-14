@@ -28,6 +28,11 @@ class SiteConfig(models.Model):
     phone = models.CharField(max_length=20, blank=True)
     email = models.EmailField(blank=True)
     address = models.TextField(blank=True)
+    google_map_url = models.URLField(
+        max_length=1000,
+        blank=True,
+        help_text="Google Maps link or embed URL used on the Contact page (paste the share-link or the iframe src URL).",
+    )
     
     # Social Media URLs
     facebook_url = models.URLField(blank=True, help_text="Facebook page URL")
@@ -127,10 +132,21 @@ class Value(models.Model):
 
 class Leader(models.Model):
     """Trail leader / team member"""
+    CATEGORY_CHOICES = [
+        ("guide", "Trail Leader / Guide"),
+        ("team", "Office Team (CEO / Staff)"),
+    ]
+
     name = models.CharField(max_length=140)
     role = models.CharField(max_length=140, blank=True)
     bio = models.TextField(blank=True)
     image = models.ImageField(upload_to="leaders/", blank=True, null=True)
+    category = models.CharField(
+        max_length=20,
+        choices=CATEGORY_CHOICES,
+        default="guide",
+        help_text="'Trail Leader / Guide' shows in Trail Leaders section. 'Office Team' shows in Meet Our Team section on the About page.",
+    )
     order = models.PositiveIntegerField(default=0)
     is_active = models.BooleanField(default=True)
 
