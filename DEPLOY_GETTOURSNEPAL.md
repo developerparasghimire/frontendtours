@@ -1,7 +1,7 @@
 # Deploying Get Tours Nepal to gettoursnepal.com
 
 This guide assumes:
-- Backend (Django) → Heroku app `gettours-backend-b1e8e0ad6f50` mapped to `api.gettoursnepal.com`
+- Backend (Django) → Heroku app `gettours-backend` mapped to `api.gettoursnepal.com`
 - Frontend (Next.js) → Vercel project `frontend` mapped to `gettoursnepal.com` (+ `www.gettoursnepal.com`)
 - Domain `gettoursnepal.com` registered and DNS managed by you
 
@@ -33,7 +33,7 @@ git -c http.https://github.com/.extraheader="AUTHORIZATION: basic $(printf 'x-ac
 
 Get the Heroku DNS target with:
 ```bash
-heroku domains:add api.gettoursnepal.com -a gettours-backend-b1e8e0ad6f50
+heroku domains:add api.gettoursnepal.com -a gettours-backend
 ```
 Heroku will print a `*.herokudns.com` value — use it as the CNAME target.
 
@@ -50,13 +50,13 @@ heroku login
 ### 2b. Create app & add PostgreSQL
 ```bash
 # Create the app (skip if already exists)
-heroku create gettours-backend-b1e8e0ad6f50
+heroku create gettours-backend
 
 # Or link to existing app
-heroku git:remote -a gettours-backend-b1e8e0ad6f50
+heroku git:remote -a gettours-backend
 
 # Add free Postgres (sets DATABASE_URL automatically)
-heroku addons:create heroku-postgresql:essential-0 -a gettours-backend-b1e8e0ad6f50
+heroku addons:create heroku-postgresql:essential-0 -a gettours-backend
 ```
 
 ### 2c. Set env vars
@@ -64,10 +64,10 @@ heroku addons:create heroku-postgresql:essential-0 -a gettours-backend-b1e8e0ad6
 Run once, locally:
 
 ```bash
-heroku config:set -a gettours-backend-b1e8e0ad6f50 \
+heroku config:set -a gettours-backend \
   SECRET_KEY="$(python -c 'import secrets;print(secrets.token_urlsafe(50))')" \
   DEBUG=False \
-  ALLOWED_HOSTS=api.gettoursnepal.com,gettours-backend-b1e8e0ad6f50.herokuapp.com \
+  ALLOWED_HOSTS=api.gettoursnepal.com,gettours-backend-b727a3afc844.herokuapp.com \
   CORS_ALLOWED_ORIGINS=https://gettoursnepal.com,https://www.gettoursnepal.com \
   CSRF_TRUSTED_ORIGINS=https://gettoursnepal.com,https://www.gettoursnepal.com,https://api.gettoursnepal.com \
   FRONTEND_URL=https://gettoursnepal.com \
@@ -111,7 +111,7 @@ The `release` command in `Procfile` runs `collectstatic` and `migrate` automatic
 
 ### 2d. Create a superuser
 ```bash
-heroku run python manage.py createsuperuser -a gettours-backend-b1e8e0ad6f50
+heroku run python manage.py createsuperuser -a gettours-backend
 ```
 
 ---
