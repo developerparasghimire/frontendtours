@@ -223,9 +223,6 @@ export default function FAQsPage() {
                         aria-expanded={isOpen}
                         className="w-full text-left px-5 sm:px-6 py-4 sm:py-5 flex items-start gap-4 group"
                       >
-                        {/* Left dot accent */}
-                        <span className={`mt-[5px] w-2 h-2 rounded-full shrink-0 transition-colors duration-200 ${isOpen ? meta.dot : "bg-slate-300 group-hover:bg-slate-400"}`} />
-
                         <span className={`flex-1 font-semibold text-sm sm:text-base leading-snug transition-colors duration-200 ${isOpen ? "text-brand-navy" : "text-slate-700 group-hover:text-brand-navy"}`}>
                           {item.q}
                         </span>

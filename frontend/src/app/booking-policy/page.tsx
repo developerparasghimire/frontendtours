@@ -143,8 +143,7 @@ export default function BookingPolicyPage() {
                 </h2>
                 <ul className="space-y-3">
                   {section.content.map((item, i) => (
-                    <li key={i} className="flex gap-3 text-gray-600 text-sm leading-relaxed">
-                      <span className="w-1.5 h-1.5 rounded-full bg-brand-blue mt-2 flex-shrink-0" />
+                    <li key={i} className="text-gray-600 text-sm leading-relaxed">
                       {item}
                     </li>
                   ))}
