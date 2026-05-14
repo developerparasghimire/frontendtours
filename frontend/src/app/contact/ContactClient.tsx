@@ -7,35 +7,6 @@ import PageHero from "@/components/sections/PageHero";
 import { submitContact, getSiteConfig, type SiteConfig } from "@/lib/api";
 import { sectionImages } from "@/lib/sectionImages";
 
-/**
- * Convert any user-supplied Google Maps URL into an embeddable iframe src.
- * Accepts:
- *  - Already-embed URLs (https://www.google.com/maps/embed?pb=...)
- *  - Share links (https://maps.app.goo.gl/..., https://goo.gl/maps/...)
- *  - Place / search URLs (https://www.google.com/maps/place/..., /search/...)
- *  - Plain text address (used as q= parameter)
- */
-function toEmbedSrc(raw: string | null | undefined, fallbackQuery: string): string {
-  const value = (raw || "").trim();
-  if (!value) {
-    return `https://www.google.com/maps?q=${encodeURIComponent(fallbackQuery)}&z=15&output=embed`;
-  }
-  // Already an embed URL
-  if (/google\.[^/]+\/maps\/embed/i.test(value)) {
-    return value;
-  }
-  // Plain google.com/maps URL — append output=embed
-  if (/^https?:\/\/(www\.)?google\.[^/]+\/maps/i.test(value)) {
-    const sep = value.includes("?") ? "&" : "?";
-    return `${value}${sep}output=embed`;
-  }
-  // Short share link or any other URL — fall back to wrapping it in q=
-  if (/^https?:\/\//i.test(value)) {
-    return `https://www.google.com/maps?q=${encodeURIComponent(value)}&output=embed`;
-  }
-  // Plain text address
-  return `https://www.google.com/maps?q=${encodeURIComponent(value)}&z=15&output=embed`;
-}
 
 export default function ContactClient() {
   const [formData, setFormData] = useState({
@@ -74,16 +45,13 @@ export default function ContactClient() {
   const phone = (config.phone || "").trim();
   const email = (config.email || "").trim();
   const address = (config.address || "").trim();
-  const mapUrl = (config.google_map_url || "").trim();
-
   const addressLines = useMemo(() => address.split(/\r?\n|,\s*/).map((l) => l.trim()).filter(Boolean), [address]);
   const phoneLines = useMemo(() => phone.split(/\r?\n|,\s*/).map((l) => l.trim()).filter(Boolean), [phone]);
   const emailLines = useMemo(() => email.split(/\r?\n|,\s*/).map((l) => l.trim()).filter(Boolean), [email]);
 
-  const mapEmbedSrc = toEmbedSrc(mapUrl, address || "Thamel, Kathmandu, Nepal");
-  const mapOpenUrl = mapUrl && /^https?:\/\//i.test(mapUrl)
-    ? mapUrl
-    : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address || "Thamel, Kathmandu, Nepal")}`;
+  const MAP_EMBED_SRC = "https://www.google.com/maps?q=27.7178371,85.3065572&z=17&output=embed";
+  const MAP_OPEN_URL = "https://www.google.com/maps/place/Golden+Era+Travels+and+Tours/@27.7178418,85.3019438,17z";
+  const mapOpenUrl = address ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}` : MAP_OPEN_URL;
 
   const infoCards = [
     {
@@ -91,7 +59,7 @@ export default function ContactClient() {
       icon2: "M15 11a3 3 0 11-6 0 3 3 0 016 0z",
       title: "Visit Us",
       lines: addressLines.length > 0 ? addressLines : ["Address not set yet."],
-      href: address ? mapOpenUrl : null,
+      href: mapOpenUrl,
     },
     {
       icon: "M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z",
@@ -174,7 +142,20 @@ export default function ContactClient() {
             </StaggerContainer>
 
             {/* Google Map */}
-            
+            <MotionWrapper variant="fade-up">
+              <div className="rounded-2xl overflow-hidden border border-gray-100 shadow-md">
+                <iframe
+                  src={MAP_EMBED_SRC}
+                  width="100%"
+                  height="260"
+                  style={{ border: 0 }}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title="Get Tours Nepal Location"
+                />
+              </div>
+            </MotionWrapper>
           </div>
 
           {/* Contact Form */}
