@@ -270,7 +270,7 @@ export default function ContactClient() {
             <p className="text-white/70 text-sm font-medium ml-2">📍 {address || "Get Tours Nepal — Thamel, Kathmandu, Nepal"}</p>
           </div>
           <iframe
-            src={mapEmbedSrc}
+            src={MAP_EMBED_SRC}
             width="100%"
             height="400"
             style={{ border: 0 }}
