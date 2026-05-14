@@ -49,7 +49,7 @@ export default function SubscribeForm({ compact = false, className = "" }: Subsc
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="Your email address"
-          className="flex-1 px-5 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-red"
+          className="flex-1 px-5 py-3 rounded-xl bg-white border border-white/30 text-brand-navy placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-red shadow-sm"
         />
         <button
           type="submit"
@@ -59,7 +59,7 @@ export default function SubscribeForm({ compact = false, className = "" }: Subsc
           {status === "loading" ? "Subscribing…" : "Subscribe"}
         </button>
         {status === "error" && (
-          <p className="w-full text-red-400 text-sm mt-1">{message}</p>
+          <p className="w-full text-red-300 text-sm mt-1">{message}</p>
         )}
       </form>
     );
@@ -74,7 +74,7 @@ export default function SubscribeForm({ compact = false, className = "" }: Subsc
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="Your email address"
-          className="flex-1 px-5 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-red"
+          className="flex-1 px-5 py-3 rounded-xl bg-white border border-white/30 text-brand-navy placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-red shadow-sm"
         />
         <button
           type="submit"
@@ -85,7 +85,7 @@ export default function SubscribeForm({ compact = false, className = "" }: Subsc
         </button>
       </div>
       {status === "error" && (
-        <p className="text-red-400 text-sm mt-3 text-center">{message}</p>
+        <p className="text-red-300 text-sm mt-3 text-center">{message}</p>
       )}
     </form>
   );
