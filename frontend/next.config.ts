@@ -155,7 +155,7 @@ const nextConfig: NextConfig = {
         ],
       },
       {
-        source: "/logo\\.{jpeg,jpg,png,svg,webp}",
+        source: "/logo.png",
         headers: [
           { key: "Cache-Control", value: NO_STORE_CACHE_CONTROL },
           { key: "Pragma", value: "no-cache" },
@@ -169,6 +169,22 @@ const nextConfig: NextConfig = {
           { key: "Pragma", value: "no-cache" },
           { key: "Expires", value: "0" },
         ],
+      },
+    ];
+  },
+  async redirects() {
+    return [
+      // Redirect legacy logo.jpeg / logo.jpg requests to the canonical logo.png.
+      // Some browser caches, crawlers, and old siteConfig DB entries request these.
+      {
+        source: "/logo.jpeg",
+        destination: "/logo.png",
+        permanent: true,
+      },
+      {
+        source: "/logo.jpg",
+        destination: "/logo.png",
+        permanent: true,
       },
     ];
   },
