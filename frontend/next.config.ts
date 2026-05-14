@@ -46,7 +46,7 @@ const cspDirectives = [
   "font-src 'self' https://fonts.gstatic.com data:",
   `img-src 'self' data: blob: https://res.cloudinary.com https://lh3.googleusercontent.com ${allLoopbackOrigins}`.trim(),
   `connect-src 'self' https://accounts.google.com ${allLoopbackOrigins}`.trim(),
-  "frame-src 'self' https://accounts.google.com https://www.google.com https://maps.google.com",
+  "frame-src 'self' https://accounts.google.com https://www.google.com https://maps.google.com https://maps.googleapis.com",
   "worker-src 'self' blob:",
   ...(isProduction ? ["upgrade-insecure-requests"] : []),
 ]

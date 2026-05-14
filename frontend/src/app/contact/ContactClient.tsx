@@ -49,7 +49,7 @@ export default function ContactClient() {
   const phoneLines = useMemo(() => phone.split(/\r?\n|,\s*/).map((l) => l.trim()).filter(Boolean), [phone]);
   const emailLines = useMemo(() => email.split(/\r?\n|,\s*/).map((l) => l.trim()).filter(Boolean), [email]);
 
-  const MAP_EMBED_SRC = "https://www.google.com/maps?q=27.7178371,85.3065572&z=17&output=embed";
+  const MAP_EMBED_SRC = "https://maps.google.com/maps?q=27.7178371,85.3065572&z=17&ie=UTF8&iwloc=&output=embed";
   const MAP_OPEN_URL = "https://www.google.com/maps/place/Golden+Era+Travels+and+Tours/@27.7178418,85.3019438,17z";
   const mapOpenUrl = address ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}` : MAP_OPEN_URL;
 
