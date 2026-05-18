@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import MotionWrapper from "@/components/shared/MotionWrapper";
 import EventCard from "@/components/shared/EventCard";
 import type { Event } from "@/types";
@@ -8,8 +9,26 @@ import ZoomSection from "@/components/ui/ZoomSection";
 import { sectionImages } from "@/lib/sectionImages";
 
 const eventCardOffsets = ["xl:translate-y-6", "xl:-translate-y-8", "xl:translate-y-10", "xl:-translate-y-4"] as const;
+const ALL = "All";
 
 export default function EventsClient({ events }: { events: Event[] }) {
+  const categories = useMemo(() => {
+    const set = new Set<string>();
+    events.forEach((e) => {
+      if (e.category && e.category.trim()) set.add(e.category.trim());
+    });
+    return [ALL, ...Array.from(set).sort((a, b) => a.localeCompare(b))];
+  }, [events]);
+
+  const [selectedCategory, setSelectedCategory] = useState<string>(ALL);
+
+  const filteredEvents = useMemo(() => {
+    if (selectedCategory === ALL) return events;
+    return events.filter(
+      (e) => (e.category || "").trim().toLowerCase() === selectedCategory.toLowerCase()
+    );
+  }, [events, selectedCategory]);
+
   return (
     <div className="flex flex-col overflow-x-hidden">
       {/* ═══════════ HERO ═══════════ */}
@@ -24,25 +43,74 @@ export default function EventsClient({ events }: { events: Event[] }) {
 
       {/* ═══════════ EVENT GRID ═══════════ */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 w-full">
+        {categories.length > 1 && (
+          <div className="mb-5">
+            {/* Pills for sm+ */}
+            <div className="hidden sm:flex flex-wrap gap-2">
+              {categories.map((cat) => {
+                const active = selectedCategory === cat;
+                return (
+                  <button
+                    key={cat}
+                    type="button"
+                    onClick={() => setSelectedCategory(cat)}
+                    className={`px-4 py-2 rounded-full text-sm font-semibold border transition-colors duration-200 ${
+                      active
+                        ? "bg-brand-blue text-white border-brand-blue"
+                        : "bg-white text-brand-navy border-gray-200 hover:border-brand-blue hover:text-brand-blue"
+                    }`}
+                    aria-pressed={active}
+                  >
+                    {cat}
+                  </button>
+                );
+              })}
+            </div>
+            {/* Select for mobile */}
+            <div className="sm:hidden">
+              <label htmlFor="event-category" className="sr-only">
+                Filter events by category
+              </label>
+              <select
+                id="event-category"
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-brand-navy focus:border-brand-blue focus:outline-none"
+              >
+                {categories.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {cat === ALL ? "All categories" : cat}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        )}
+
         <div className="mb-8">
           <p className="text-gray-500 text-sm">
-            Showing <span className="font-bold text-brand-navy">{events.length}</span> event{events.length !== 1 ? "s" : ""}
+            Showing <span className="font-bold text-brand-navy">{filteredEvents.length}</span> event{filteredEvents.length !== 1 ? "s" : ""}
+            {selectedCategory !== ALL && (
+              <>
+                {" "}in <span className="font-bold text-brand-navy">{selectedCategory}</span>
+              </>
+            )}
           </p>
         </div>
 
-        {events.length > 0 ? (
+        {filteredEvents.length > 0 ? (
           <ZoomSection>
             <div className={`grid gap-5 ${
-              events.length === 1
+              filteredEvents.length === 1
                 ? "grid-cols-1 max-w-sm mx-auto"
-                : events.length === 2
+                : filteredEvents.length === 2
                 ? "grid-cols-1 sm:grid-cols-2 max-w-2xl mx-auto sm:gap-6"
-                : events.length === 3
+                : filteredEvents.length === 3
                 ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 sm:gap-6 max-w-5xl mx-auto"
                 : "grid-cols-1 sm:grid-cols-2 sm:gap-6 xl:grid-cols-4 xl:gap-8"
             }`}>
-              {events.map((event, index) => (
-                <div key={event.id} className={events.length >= 4 ? `${eventCardOffsets[index % eventCardOffsets.length]} transition-opacity duration-300` : "transition-opacity duration-300"}>
+              {filteredEvents.map((event, index) => (
+                <div key={event.id} className={filteredEvents.length >= 4 ? `${eventCardOffsets[index % eventCardOffsets.length]} transition-opacity duration-300` : "transition-opacity duration-300"}>
                   <EventCard {...event} />
                 </div>
               ))}
@@ -51,9 +119,24 @@ export default function EventsClient({ events }: { events: Event[] }) {
         ) : (
           <div className="text-center py-20">
             <p className="text-gray-400 text-6xl mb-4">🎭</p>
-            <p className="text-gray-500 text-lg">
-              No events available right now. Check back soon!
-            </p>
+            {selectedCategory !== ALL && events.length > 0 ? (
+              <>
+                <p className="text-gray-500 text-lg mb-4">
+                  No events found in <span className="font-semibold text-brand-navy">{selectedCategory}</span>.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setSelectedCategory(ALL)}
+                  className="inline-flex items-center gap-2 bg-brand-blue text-white font-semibold px-5 py-2.5 rounded-lg hover:bg-blue-700 transition-colors duration-200"
+                >
+                  Show all events
+                </button>
+              </>
+            ) : (
+              <p className="text-gray-500 text-lg">
+                No events available right now. Check back soon!
+              </p>
+            )}
           </div>
         )}
       </section>
