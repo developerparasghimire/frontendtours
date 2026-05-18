@@ -1164,6 +1164,60 @@ export async function deletePartner(id: number, token: string): Promise<void> {
   return fetchDelete(`/common/partners/${id}/`, token);
 }
 
+/* ──────────────── Categories API (Tour & Event taxonomy) ──────────────── */
+
+export interface APICategory {
+  id: number;
+  kind: "tour" | "event";
+  name: string;
+  parent: number | null;
+  parent_name: string | null;
+  order: number;
+  is_active: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export async function getCategories(params?: {
+  kind?: "tour" | "event";
+  parent?: number | "null";
+  is_active?: boolean;
+}): Promise<APICategory[]> {
+  const sp = new URLSearchParams();
+  if (params?.kind) sp.set("kind", params.kind);
+  if (params?.parent !== undefined) sp.set("parent", String(params.parent));
+  if (params?.is_active !== undefined) sp.set("is_active", String(params.is_active));
+  const qs = sp.toString();
+  return fetchAPI<APICategory[]>(`/common/categories/${qs ? `?${qs}` : ""}`);
+}
+
+export async function createCategory(
+  data: { kind: "tour" | "event"; name: string; parent?: number | null; order?: number; is_active?: boolean },
+  token: string,
+): Promise<APICategory> {
+  return fetchAPI<APICategory>("/common/categories/create/", {
+    method: "POST",
+    headers: authHeaders(token),
+    body: JSON.stringify(data),
+  });
+}
+
+export async function updateCategory(
+  id: number,
+  data: Partial<{ kind: "tour" | "event"; name: string; parent: number | null; order: number; is_active: boolean }>,
+  token: string,
+): Promise<APICategory> {
+  return fetchAPI<APICategory>(`/common/categories/${id}/`, {
+    method: "PATCH",
+    headers: authHeaders(token),
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deleteCategory(id: number, token: string): Promise<void> {
+  return fetchDelete(`/common/categories/${id}/`, token);
+}
+
 /* ──────────────── User Bookings API ──────────────── */
 
 export interface MyTourBooking {

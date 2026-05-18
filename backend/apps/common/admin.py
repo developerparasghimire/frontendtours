@@ -1,6 +1,16 @@
 from django.contrib import admin
 from .models import SiteConfig, ContactSubmission, NewsletterSubscription
-from .models import AboutStat, Value, Leader, Milestone, PageBanner, Partner
+from .models import AboutStat, Value, Leader, Milestone, PageBanner, Partner, Category
+
+
+@admin.register(Category)
+class CategoryAdmin(admin.ModelAdmin):
+    list_display = ("name", "kind", "parent", "order", "is_active", "updated_at")
+    list_filter = ("kind", "is_active")
+    search_fields = ("name", "parent__name")
+    list_editable = ("order", "is_active")
+    autocomplete_fields = ("parent",)
+    ordering = ("kind", "order", "name")
 
 
 @admin.register(SiteConfig)

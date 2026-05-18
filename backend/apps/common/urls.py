@@ -27,6 +27,9 @@ from .views import (
     partners_list_view,
     partner_create_view,
     partner_detail_view,
+    categories_list_view,
+    category_create_view,
+    category_detail_view,
 )
 
 urlpatterns = [
@@ -57,4 +60,7 @@ urlpatterns = [
     path('partners/', partners_list_view, name='partners-list'),
     path('partners/create/', partner_create_view, name='partner-create'),
     path('partners/<int:pk>/', partner_detail_view, name='partner-detail'),
+    path('categories/', categories_list_view, name='categories-list'),
+    path('categories/create/', category_create_view, name='category-create'),
+    path('categories/<int:pk>/', category_detail_view, name='category-detail'),
 ]

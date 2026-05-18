@@ -185,6 +185,58 @@ class Partner(models.Model):
         return self.name
 
 
+class Category(models.Model):
+    """Admin-managed taxonomy for Tours and Events.
+
+    Top-level rows are categories (parent=None); rows with a `parent` are
+    sub-categories. `kind` distinguishes whether the row applies to Tours or Events.
+    """
+    KIND_CHOICES = [
+        ("tour", "Tour"),
+        ("event", "Event"),
+    ]
+
+    kind = models.CharField(max_length=10, choices=KIND_CHOICES)
+    name = models.CharField(max_length=100)
+    parent = models.ForeignKey(
+        'self',
+        on_delete=models.CASCADE,
+        related_name='subcategories',
+        null=True,
+        blank=True,
+        help_text="Leave blank to create a top-level category. Set to create a sub-category under another category.",
+    )
+    order = models.PositiveIntegerField(default=0, help_text="Display order (lower numbers first).")
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['kind', 'order', 'name']
+        verbose_name = 'Category'
+        verbose_name_plural = 'Categories'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['kind', 'parent', 'name'],
+                name='unique_category_per_parent_and_kind',
+            ),
+        ]
+
+    def __str__(self):
+        if self.parent_id:
+            return f"{self.get_kind_display()} • {self.parent.name} › {self.name}"
+        return f"{self.get_kind_display()} • {self.name}"
+
+    def clean(self):
+        from django.core.exceptions import ValidationError
+        # Only one nesting level allowed.
+        if self.parent and self.parent.parent_id:
+            raise ValidationError("Sub-categories cannot be nested further (max one level deep).")
+        # Parent must be the same kind.
+        if self.parent and self.parent.kind != self.kind:
+            raise ValidationError("Parent category must have the same kind (tour/event).")
+
+
 class PageBanner(models.Model):
     """Hero / banner content for each page — editable from the admin panel."""
     PAGE_CHOICES = [

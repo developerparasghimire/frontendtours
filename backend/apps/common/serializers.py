@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import SiteConfig, ContactSubmission, NewsletterSubscription, AboutStat, Value, Leader, Milestone, PageBanner, Partner
+from .models import SiteConfig, ContactSubmission, NewsletterSubscription, AboutStat, Value, Leader, Milestone, PageBanner, Partner, Category
 
 class SiteConfigSerializer(serializers.ModelSerializer):
     logo = serializers.SerializerMethodField()
@@ -143,4 +143,29 @@ class PageBannerSerializer(serializers.ModelSerializer):
     class Meta:
         model = PageBanner
         fields = ['id', 'page', 'title', 'subtitle', 'description', 'updated_at']
+
+
+class CategorySerializer(serializers.ModelSerializer):
+    parent_name = serializers.CharField(source='parent.name', read_only=True, default=None)
+
+    class Meta:
+        model = Category
+        fields = [
+            'id', 'kind', 'name', 'parent', 'parent_name',
+            'order', 'is_active', 'created_at', 'updated_at',
+        ]
+        read_only_fields = ['id', 'parent_name', 'created_at', 'updated_at']
+
+    def validate(self, attrs):
+        kind = attrs.get('kind') or getattr(self.instance, 'kind', None)
+        parent = attrs.get('parent') if 'parent' in attrs else getattr(self.instance, 'parent', None)
+        if parent is not None:
+            if parent.parent_id is not None:
+                raise serializers.ValidationError({'parent': 'Sub-categories cannot be nested further.'})
+            if kind and parent.kind != kind:
+                raise serializers.ValidationError({'parent': 'Parent category must have the same kind.'})
+        # Prevent self-parenting on update.
+        if self.instance and parent and parent.pk == self.instance.pk:
+            raise serializers.ValidationError({'parent': 'A category cannot be its own parent.'})
+        return attrs
         read_only_fields = ['id', 'updated_at']

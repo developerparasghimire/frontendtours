@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import Image from "next/image";
 import AdminShell from "../AdminShell";
 import { EditButton, DeleteButton, CancelButton } from "../components/ActionButtons";
@@ -10,7 +10,9 @@ import {
   createEvent,
   updateEvent,
   deleteEvent,
+  getCategories,
   type APIEvent,
+  type APICategory,
 } from "@/lib/api";
 import { shouldUseUnoptimizedImage } from "@/lib/images";
 
@@ -34,7 +36,7 @@ type EventForm = {
   is_latest: boolean;
 };
 
-const EVENT_CATEGORIES = ["Music", "Culture", "Festivals", "Food", "Sports", "Workshops", "Adventure", "Spiritual"];
+const EVENT_CATEGORY_FALLBACK = ["Music", "Culture", "Festivals", "Food", "Sports", "Workshops", "Adventure", "Spiritual"];
 
 const emptyForm: EventForm = {
   title: "",
@@ -58,6 +60,7 @@ const emptyForm: EventForm = {
 
 export default function AdminEventsPage() {
   const [events, setEvents] = useState<APIEvent[]>([]);
+  const [categories, setCategories] = useState<APICategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState<APIEvent | null>(null);
@@ -74,9 +77,21 @@ export default function AdminEventsPage() {
       .finally(() => setLoading(false));
   }, []);
 
+  const loadCategories = useCallback(() => {
+    getCategories({ kind: "event", is_active: true })
+      .then(setCategories)
+      .catch(() => {});
+  }, []);
+
   useEffect(() => {
     loadEvents();
-  }, [loadEvents]);
+    loadCategories();
+  }, [loadEvents, loadCategories]);
+
+  const categoryOptions = useMemo(() => {
+    const fromApi = categories.filter((c) => c.parent === null).map((c) => c.name);
+    return Array.from(new Set([...fromApi, ...EVENT_CATEGORY_FALLBACK]));
+  }, [categories]);
 
   function openCreate() {
     setEditing(null);
@@ -336,13 +351,19 @@ export default function AdminEventsPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Category
+                  <a href="/gettoursadmin/categories" className="ml-2 text-[11px] font-normal text-brand-blue hover:underline" target="_blank" rel="noreferrer">manage</a>
+                </label>
                 <select
                   value={form.category}
                   onChange={(e) => setForm({ ...form, category: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-navy focus:border-transparent outline-none text-sm"
                 >
-                  {EVENT_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                  {!categoryOptions.includes(form.category) && form.category && (
+                    <option value={form.category}>{form.category}</option>
+                  )}
+                  {categoryOptions.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
               </div>
               {/* Image Upload */}

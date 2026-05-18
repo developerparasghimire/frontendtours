@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import Image from "next/image";
 import AdminShell from "../AdminShell";
 import { EditButton, DeleteButton, CancelButton } from "../components/ActionButtons";
@@ -10,7 +10,9 @@ import {
   createTour,
   updateTour,
   deleteTour,
+  getCategories,
   type APITour,
+  type APICategory,
 } from "@/lib/api";
 import { shouldUseUnoptimizedImage } from "@/lib/images";
 
@@ -39,8 +41,8 @@ type TourForm = {
   is_latest: boolean;
 };
 
-const CATEGORIES = ["Adventure", "Cultural", "Trekking", "Wildlife", "Spiritual", "Day Trip"];
-const TREKKING_SUBCATEGORIES = [
+const CATEGORY_FALLBACK = ["Adventure", "Cultural", "Trekking", "Wildlife", "Spiritual", "Day Trip"];
+const TREKKING_SUBCATEGORY_FALLBACK = [
   "Everest Region",
   "Annapurna Region",
   "Langtang Region",
@@ -80,6 +82,7 @@ const emptyForm: TourForm = {
 
 export default function AdminToursPage() {
   const [tours, setTours] = useState<APITour[]>([]);
+  const [categories, setCategories] = useState<APICategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState<APITour | null>(null);
@@ -96,9 +99,37 @@ export default function AdminToursPage() {
       .finally(() => setLoading(false));
   }, []);
 
+  const loadCategories = useCallback(() => {
+    getCategories({ kind: "tour", is_active: true })
+      .then(setCategories)
+      .catch(() => {});
+  }, []);
+
   useEffect(() => {
     loadTours();
-  }, [loadTours]);
+    loadCategories();
+  }, [loadTours, loadCategories]);
+
+  // Top-level tour category names from the API, falling back to the legacy hardcoded list.
+  const categoryOptions = useMemo(() => {
+    const fromApi = categories.filter((c) => c.parent === null).map((c) => c.name);
+    const merged = Array.from(new Set([...fromApi, ...CATEGORY_FALLBACK]));
+    return merged;
+  }, [categories]);
+
+  // Sub-categories under the currently selected parent category.
+  const subcategoryOptions = useMemo(() => {
+    const parent = categories.find(
+      (c) => c.parent === null && c.name.toLowerCase() === form.category.toLowerCase(),
+    );
+    const fromApi = parent
+      ? categories.filter((c) => c.parent === parent.id).map((c) => c.name)
+      : [];
+    if (form.category.toLowerCase() === "trekking") {
+      return Array.from(new Set([...fromApi, ...TREKKING_SUBCATEGORY_FALLBACK]));
+    }
+    return fromApi;
+  }, [categories, form.category]);
 
   function openCreate() {
     setEditing(null);
@@ -155,7 +186,7 @@ export default function AdminToursPage() {
       fd.append("duration_days", String(form.duration_days));
       fd.append("max_capacity", String(form.max_capacity));
       fd.append("category", form.category);
-      fd.append("subcategory", form.category === "Trekking" ? form.subcategory.trim() : "");
+      fd.append("subcategory", form.subcategory.trim());
       fd.append("difficulty", form.difficulty);
       fd.append("rating", form.rating);
       fd.append("badge", form.badge);
@@ -384,13 +415,19 @@ export default function AdminToursPage() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Category
+                    <a href="/gettoursadmin/categories" className="ml-2 text-[11px] font-normal text-brand-blue hover:underline" target="_blank" rel="noreferrer">manage</a>
+                  </label>
                   <select
                     value={form.category}
-                    onChange={(e) => setForm({ ...form, category: e.target.value, subcategory: e.target.value === "Trekking" ? form.subcategory : "" })}
+                    onChange={(e) => setForm({ ...form, category: e.target.value, subcategory: "" })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-navy focus:border-transparent outline-none text-sm"
                   >
-                    {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                    {!categoryOptions.includes(form.category) && form.category && (
+                      <option value={form.category}>{form.category}</option>
+                    )}
+                    {categoryOptions.map(c => <option key={c} value={c}>{c}</option>)}
                   </select>
                 </div>
                 <div>
@@ -404,22 +441,24 @@ export default function AdminToursPage() {
                   </select>
                 </div>
               </div>
-              {form.category === "Trekking" && (
+              {subcategoryOptions.length > 0 && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Trekking Sub-category <span className="text-gray-400 font-normal text-xs">(region)</span>
+                    Sub-category <span className="text-gray-400 font-normal text-xs">(under {form.category})</span>
                   </label>
                   <input
-                    list="trekking-subcategories"
+                    list="tour-subcategories"
                     value={form.subcategory}
                     onChange={(e) => setForm({ ...form, subcategory: e.target.value })}
-                    placeholder="e.g. Everest Region, Annapurna Region, Short Treks"
+                    placeholder={`e.g. ${subcategoryOptions.slice(0, 2).join(", ")}`}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-navy focus:border-transparent outline-none text-sm"
                   />
-                  <datalist id="trekking-subcategories">
-                    {TREKKING_SUBCATEGORIES.map((s) => <option key={s} value={s} />)}
+                  <datalist id="tour-subcategories">
+                    {subcategoryOptions.map((s) => <option key={s} value={s} />)}
                   </datalist>
-                  <p className="mt-1 text-xs text-gray-500">Pick a suggested region or type your own. Used to group treks on the tours page.</p>
+                  <p className="mt-1 text-xs text-gray-500">
+                    Pick a sub-category or type your own. Manage the list in <a href="/gettoursadmin/categories" className="text-brand-blue hover:underline" target="_blank" rel="noreferrer">Categories</a>.
+                  </p>
                 </div>
               )}
               <div className="grid grid-cols-2 gap-4">

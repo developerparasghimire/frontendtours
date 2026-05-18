@@ -11,7 +11,7 @@ from rest_framework.response import Response
 from rest_framework import status
 
 logger = logging.getLogger(__name__)
-from .models import SiteConfig, ContactSubmission, NewsletterSubscription, AboutStat, Value, Leader, Milestone, PageBanner, Partner
+from .models import SiteConfig, ContactSubmission, NewsletterSubscription, AboutStat, Value, Leader, Milestone, PageBanner, Partner, Category
 from .serializers import (
     SiteConfigSerializer,
     ContactSubmissionSerializer,
@@ -22,6 +22,7 @@ from .serializers import (
     MilestoneSerializer,
     PageBannerSerializer,
     PartnerSerializer,
+    CategorySerializer,
 )
 
 
@@ -451,6 +452,73 @@ def partner_detail_view(request, pk):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     serializer = PartnerSerializer(partner, data=request.data, partial=True, context={'request': request})
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# ──────────────── Categories (Tour & Event taxonomy) ────────────────
+
+def _filter_categories(request):
+    qs = Category.objects.all().select_related('parent')
+    kind = request.query_params.get('kind')
+    parent = request.query_params.get('parent')
+    is_active = request.query_params.get('is_active')
+    if kind:
+        qs = qs.filter(kind=kind)
+    if parent == 'null':
+        qs = qs.filter(parent__isnull=True)
+    elif parent:
+        try:
+            qs = qs.filter(parent_id=int(parent))
+        except (TypeError, ValueError):
+            pass
+    if is_active is not None:
+        qs = qs.filter(is_active=is_active.lower() in ('1', 'true', 'yes'))
+    return qs
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def categories_list_view(request):
+    """Public list of categories. Filterable by ?kind=tour|event, ?parent=<id|null>, ?is_active=true."""
+    qs = _filter_categories(request)
+    serializer = CategorySerializer(qs, many=True)
+    return Response(serializer.data)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def category_create_view(request):
+    if not hasattr(request.user, 'role') or request.user.role not in ('SUPER_ADMIN', 'ADMIN'):
+        return Response({'error': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)
+    serializer = CategorySerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET', 'PATCH', 'DELETE'])
+@permission_classes([IsAuthenticated])
+def category_detail_view(request, pk):
+    try:
+        category = Category.objects.get(pk=pk)
+    except Category.DoesNotExist:
+        return Response({'error': 'Not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'GET':
+        return Response(CategorySerializer(category).data)
+
+    if not hasattr(request.user, 'role') or request.user.role not in ('SUPER_ADMIN', 'ADMIN'):
+        return Response({'error': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)
+
+    if request.method == 'DELETE':
+        category.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    serializer = CategorySerializer(category, data=request.data, partial=True)
     if serializer.is_valid():
         serializer.save()
         return Response(serializer.data)
