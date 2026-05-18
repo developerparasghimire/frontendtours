@@ -401,6 +401,7 @@ export interface APITour {
   currency: string;
   duration_days: number;
   category: string;
+  subcategory?: string;
   difficulty: string;
   rating: string;
   badge: string;
@@ -418,6 +419,7 @@ export async function getTours(params?: {
   search?: string;
   destination?: string;
   category?: string;
+  subcategory?: string;
   ordering?: string;
   is_latest?: boolean;
 }): Promise<APITour[]> {
@@ -425,6 +427,7 @@ export async function getTours(params?: {
   if (params?.search) searchParams.set("search", params.search);
   if (params?.destination) searchParams.set("destination", params.destination);
   if (params?.category) searchParams.set("category", params.category);
+  if (params?.subcategory) searchParams.set("subcategory", params.subcategory);
   if (params?.ordering) searchParams.set("ordering", params.ordering);
   if (params?.is_latest !== undefined) searchParams.set("is_latest", String(params.is_latest));
   const qs = searchParams.toString();

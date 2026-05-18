@@ -21,13 +21,41 @@ export default function ToursClient({ tours }: { tours: Tour[] }) {
   }, [tours]);
 
   const [selectedCategory, setSelectedCategory] = useState<string>(ALL);
+  const [selectedSubcategory, setSelectedSubcategory] = useState<string>(ALL);
+
+  // Sub-categories available within the currently selected category (only meaningful for categories like Trekking).
+  const subcategories = useMemo(() => {
+    if (selectedCategory === ALL) return [] as string[];
+    const set = new Set<string>();
+    tours.forEach((t) => {
+      const matchesCat = (t.category || "").trim().toLowerCase() === selectedCategory.toLowerCase();
+      if (matchesCat && t.subcategory && t.subcategory.trim()) {
+        set.add(t.subcategory.trim());
+      }
+    });
+    if (set.size === 0) return [];
+    return [ALL, ...Array.from(set).sort((a, b) => a.localeCompare(b))];
+  }, [tours, selectedCategory]);
+
+  function handleCategoryChange(cat: string) {
+    setSelectedCategory(cat);
+    setSelectedSubcategory(ALL);
+  }
 
   const filteredTours = useMemo(() => {
-    if (selectedCategory === ALL) return tours;
-    return tours.filter(
-      (t) => (t.category || "").trim().toLowerCase() === selectedCategory.toLowerCase()
-    );
-  }, [tours, selectedCategory]);
+    let list = tours;
+    if (selectedCategory !== ALL) {
+      list = list.filter(
+        (t) => (t.category || "").trim().toLowerCase() === selectedCategory.toLowerCase()
+      );
+    }
+    if (selectedSubcategory !== ALL) {
+      list = list.filter(
+        (t) => (t.subcategory || "").trim().toLowerCase() === selectedSubcategory.toLowerCase()
+      );
+    }
+    return list;
+  }, [tours, selectedCategory, selectedSubcategory]);
 
   return (
     <div className="flex flex-col overflow-x-hidden">
@@ -53,7 +81,7 @@ export default function ToursClient({ tours }: { tours: Tour[] }) {
                   <button
                     key={cat}
                     type="button"
-                    onClick={() => setSelectedCategory(cat)}
+                    onClick={() => handleCategoryChange(cat)}
                     className={`px-4 py-2 rounded-full text-sm font-semibold border transition-colors duration-200 ${
                       active
                         ? "bg-brand-orange text-white border-brand-orange"
@@ -74,7 +102,7 @@ export default function ToursClient({ tours }: { tours: Tour[] }) {
               <select
                 id="tour-category"
                 value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
+                onChange={(e) => handleCategoryChange(e.target.value)}
                 className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-brand-navy focus:border-brand-orange focus:outline-none"
               >
                 {categories.map((cat) => (
@@ -86,11 +114,63 @@ export default function ToursClient({ tours }: { tours: Tour[] }) {
             </div>
           </div>
         )}
+
+        {/* Sub-category filter (e.g. Trekking regions) */}
+        {subcategories.length > 1 && (
+          <div className="mb-5">
+            <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">
+              {selectedCategory} regions
+            </p>
+            <div className="hidden sm:flex flex-wrap gap-2">
+              {subcategories.map((sub) => {
+                const active = selectedSubcategory === sub;
+                return (
+                  <button
+                    key={sub}
+                    type="button"
+                    onClick={() => setSelectedSubcategory(sub)}
+                    className={`px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-colors duration-200 ${
+                      active
+                        ? "bg-brand-navy text-white border-brand-navy"
+                        : "bg-white text-brand-navy border-gray-200 hover:border-brand-navy"
+                    }`}
+                    aria-pressed={active}
+                  >
+                    {sub}
+                  </button>
+                );
+              })}
+            </div>
+            <div className="sm:hidden">
+              <label htmlFor="tour-subcategory" className="sr-only">
+                Filter by {selectedCategory} region
+              </label>
+              <select
+                id="tour-subcategory"
+                value={selectedSubcategory}
+                onChange={(e) => setSelectedSubcategory(e.target.value)}
+                className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-brand-navy focus:border-brand-navy focus:outline-none"
+              >
+                {subcategories.map((sub) => (
+                  <option key={sub} value={sub}>
+                    {sub === ALL ? `All ${selectedCategory.toLowerCase()} regions` : sub}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        )}
+
         <p className="text-gray-500 text-sm">
           Showing <span className="font-bold text-brand-navy">{filteredTours.length}</span> tour{filteredTours.length !== 1 ? "s" : ""}
           {selectedCategory !== ALL && (
             <>
               {" "}in <span className="font-bold text-brand-navy">{selectedCategory}</span>
+            </>
+          )}
+          {selectedSubcategory !== ALL && (
+            <>
+              {" — "}<span className="font-bold text-brand-navy">{selectedSubcategory}</span>
             </>
           )}
         </p>
@@ -122,11 +202,22 @@ export default function ToursClient({ tours }: { tours: Tour[] }) {
             {selectedCategory !== ALL && tours.length > 0 ? (
               <>
                 <p className="text-gray-500 text-lg mb-4">
-                  No tours found in <span className="font-semibold text-brand-navy">{selectedCategory}</span>.
+                  No tours found in{" "}
+                  <span className="font-semibold text-brand-navy">{selectedCategory}</span>
+                  {selectedSubcategory !== ALL && (
+                    <>
+                      {" "}—{" "}
+                      <span className="font-semibold text-brand-navy">{selectedSubcategory}</span>
+                    </>
+                  )}
+                  .
                 </p>
                 <button
                   type="button"
-                  onClick={() => setSelectedCategory(ALL)}
+                  onClick={() => {
+                    setSelectedCategory(ALL);
+                    setSelectedSubcategory(ALL);
+                  }}
                   className="inline-flex items-center gap-2 bg-brand-orange text-white font-semibold px-5 py-2.5 rounded-lg hover:bg-orange-600 transition-colors duration-200"
                 >
                   Show all tours

@@ -27,6 +27,7 @@ type TourForm = {
   duration_days: number;
   max_capacity: number;
   category: string;
+  subcategory: string;
   difficulty: string;
   rating: string;
   badge: string;
@@ -39,6 +40,17 @@ type TourForm = {
 };
 
 const CATEGORIES = ["Adventure", "Cultural", "Trekking", "Wildlife", "Spiritual", "Day Trip"];
+const TREKKING_SUBCATEGORIES = [
+  "Everest Region",
+  "Annapurna Region",
+  "Langtang Region",
+  "Manaslu Region",
+  "Mustang Region",
+  "Kanchenjunga Region",
+  "Dolpo Region",
+  "Short Treks",
+  "Other",
+];
 const DIFFICULTIES = ["Easy", "Moderate", "Challenging", "Extreme"];
 
 const emptyForm: TourForm = {
@@ -54,6 +66,7 @@ const emptyForm: TourForm = {
   duration_days: 1,
   max_capacity: 10,
   category: "Adventure",
+  subcategory: "",
   difficulty: "Moderate",
   rating: "4.5",
   badge: "",
@@ -109,6 +122,7 @@ export default function AdminToursPage() {
       duration_days: tour.duration_days,
       max_capacity: tour.max_capacity,
       category: tour.category || "Adventure",
+      subcategory: tour.subcategory || "",
       difficulty: tour.difficulty || "Moderate",
       rating: tour.rating ? String(tour.rating) : "4.5",
       badge: tour.badge || "",
@@ -141,6 +155,7 @@ export default function AdminToursPage() {
       fd.append("duration_days", String(form.duration_days));
       fd.append("max_capacity", String(form.max_capacity));
       fd.append("category", form.category);
+      fd.append("subcategory", form.category === "Trekking" ? form.subcategory.trim() : "");
       fd.append("difficulty", form.difficulty);
       fd.append("rating", form.rating);
       fd.append("badge", form.badge);
@@ -372,7 +387,7 @@ export default function AdminToursPage() {
                   <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
                   <select
                     value={form.category}
-                    onChange={(e) => setForm({ ...form, category: e.target.value })}
+                    onChange={(e) => setForm({ ...form, category: e.target.value, subcategory: e.target.value === "Trekking" ? form.subcategory : "" })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-navy focus:border-transparent outline-none text-sm"
                   >
                     {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
@@ -389,6 +404,24 @@ export default function AdminToursPage() {
                   </select>
                 </div>
               </div>
+              {form.category === "Trekking" && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Trekking Sub-category <span className="text-gray-400 font-normal text-xs">(region)</span>
+                  </label>
+                  <input
+                    list="trekking-subcategories"
+                    value={form.subcategory}
+                    onChange={(e) => setForm({ ...form, subcategory: e.target.value })}
+                    placeholder="e.g. Everest Region, Annapurna Region, Short Treks"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-navy focus:border-transparent outline-none text-sm"
+                  />
+                  <datalist id="trekking-subcategories">
+                    {TREKKING_SUBCATEGORIES.map((s) => <option key={s} value={s} />)}
+                  </datalist>
+                  <p className="mt-1 text-xs text-gray-500">Pick a suggested region or type your own. Used to group treks on the tours page.</p>
+                </div>
+              )}
               <div className="grid grid-cols-2 gap-4">
                 <Field label="Rating (0-5)" value={form.rating} onChange={(v) => setForm({ ...form, rating: v })} type="number" required={false} />
                 <Field label="Badge" value={form.badge} onChange={(v) => setForm({ ...form, badge: v })} placeholder="e.g. Best Seller, New" required={false} />

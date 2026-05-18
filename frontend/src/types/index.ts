@@ -12,6 +12,7 @@ export interface Tour {
   badge?: string;
   difficulty?: "Easy" | "Moderate" | "Challenging" | "Extreme";
   category?: string;
+  subcategory?: string;
   highlights?: string[];
   includes?: string[];
   gallery?: string[];

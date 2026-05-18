@@ -11,8 +11,8 @@ class TourViewSet(viewsets.ModelViewSet):
     serializer_class = TourSerializer
     lookup_field = 'slug'
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['destination', 'is_active', 'is_latest', 'category', 'difficulty']
-    search_fields = ['title', 'description', 'destination', 'category']
+    filterset_fields = ['destination', 'is_active', 'is_latest', 'category', 'subcategory', 'difficulty']
+    search_fields = ['title', 'description', 'destination', 'category', 'subcategory']
     ordering_fields = ['base_price', 'duration_days', 'rating']
 
     def get_queryset(self):

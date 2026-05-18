@@ -25,6 +25,12 @@ class Tour(TimeStampedModel):
     duration_days = models.PositiveIntegerField(default=1)
     
     category = models.CharField(max_length=100, default="Adventure", help_text="e.g. Adventure, Cultural, Trekking, Wildlife, Spiritual, Day Trip")
+    subcategory = models.CharField(
+        max_length=100,
+        blank=True,
+        default="",
+        help_text="Optional sub-category — primarily for Trekking (e.g. Everest Region, Annapurna Region, Langtang, Manaslu, Mustang, Short Treks).",
+    )
     difficulty = models.CharField(max_length=20, choices=DIFFICULTY_CHOICES, default="Moderate")
     rating = models.DecimalField(max_digits=2, decimal_places=1, default=4.5)
     badge = models.CharField(max_length=50, blank=True, help_text="e.g. Best Seller, New, Popular")
