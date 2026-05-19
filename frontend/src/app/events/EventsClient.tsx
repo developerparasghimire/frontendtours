@@ -27,14 +27,35 @@ export default function EventsClient({
     return [ALL, ...names];
   }, [adminCategories]);
 
+  // Set of admin category names (lowercased) used to filter out events whose
+  // category is not (or no longer) in the admin-managed list.
+  const adminCategoryNames = useMemo(
+    () =>
+      new Set(
+        adminCategories
+          .filter((c) => c.parent === null && c.is_active)
+          .map((c) => c.name.trim().toLowerCase()),
+      ),
+    [adminCategories],
+  );
+
+  // Only show events whose category matches an admin-managed category. If no
+  // admin categories have been configured yet, fall back to showing everything.
+  const visibleEvents = useMemo(() => {
+    if (adminCategoryNames.size === 0) return events;
+    return events.filter((e) =>
+      adminCategoryNames.has((e.category || "").trim().toLowerCase()),
+    );
+  }, [events, adminCategoryNames]);
+
   const [selectedCategory, setSelectedCategory] = useState<string>(ALL);
 
   const filteredEvents = useMemo(() => {
-    if (selectedCategory === ALL) return events;
-    return events.filter(
+    if (selectedCategory === ALL) return visibleEvents;
+    return visibleEvents.filter(
       (e) => (e.category || "").trim().toLowerCase() === selectedCategory.toLowerCase()
     );
-  }, [events, selectedCategory]);
+  }, [visibleEvents, selectedCategory]);
 
   return (
     <div className="flex flex-col overflow-x-hidden">

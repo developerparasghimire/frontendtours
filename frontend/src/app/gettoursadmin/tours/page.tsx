@@ -41,18 +41,6 @@ type TourForm = {
   is_latest: boolean;
 };
 
-const CATEGORY_FALLBACK = ["Adventure", "Cultural", "Trekking", "Wildlife", "Spiritual", "Day Trip"];
-const TREKKING_SUBCATEGORY_FALLBACK = [
-  "Everest Region",
-  "Annapurna Region",
-  "Langtang Region",
-  "Manaslu Region",
-  "Mustang Region",
-  "Kanchenjunga Region",
-  "Dolpo Region",
-  "Short Treks",
-  "Other",
-];
 const DIFFICULTIES = ["Easy", "Moderate", "Challenging", "Extreme"];
 
 const emptyForm: TourForm = {
@@ -67,7 +55,7 @@ const emptyForm: TourForm = {
   currency: "USD",
   duration_days: 1,
   max_capacity: 10,
-  category: "Adventure",
+  category: "",
   subcategory: "",
   difficulty: "Moderate",
   rating: "4.5",
@@ -110,25 +98,24 @@ export default function AdminToursPage() {
     loadCategories();
   }, [loadTours, loadCategories]);
 
-  // Top-level tour category names from the API, falling back to the legacy hardcoded list.
+  // Top-level tour category names — admin-managed only (no hardcoded fallbacks).
   const categoryOptions = useMemo(() => {
-    const fromApi = categories.filter((c) => c.parent === null).map((c) => c.name);
-    const merged = Array.from(new Set([...fromApi, ...CATEGORY_FALLBACK]));
-    return merged;
+    return categories
+      .filter((c) => c.parent === null)
+      .sort((a, b) => (a.order - b.order) || a.name.localeCompare(b.name))
+      .map((c) => c.name);
   }, [categories]);
 
-  // Sub-categories under the currently selected parent category.
+  // Sub-categories under the currently selected parent category — admin-managed only.
   const subcategoryOptions = useMemo(() => {
     const parent = categories.find(
       (c) => c.parent === null && c.name.toLowerCase() === form.category.toLowerCase(),
     );
-    const fromApi = parent
-      ? categories.filter((c) => c.parent === parent.id).map((c) => c.name)
-      : [];
-    if (form.category.toLowerCase() === "trekking") {
-      return Array.from(new Set([...fromApi, ...TREKKING_SUBCATEGORY_FALLBACK]));
-    }
-    return fromApi;
+    if (!parent) return [];
+    return categories
+      .filter((c) => c.parent === parent.id)
+      .sort((a, b) => (a.order - b.order) || a.name.localeCompare(b.name))
+      .map((c) => c.name);
   }, [categories, form.category]);
 
   function openCreate() {
@@ -152,7 +139,7 @@ export default function AdminToursPage() {
       currency: tour.currency,
       duration_days: tour.duration_days,
       max_capacity: tour.max_capacity,
-      category: tour.category || "Adventure",
+      category: tour.category || "",
       subcategory: tour.subcategory || "",
       difficulty: tour.difficulty || "Moderate",
       rating: tour.rating ? String(tour.rating) : "4.5",
@@ -423,9 +410,13 @@ export default function AdminToursPage() {
                     value={form.category}
                     onChange={(e) => setForm({ ...form, category: e.target.value, subcategory: "" })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-navy focus:border-transparent outline-none text-sm"
+                    required
                   >
+                    <option value="" disabled>
+                      {categoryOptions.length === 0 ? "— No categories yet (add in Categories) —" : "Select a category…"}
+                    </option>
                     {!categoryOptions.includes(form.category) && form.category && (
-                      <option value={form.category}>{form.category}</option>
+                      <option value={form.category}>{form.category} (legacy — not in Categories)</option>
                     )}
                     {categoryOptions.map(c => <option key={c} value={c}>{c}</option>)}
                   </select>

@@ -36,14 +36,12 @@ type EventForm = {
   is_latest: boolean;
 };
 
-const EVENT_CATEGORY_FALLBACK = ["Music", "Culture", "Festivals", "Food", "Sports", "Workshops", "Adventure", "Spiritual"];
-
 const emptyForm: EventForm = {
   title: "",
   slug: "",
   description: "",
   long_description: "",
-  category: "Culture",
+  category: "",
   highlights: "",
   imageFile: null,
   currentImage: "",
@@ -89,8 +87,10 @@ export default function AdminEventsPage() {
   }, [loadEvents, loadCategories]);
 
   const categoryOptions = useMemo(() => {
-    const fromApi = categories.filter((c) => c.parent === null).map((c) => c.name);
-    return Array.from(new Set([...fromApi, ...EVENT_CATEGORY_FALLBACK]));
+    return categories
+      .filter((c) => c.parent === null)
+      .sort((a, b) => (a.order - b.order) || a.name.localeCompare(b.name))
+      .map((c) => c.name);
   }, [categories]);
 
   function openCreate() {
@@ -107,7 +107,7 @@ export default function AdminEventsPage() {
       slug: evt.slug,
       description: evt.description,
       long_description: evt.long_description || "",
-      category: evt.category || "Culture",
+      category: evt.category || "",
       highlights: evt.highlights?.length ? evt.highlights.join("\n") : "",
       imageFile: null,
       currentImage: evt.image || "",
@@ -359,9 +359,13 @@ export default function AdminEventsPage() {
                   value={form.category}
                   onChange={(e) => setForm({ ...form, category: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-navy focus:border-transparent outline-none text-sm"
+                  required
                 >
+                  <option value="" disabled>
+                    {categoryOptions.length === 0 ? "— No categories yet (add in Categories) —" : "Select a category…"}
+                  </option>
                   {!categoryOptions.includes(form.category) && form.category && (
-                    <option value={form.category}>{form.category}</option>
+                    <option value={form.category}>{form.category} (legacy — not in Categories)</option>
                   )}
                   {categoryOptions.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>

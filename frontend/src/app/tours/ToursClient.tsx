@@ -28,6 +28,27 @@ export default function ToursClient({
     return [ALL, ...names];
   }, [adminCategories]);
 
+  // Set of admin category names (lowercased) used to filter out tours whose
+  // category is not (or no longer) in the admin-managed list.
+  const adminCategoryNames = useMemo(
+    () =>
+      new Set(
+        adminCategories
+          .filter((c) => c.parent === null && c.is_active)
+          .map((c) => c.name.trim().toLowerCase()),
+      ),
+    [adminCategories],
+  );
+
+  // Only show tours whose category matches an admin-managed category. If no
+  // admin categories have been configured yet, fall back to showing everything.
+  const visibleTours = useMemo(() => {
+    if (adminCategoryNames.size === 0) return tours;
+    return tours.filter((t) =>
+      adminCategoryNames.has((t.category || "").trim().toLowerCase()),
+    );
+  }, [tours, adminCategoryNames]);
+
   const [selectedCategory, setSelectedCategory] = useState<string>(ALL);
   const [selectedSubcategory, setSelectedSubcategory] = useState<string>(ALL);
 
@@ -55,7 +76,7 @@ export default function ToursClient({
   }
 
   const filteredTours = useMemo(() => {
-    let list = tours;
+    let list = visibleTours;
     if (selectedCategory !== ALL) {
       list = list.filter(
         (t) => (t.category || "").trim().toLowerCase() === selectedCategory.toLowerCase()
@@ -67,7 +88,7 @@ export default function ToursClient({
       );
     }
     return list;
-  }, [tours, selectedCategory, selectedSubcategory]);
+  }, [visibleTours, selectedCategory, selectedSubcategory]);
 
   return (
     <div className="flex flex-col overflow-x-hidden">
