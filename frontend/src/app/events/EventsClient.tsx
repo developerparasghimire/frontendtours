@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import MotionWrapper from "@/components/shared/MotionWrapper";
 import EventCard from "@/components/shared/EventCard";
 import type { Event } from "@/types";
+import type { APICategory } from "@/lib/api";
 import PageHero from "@/components/sections/PageHero";
 import ZoomSection from "@/components/ui/ZoomSection";
 import { sectionImages } from "@/lib/sectionImages";
@@ -11,14 +12,20 @@ import { sectionImages } from "@/lib/sectionImages";
 const eventCardOffsets = ["xl:translate-y-6", "xl:-translate-y-8", "xl:translate-y-10", "xl:-translate-y-4"] as const;
 const ALL = "All";
 
-export default function EventsClient({ events }: { events: Event[] }) {
+export default function EventsClient({
+  events,
+  adminCategories = [],
+}: {
+  events: Event[];
+  adminCategories?: APICategory[];
+}) {
   const categories = useMemo(() => {
-    const set = new Set<string>();
-    events.forEach((e) => {
-      if (e.category && e.category.trim()) set.add(e.category.trim());
-    });
-    return [ALL, ...Array.from(set).sort((a, b) => a.localeCompare(b))];
-  }, [events]);
+    const names = adminCategories
+      .filter((c) => c.parent === null && c.is_active)
+      .sort((a, b) => (a.order - b.order) || a.name.localeCompare(b.name))
+      .map((c) => c.name);
+    return [ALL, ...names];
+  }, [adminCategories]);
 
   const [selectedCategory, setSelectedCategory] = useState<string>(ALL);
 

@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import MotionWrapper from "@/components/shared/MotionWrapper";
 import TourCard from "@/components/shared/TourCard";
 import type { Tour } from "@/types";
+import type { APICategory } from "@/lib/api";
 import PageHero from "@/components/sections/PageHero";
 import ZoomSection from "@/components/ui/ZoomSection";
 import { sectionImages } from "@/lib/sectionImages";
@@ -11,31 +12,42 @@ import { sectionImages } from "@/lib/sectionImages";
 const tourCardOffsets = ["xl:translate-y-6", "xl:-translate-y-8", "xl:translate-y-10", "xl:-translate-y-4"] as const;
 const ALL = "All";
 
-export default function ToursClient({ tours }: { tours: Tour[] }) {
+export default function ToursClient({
+  tours,
+  adminCategories = [],
+}: {
+  tours: Tour[];
+  adminCategories?: APICategory[];
+}) {
+  // Top-level categories defined by admin (active only).
   const categories = useMemo(() => {
-    const set = new Set<string>();
-    tours.forEach((t) => {
-      if (t.category && t.category.trim()) set.add(t.category.trim());
-    });
-    return [ALL, ...Array.from(set).sort((a, b) => a.localeCompare(b))];
-  }, [tours]);
+    const names = adminCategories
+      .filter((c) => c.parent === null && c.is_active)
+      .sort((a, b) => (a.order - b.order) || a.name.localeCompare(b.name))
+      .map((c) => c.name);
+    return [ALL, ...names];
+  }, [adminCategories]);
 
   const [selectedCategory, setSelectedCategory] = useState<string>(ALL);
   const [selectedSubcategory, setSelectedSubcategory] = useState<string>(ALL);
 
-  // Sub-categories available within the currently selected category (only meaningful for categories like Trekking).
+  // Sub-categories defined by admin under the currently selected parent.
   const subcategories = useMemo(() => {
     if (selectedCategory === ALL) return [] as string[];
-    const set = new Set<string>();
-    tours.forEach((t) => {
-      const matchesCat = (t.category || "").trim().toLowerCase() === selectedCategory.toLowerCase();
-      if (matchesCat && t.subcategory && t.subcategory.trim()) {
-        set.add(t.subcategory.trim());
-      }
-    });
-    if (set.size === 0) return [];
-    return [ALL, ...Array.from(set).sort((a, b) => a.localeCompare(b))];
-  }, [tours, selectedCategory]);
+    const parent = adminCategories.find(
+      (c) =>
+        c.parent === null &&
+        c.is_active &&
+        c.name.toLowerCase() === selectedCategory.toLowerCase(),
+    );
+    if (!parent) return [];
+    const subs = adminCategories
+      .filter((c) => c.parent === parent.id && c.is_active)
+      .sort((a, b) => (a.order - b.order) || a.name.localeCompare(b.name))
+      .map((c) => c.name);
+    if (subs.length === 0) return [];
+    return [ALL, ...subs];
+  }, [adminCategories, selectedCategory]);
 
   function handleCategoryChange(cat: string) {
     setSelectedCategory(cat);

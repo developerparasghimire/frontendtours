@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { getEvents } from "@/lib/api";
+import { getEvents, getCategories, type APICategory } from "@/lib/api";
 import { mapAPIEvent } from "@/lib/mappers";
 import type { Event } from "@/types";
 import EventsClient from "./EventsClient";
@@ -19,6 +19,7 @@ export const metadata: Metadata = {
 
 export default async function EventsPage() {
   let events: Event[] = [];
+  let adminCategories: APICategory[] = [];
 
   try {
     const apiEvents = await getEvents();
@@ -27,5 +28,11 @@ export default async function EventsPage() {
     // API unavailable
   }
 
-  return <EventsClient events={events} />;
+  try {
+    adminCategories = await getCategories({ kind: "event", is_active: true });
+  } catch {
+    // API unavailable — fallback to empty (client will show no filter pills)
+  }
+
+  return <EventsClient events={events} adminCategories={adminCategories} />;
 }

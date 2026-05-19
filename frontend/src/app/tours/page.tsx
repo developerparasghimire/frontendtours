@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { getTours } from "@/lib/api";
+import { getTours, getCategories, type APICategory } from "@/lib/api";
 import { mapAPITour } from "@/lib/mappers";
 import type { Tour } from "@/types";
 import ToursClient from "./ToursClient";
@@ -31,6 +31,7 @@ function readFirstParam(value?: string | string[]) {
 
 export default async function ToursPage({ searchParams }: ToursPageProps) {
   let tours: Tour[] = [];
+  let adminCategories: APICategory[] = [];
   const params = searchParams ? await searchParams : undefined;
   const keyword = readFirstParam(params?.search)?.trim() || "";
   const destination = readFirstParam(params?.destination)?.trim() || "";
@@ -47,5 +48,11 @@ export default async function ToursPage({ searchParams }: ToursPageProps) {
     // API unavailable
   }
 
-  return <ToursClient tours={tours} />;
+  try {
+    adminCategories = await getCategories({ kind: "tour", is_active: true });
+  } catch {
+    // API unavailable — fallback to empty (client will show no filter pills)
+  }
+
+  return <ToursClient tours={tours} adminCategories={adminCategories} />;
 }
