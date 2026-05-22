@@ -104,7 +104,7 @@ export default function Navbar() {
                   : "max-w-0 opacity-0"
               }`}
             >
-              Get Tours
+              GET TOURS
             </span>
           </Link>
 

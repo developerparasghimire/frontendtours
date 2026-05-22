@@ -34,6 +34,7 @@ class SiteConfigSerializer(serializers.ModelSerializer):
             'home_portfolio_image_4', 'home_portfolio_image_5',
             'home_portfolio_image_1_upload', 'home_portfolio_image_2_upload', 'home_portfolio_image_3_upload',
             'home_portfolio_image_4_upload', 'home_portfolio_image_5_upload',
+            'about_eyebrow', 'about_title', 'about_paragraph_1', 'about_paragraph_2',
             'privacy_policy_url', 'terms_of_service_url', 'updated_at'
         ]
         read_only_fields = ['updated_at']
@@ -147,14 +148,26 @@ class PageBannerSerializer(serializers.ModelSerializer):
 
 class CategorySerializer(serializers.ModelSerializer):
     parent_name = serializers.CharField(source='parent.name', read_only=True, default=None)
+    image = serializers.SerializerMethodField()
+    image_file = serializers.ImageField(source='image', write_only=True, required=False)
 
     class Meta:
         model = Category
         fields = [
             'id', 'kind', 'name', 'parent', 'parent_name',
-            'order', 'is_active', 'created_at', 'updated_at',
+            'icon', 'image', 'image_file', 'description',
+            'is_featured', 'order', 'is_active',
+            'created_at', 'updated_at',
         ]
         read_only_fields = ['id', 'parent_name', 'created_at', 'updated_at']
+
+    def get_image(self, obj):
+        if obj.image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.image.url)
+            return obj.image.url
+        return None
 
     def validate(self, attrs):
         kind = attrs.get('kind') or getattr(self.instance, 'kind', None)

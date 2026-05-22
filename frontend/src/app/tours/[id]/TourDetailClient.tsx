@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import MotionWrapper, { StaggerContainer, StaggerItem } from "@/components/shared/MotionWrapper";
@@ -9,6 +10,34 @@ import { shouldUseUnoptimizedImage } from "@/lib/images";
 import { sanitizeHTML } from "@/lib/sanitize";
 
 export default function TourDetailClient({ tour }: { tour: Tour }) {
+  const gallery = tour.gallery || [];
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const closeLightbox = useCallback(() => setLightboxIndex(null), []);
+  const showPrev = useCallback(
+    () => setLightboxIndex((i) => (i === null ? null : (i - 1 + gallery.length) % gallery.length)),
+    [gallery.length],
+  );
+  const showNext = useCallback(
+    () => setLightboxIndex((i) => (i === null ? null : (i + 1) % gallery.length)),
+    [gallery.length],
+  );
+
+  useEffect(() => {
+    if (lightboxIndex === null) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") closeLightbox();
+      else if (e.key === "ArrowLeft") showPrev();
+      else if (e.key === "ArrowRight") showNext();
+    };
+    window.addEventListener("keydown", onKey);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [lightboxIndex, closeLightbox, showPrev, showNext]);
+
   return (
     <div className="flex flex-col">
       {/* ═══════════ HERO ═══════════ */}
@@ -79,6 +108,11 @@ export default function TourDetailClient({ tour }: { tour: Tour }) {
                 {tour.difficulty}
               </span>
             )}
+            {tour.bestSeason && (
+              <span className="px-3 py-1 rounded-full bg-brand-green/30 text-white text-xs font-semibold">
+                {tour.bestSeason}
+              </span>
+            )}
           </div>
         </div>
       </section>
@@ -127,10 +161,13 @@ export default function TourDetailClient({ tour }: { tour: Tour }) {
             <MotionWrapper delay={0.2}>
               <h2 className="text-xl sm:text-2xl font-bold text-brand-navy mb-4">Gallery</h2>
               <StaggerContainer className="grid grid-cols-2 gap-4" staggerDelay={0.1}>
-                {tour.gallery?.map((src, i) => (
+                {gallery.map((src, i) => (
                   <StaggerItem key={i}>
-                    <div
-                      className="relative aspect-video rounded-2xl overflow-hidden group"
+                    <button
+                      type="button"
+                      onClick={() => setLightboxIndex(i)}
+                      aria-label={`Open image ${i + 1} of ${gallery.length}`}
+                      className="relative aspect-video rounded-2xl overflow-hidden group block w-full cursor-zoom-in focus:outline-none focus:ring-2 focus:ring-brand-orange"
                     >
                       <Image
                         src={src}
@@ -141,7 +178,7 @@ export default function TourDetailClient({ tour }: { tour: Tour }) {
                         unoptimized={shouldUseUnoptimizedImage(src)}
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    </div>
+                    </button>
                   </StaggerItem>
                 ))}
               </StaggerContainer>
@@ -233,6 +270,65 @@ export default function TourDetailClient({ tour }: { tour: Tour }) {
           </Link>
         </div>
       </section>
+
+      {/* ═══════════ GALLERY LIGHTBOX ═══════════ */}
+      {lightboxIndex !== null && gallery[lightboxIndex] && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Image viewer"
+          className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center"
+          onClick={closeLightbox}
+        >
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); closeLightbox(); }}
+            aria-label="Close"
+            className="absolute top-4 right-4 z-10 w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-2xl"
+          >
+            ×
+          </button>
+          {gallery.length > 1 && (
+            <>
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); showPrev(); }}
+                aria-label="Previous image"
+                className="absolute left-2 sm:left-6 top-1/2 -translate-y-1/2 z-10 w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center"
+              >
+                ‹
+              </button>
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); showNext(); }}
+                aria-label="Next image"
+                className="absolute right-2 sm:right-6 top-1/2 -translate-y-1/2 z-10 w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center"
+              >
+                ›
+              </button>
+            </>
+          )}
+          <div
+            className="relative w-[92vw] h-[80vh] max-w-6xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Image
+              src={gallery[lightboxIndex]}
+              alt={`${tour.title} ${lightboxIndex + 1}`}
+              fill
+              className="object-contain"
+              sizes="92vw"
+              unoptimized={shouldUseUnoptimizedImage(gallery[lightboxIndex])}
+              priority
+            />
+          </div>
+          {gallery.length > 1 && (
+            <div className="absolute bottom-4 left-0 right-0 text-center text-white/80 text-sm">
+              {lightboxIndex + 1} / {gallery.length}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

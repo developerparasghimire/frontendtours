@@ -74,7 +74,7 @@ class TourSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'title', 'slug', 'description', 'long_description', 'destination',
             'image', 'image_file', 'gallery', 'base_price', 'currency',
-            'duration_days', 'category', 'subcategory', 'difficulty', 'rating', 'badge',
+            'duration_days', 'category', 'subcategory', 'difficulty', 'rating', 'badge', 'best_season',
             'highlights', 'includes', 'max_capacity', 'is_active', 'is_latest',
             'booking_count',
             'created_at', 'updated_at',

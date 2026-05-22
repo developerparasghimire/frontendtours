@@ -35,6 +35,7 @@ export function mapAPITour(t: APITour): Tour {
     location: t.destination,
     rating: Number(t.rating) || 4.5,
     badge: t.badge || undefined,
+    bestSeason: t.best_season || undefined,
     difficulty: (t.difficulty as Tour["difficulty"]) || "Moderate",
     category: t.category || "Adventure",
     subcategory: t.subcategory || "",

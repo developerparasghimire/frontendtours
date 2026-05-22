@@ -28,8 +28,8 @@ class TourAdmin(admin.ModelAdmin):
         }),
         ("Main Image", {"fields": ("image",)}),
         ("Details", {
-            "fields": ("destination", "duration_days", "max_capacity", "category", "subcategory", "difficulty", "rating", "badge"),
-            "description": "Subcategory is mainly used for Trekking (e.g. Everest Region, Annapurna Region, Langtang, Manaslu, Mustang, Short Treks). Leave blank for non-trekking tours.",
+            "fields": ("destination", "duration_days", "max_capacity", "category", "subcategory", "difficulty", "rating", "badge", "best_season"),
+            "description": "Subcategory is mainly used for Trekking (e.g. Everest Region, Annapurna Region, Langtang, Manaslu, Mustang, Short Treks). Leave blank for non-trekking tours. 'Best season' shows next to duration/rating on the tour detail page (e.g. 'Best Season: Mar–May, Sep–Nov').",
         }),
         ("Tour Content", {"fields": ("highlights", "includes"), "description": "Enter as JSON arrays, e.g. [\"Item one\", \"Item two\"]"}),
         ("Pricing", {"fields": ("base_price", "currency")}),

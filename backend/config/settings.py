@@ -326,3 +326,10 @@ if CELERY_BROKER_URL.startswith('rediss://'):
 ADMIN_URL = config('ADMIN_URL', default='gettoursadmin/')
 if not ADMIN_URL.endswith('/'):
     ADMIN_URL += '/'
+
+# Deploy hooks (used by the admin "Trigger Deploy" button). Never store full tokens
+# in the DB — keep them as env-only secrets. Hook URLs themselves act as bearer
+# credentials; rotate in the provider dashboard to revoke access.
+VERCEL_DEPLOY_HOOK_URL = config('VERCEL_DEPLOY_HOOK_URL', default='')
+HEROKU_DEPLOY_HOOK_URL = config('HEROKU_DEPLOY_HOOK_URL', default='')
+GITHUB_DEPLOY_HOOK_URL = config('GITHUB_DEPLOY_HOOK_URL', default='')

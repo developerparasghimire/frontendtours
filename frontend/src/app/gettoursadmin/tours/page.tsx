@@ -33,6 +33,7 @@ type TourForm = {
   difficulty: string;
   rating: string;
   badge: string;
+  best_season: string;
   highlights: string;
   includes: string;
   galleryFiles: File[];
@@ -60,6 +61,7 @@ const emptyForm: TourForm = {
   difficulty: "Moderate",
   rating: "4.5",
   badge: "",
+  best_season: "",
   highlights: "",
   includes: "",
   galleryFiles: [],
@@ -144,6 +146,7 @@ export default function AdminToursPage() {
       difficulty: tour.difficulty || "Moderate",
       rating: tour.rating ? String(tour.rating) : "4.5",
       badge: tour.badge || "",
+      best_season: tour.best_season || "",
       highlights: tour.highlights?.length ? tour.highlights.join("\n") : "",
       includes: tour.includes?.length ? tour.includes.join("\n") : "",
       galleryFiles: [],
@@ -177,6 +180,7 @@ export default function AdminToursPage() {
       fd.append("difficulty", form.difficulty);
       fd.append("rating", form.rating);
       fd.append("badge", form.badge);
+      fd.append("best_season", form.best_season);
       fd.append("is_active", String(form.is_active));
       fd.append("is_latest", String(form.is_latest));
       if (form.imageFile) fd.append("image_file", form.imageFile);
@@ -456,6 +460,7 @@ export default function AdminToursPage() {
                 <Field label="Rating (0-5)" value={form.rating} onChange={(v) => setForm({ ...form, rating: v })} type="number" required={false} />
                 <Field label="Badge" value={form.badge} onChange={(v) => setForm({ ...form, badge: v })} placeholder="e.g. Best Seller, New" required={false} />
               </div>
+              <Field label="Best Season" value={form.best_season} onChange={(v) => setForm({ ...form, best_season: v })} placeholder="e.g. Best Season, Excellent Season, Sept–Nov" required={false} />
               {/* Image Upload */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Tour Image</label>

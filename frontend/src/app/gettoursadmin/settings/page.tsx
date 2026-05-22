@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import AdminShell from "../AdminShell";
 import { getSiteConfig, updateSiteConfig, type SiteConfig } from "@/lib/api";
 
-type Section = "branding" | "homepage" | "contact" | "social" | "footer";
+type Section = "branding" | "homepage" | "about" | "contact" | "social" | "footer";
 
 export default function AdminSettingsPage() {
   const [config, setConfig] = useState<Partial<SiteConfig>>({});
@@ -41,6 +41,7 @@ export default function AdminSettingsPage() {
     const formData = new FormData();
     const textFields: (keyof SiteConfig)[] = [
       "site_name", "site_tagline", "site_description",
+      "about_eyebrow", "about_title", "about_paragraph_1", "about_paragraph_2",
       "home_portfolio_link_label", "home_portfolio_link_url",
       "footer_text", "phone", "email", "address",
       "facebook_url", "twitter_url", "instagram_url",
@@ -82,6 +83,7 @@ export default function AdminSettingsPage() {
   const sections: { key: Section; label: string; icon: string }[] = [
     { key: "branding", label: "Branding & Logo", icon: "M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" },
     { key: "homepage", label: "Homepage Media", icon: "M5 3h14a2 2 0 012 2v14l-5-3-4 2-4-2-6 3V5a2 2 0 012-2z" },
+    { key: "about", label: "About Page", icon: "M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" },
     { key: "contact", label: "Contact Info", icon: "M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" },
     { key: "social", label: "Social Media", icon: "M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" },
     { key: "footer", label: "Footer", icon: "M4 6h16M4 12h16M4 18h7" },
@@ -195,6 +197,50 @@ export default function AdminSettingsPage() {
                       helpText="Upload an image for the homepage portfolio collage"
                     />
                   ))}
+                </>
+              )}
+
+              {activeSection === "about" && (
+                <>
+                  <h3 className="text-base font-bold text-brand-navy border-b border-gray-100 pb-3">
+                    About Page &mdash; &ldquo;Who We Are&rdquo; section
+                  </h3>
+                  <Field
+                    label="Eyebrow (small uppercase label)"
+                    value={config.about_eyebrow || ""}
+                    onChange={(v) => setField("about_eyebrow", v)}
+                    placeholder="Who We Are"
+                  />
+                  <Field
+                    label="Heading"
+                    value={config.about_title || ""}
+                    onChange={(v) => setField("about_title", v)}
+                    placeholder="We Make Every Trek Meaningful"
+                  />
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">First paragraph</label>
+                    <textarea
+                      rows={4}
+                      value={config.about_paragraph_1 || ""}
+                      onChange={(e) => setField("about_paragraph_1", e.target.value)}
+                      placeholder="Get Tours was founded in 2018..."
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-navy focus:border-transparent outline-none text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Second paragraph</label>
+                    <textarea
+                      rows={4}
+                      value={config.about_paragraph_2 || ""}
+                      onChange={(e) => setField("about_paragraph_2", e.target.value)}
+                      placeholder="We believe trekking should be more than reaching a summit..."
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-navy focus:border-transparent outline-none text-sm"
+                    />
+                  </div>
+                  <p className="text-xs text-gray-500">
+                    The 3 stats next to this section (e.g. <em>10K+ Trekkers</em>, <em>150+ Routes</em>, <em>50+ Peaks</em>) are managed in
+                    <a href="/gettoursadmin/about" className="text-brand-blue hover:underline ml-1">About Page Content</a>.
+                  </p>
                 </>
               )}
 

@@ -60,6 +60,12 @@ class SiteConfig(models.Model):
     home_portfolio_image_4 = models.ImageField(upload_to="site/home/", blank=True, null=True, help_text="Homepage portfolio image 4")
     home_portfolio_image_5 = models.ImageField(upload_to="site/home/", blank=True, null=True, help_text="Homepage portfolio image 5")
 
+    # About page — "Who We Are" editable content
+    about_eyebrow = models.CharField(max_length=120, blank=True, default="Who We Are", help_text="Small label shown above the About 'Who We Are' heading.")
+    about_title = models.CharField(max_length=255, blank=True, default="We Make Every Trek Meaningful", help_text="Main heading text in the About 'Who We Are' section.")
+    about_paragraph_1 = models.TextField(blank=True, default="", help_text="First paragraph under the About heading.")
+    about_paragraph_2 = models.TextField(blank=True, default="", help_text="Second paragraph under the About heading.")
+
     updated_at = models.DateTimeField(auto_now=True)
     
     def __str__(self):
@@ -205,6 +211,23 @@ class Category(models.Model):
         null=True,
         blank=True,
         help_text="Leave blank to create a top-level category. Set to create a sub-category under another category.",
+    )
+    icon = models.CharField(
+        max_length=10,
+        blank=True,
+        default="",
+        help_text="Optional emoji shown on the home 'Find Your Adventure' tile (e.g. 🏔️, 🛕). Used as a fallback when no image is uploaded.",
+    )
+    image = models.ImageField(
+        upload_to='categories/',
+        blank=True,
+        null=True,
+        help_text="Optional image shown on the home 'Find Your Adventure' tile. If set, it takes priority over the icon.",
+    )
+    description = models.CharField(max_length=255, blank=True, default="", help_text="Optional short description.")
+    is_featured = models.BooleanField(
+        default=False,
+        help_text="If checked, this category shows in the home page 'Find Your Adventure' section (latest 6 featured).",
     )
     order = models.PositiveIntegerField(default=0, help_text="Display order (lower numbers first).")
     is_active = models.BooleanField(default=True)

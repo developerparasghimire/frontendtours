@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import MotionWrapper, { StaggerContainer, StaggerItem } from "@/components/shared/MotionWrapper";
-import { getAboutStats, getValues, getLeaders, getMilestones } from "@/lib/api";
+import { getAboutStats, getValues, getLeaders, getMilestones, getSiteConfig } from "@/lib/api";
 import { shouldUseUnoptimizedImage } from "@/lib/images";
 import { sectionImages } from "@/lib/sectionImages";
 import PageHero from "@/components/sections/PageHero";
@@ -72,11 +72,12 @@ const trekFeatures = [
 ];
 
 export default async function AboutPage() {
-  const [valuesData, milestonesData, statsData, leaders] = await Promise.all([
+  const [valuesData, milestonesData, statsData, leaders, siteConfig] = await Promise.all([
     getValues().catch(() => []),
     getMilestones().catch(() => []),
     getAboutStats().catch(() => []),
     getLeaders().catch(() => []),
+    getSiteConfig().catch(() => null),
   ]);
 
   const heroStats = statsData;
@@ -161,36 +162,41 @@ export default async function AboutPage() {
             <MotionWrapper>
               <p className="inline-flex items-center gap-2 text-brand-red text-[0.68rem] font-black tracking-[0.28em] uppercase mb-4">
                 <span className="w-5 h-px bg-brand-red inline-block" />
-                Who We Are
+                {siteConfig?.about_eyebrow || "Who We Are"}
               </p>
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-brand-navy leading-[1.05] tracking-[-0.04em] mb-7">
-                We Make Every<br />Trek{" "}
                 <span className="relative inline-block">
-                  Meaningful
+                  {siteConfig?.about_title || "We Make Every Trek Meaningful"}
                   <span className="absolute -bottom-1 left-0 right-0 h-[3px] bg-gradient-to-r from-brand-red to-brand-orange rounded-full" />
                 </span>
               </h2>
               <p className="text-slate-500 leading-relaxed mb-5 text-base sm:text-lg">
-                Get Tours was founded in 2018 with a simple mission: make Nepal&apos;s incredible mountain trails accessible to everyone, while uplifting the communities that call those mountains home.
+                {siteConfig?.about_paragraph_1 || "Get Tours was founded in 2018 with a simple mission: make Nepal's incredible mountain trails accessible to everyone, while uplifting the communities that call those mountains home."}
               </p>
               <p className="text-slate-500 leading-relaxed mb-10 text-base sm:text-lg">
-                We believe trekking should be more than reaching a summit — it should be transformative. Every trail we chart connects you with real mountain people, ancient culture, and raw adventure.
+                {siteConfig?.about_paragraph_2 || "We believe trekking should be more than reaching a summit — it should be transformative. Every trail we chart connects you with real mountain people, ancient culture, and raw adventure."}
               </p>
 
-              {/* Mini stat grid */}
-              <div className="grid grid-cols-2 gap-3">
-                {[
-                  { value: "10K+", label: "Trekkers Guided", color: "text-brand-red", bg: "bg-brand-red/6" },
-                  { value: "150+", label: "Trek Routes", color: "text-brand-orange", bg: "bg-brand-orange/6" },
-                  { value: "50+", label: "Mountain Peaks", color: "text-brand-blue", bg: "bg-brand-blue/6" },
-                  { value: "8+",  label: "Years on Trail",  color: "text-brand-green", bg: "bg-brand-green/6" },
-                ].map((s) => (
-                  <div key={s.label} className={`${s.bg} rounded-2xl p-5 border border-white`}>
-                    <p className={`text-2xl font-black ${s.color} leading-none`}>{s.value}</p>
-                    <p className="text-slate-500 text-xs font-medium mt-1.5">{s.label}</p>
-                  </div>
-                ))}
-              </div>
+              {/* Mini stat grid — driven by AboutStat model (admin-editable) */}
+              {heroStats.length > 0 && (
+                <div className={`grid gap-3 ${heroStats.length >= 4 ? "grid-cols-2" : `grid-cols-${Math.min(heroStats.length, 3)}`}`}>
+                  {heroStats.slice(0, 4).map((s, idx) => {
+                    const palette = [
+                      { color: "text-brand-red", bg: "bg-brand-red/6" },
+                      { color: "text-brand-orange", bg: "bg-brand-orange/6" },
+                      { color: "text-brand-blue", bg: "bg-brand-blue/6" },
+                      { color: "text-brand-green", bg: "bg-brand-green/6" },
+                    ];
+                    const c = palette[idx % palette.length];
+                    return (
+                      <div key={s.label} className={`${c.bg} rounded-2xl p-5 border border-white`}>
+                        <p className={`text-2xl font-black ${c.color} leading-none`}>{s.value}</p>
+                        <p className="text-slate-500 text-xs font-medium mt-1.5">{s.label}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </MotionWrapper>
           </div>
         </div>

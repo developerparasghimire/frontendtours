@@ -1,4 +1,4 @@
-import { getTours, getEvents, getTestimonials, getSiteConfig, getPartners, type SiteConfig, type APIPartner } from "@/lib/api";
+import { getTours, getEvents, getTestimonials, getSiteConfig, getPartners, getCategories, type SiteConfig, type APIPartner, type APICategory } from "@/lib/api";
 import { mapAPITour, mapAPIEvent } from "@/lib/mappers";
 import type { Tour, Event, Testimonial } from "@/types";
 import HomeClient from "./HomeClient";
@@ -15,17 +15,20 @@ export default async function Home() {
   let testimonials: Testimonial[] = [];
   let siteConfig: SiteConfig | null = null;
   let partners: APIPartner[] = [];
+  let featuredCategories: APICategory[] = [];
 
   try {
-    const [apiTours, apiEvents, apiTestimonials, apiConfig, apiPartners] = await Promise.all([
+    const [apiTours, apiEvents, apiTestimonials, apiConfig, apiPartners, apiCategories] = await Promise.all([
       getTours({ is_latest: true }).catch(() => []),
       getEvents({ is_latest: true }).catch(() => []),
       getTestimonials().catch(() => []),
       getSiteConfig().catch(() => null),
       getPartners().catch(() => []),
+      getCategories({ kind: "tour", is_active: true, is_featured: true, ordering: "-created_at", limit: 6 }).catch(() => [] as APICategory[]),
     ]);
     siteConfig = apiConfig;
     partners = apiPartners;
+    featuredCategories = apiCategories;
     tours = apiTours.map(mapAPITour);
     events = apiEvents.map(mapAPIEvent);
     testimonials = apiTestimonials.map((t) => ({
@@ -66,7 +69,7 @@ export default async function Home() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <HomeClient tours={tours} events={events} testimonials={testimonials} siteConfig={siteConfig} partners={partners} />
+      <HomeClient tours={tours} events={events} testimonials={testimonials} siteConfig={siteConfig} partners={partners} featuredCategories={featuredCategories} />
     </>
   );
 }

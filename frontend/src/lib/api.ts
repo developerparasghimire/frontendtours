@@ -405,6 +405,7 @@ export interface APITour {
   difficulty: string;
   rating: string;
   badge: string;
+  best_season: string;
   highlights: string[];
   includes: string[];
   max_capacity: number;
@@ -815,6 +816,10 @@ export interface SiteConfig {
   site_name: string;
   site_tagline: string;
   site_description: string;
+  about_eyebrow: string;
+  about_title: string;
+  about_paragraph_1: string;
+  about_paragraph_2: string;
   logo: string | null;
   logo_dark: string | null;
   footer_logo: string | null;
@@ -1174,6 +1179,10 @@ export interface APICategory {
   parent_name: string | null;
   order: number;
   is_active: boolean;
+  icon?: string;
+  image?: string | null;
+  description?: string;
+  is_featured?: boolean;
   created_at?: string;
   updated_at?: string;
 }
@@ -1182,11 +1191,17 @@ export async function getCategories(params?: {
   kind?: "tour" | "event";
   parent?: number | "null";
   is_active?: boolean;
+  is_featured?: boolean;
+  ordering?: string;
+  limit?: number;
 }): Promise<APICategory[]> {
   const sp = new URLSearchParams();
   if (params?.kind) sp.set("kind", params.kind);
   if (params?.parent !== undefined) sp.set("parent", String(params.parent));
   if (params?.is_active !== undefined) sp.set("is_active", String(params.is_active));
+  if (params?.is_featured !== undefined) sp.set("is_featured", String(params.is_featured));
+  if (params?.ordering) sp.set("ordering", params.ordering);
+  if (params?.limit !== undefined) sp.set("limit", String(params.limit));
   const qs = sp.toString();
   return fetchAPI<APICategory[]>(`/common/categories/${qs ? `?${qs}` : ""}`);
 }
@@ -1216,6 +1231,50 @@ export async function updateCategory(
 
 export async function deleteCategory(id: number, token: string): Promise<void> {
   return fetchDelete(`/common/categories/${id}/`, token);
+}
+
+export async function createCategoryWithImage(
+  data: FormData,
+  token: string,
+): Promise<APICategory> {
+  return fetchFormData<APICategory>("/common/categories/create/", "POST", data, token);
+}
+
+export async function updateCategoryWithImage(
+  id: number,
+  data: FormData,
+  token: string,
+): Promise<APICategory> {
+  return fetchFormData<APICategory>(`/common/categories/${id}/`, "PATCH", data, token);
+}
+
+/* ──────────────── Deploy (admin only) ──────────────── */
+
+export interface DeployStatus {
+  vercel: boolean;
+  heroku: boolean;
+  github: boolean;
+}
+
+export interface DeployResult {
+  results: Record<string, { ok: boolean; status: number; message: string }>;
+}
+
+export async function getDeployStatus(token: string): Promise<DeployStatus> {
+  return fetchAPI<DeployStatus>("/common/admin/deploy/status/", {
+    headers: authHeaders(token),
+  });
+}
+
+export async function triggerDeploy(
+  token: string,
+  targets: Array<"vercel" | "heroku" | "github">,
+): Promise<DeployResult> {
+  return fetchAPI<DeployResult>("/common/admin/deploy/", {
+    method: "POST",
+    headers: authHeaders(token),
+    body: JSON.stringify({ targets }),
+  });
 }
 
 /* ──────────────── User Bookings API ──────────────── */

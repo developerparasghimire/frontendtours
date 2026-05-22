@@ -10,6 +10,7 @@ export interface Tour {
   location?: string;
   rating?: number;
   badge?: string;
+  bestSeason?: string;
   difficulty?: "Easy" | "Moderate" | "Challenging" | "Extreme";
   category?: string;
   subcategory?: string;

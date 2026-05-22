@@ -34,6 +34,12 @@ class Tour(TimeStampedModel):
     difficulty = models.CharField(max_length=20, choices=DIFFICULTY_CHOICES, default="Moderate")
     rating = models.DecimalField(max_digits=2, decimal_places=1, default=4.5)
     badge = models.CharField(max_length=50, blank=True, help_text="e.g. Best Seller, New, Popular")
+    best_season = models.CharField(
+        max_length=120,
+        blank=True,
+        default="",
+        help_text="Short label shown next to duration/rating/difficulty on the tour detail page, e.g. 'Best Season: Mar\u2013May, Sep\u2013Nov' or 'Excellent Season'.",
+    )
     
     highlights = models.JSONField(default=list, blank=True, help_text='Tour highlights, e.g. ["Sunrise view", "Guided trek"]')
     includes = models.JSONField(default=list, blank=True, help_text='What is included, e.g. ["Hotel pickup", "Meals", "Guide"]')

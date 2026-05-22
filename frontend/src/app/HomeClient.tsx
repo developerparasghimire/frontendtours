@@ -10,7 +10,7 @@ import SubscribeForm from "@/components/shared/SubscribeForm";
 import ZoomSection from "@/components/ui/ZoomSection";
 import TourImagePlaceholder from "@/components/shared/TourImagePlaceholder";
 import type { Tour, Event, Testimonial } from "@/types";
-import type { SiteConfig, APIPartner } from "@/lib/api";
+import type { SiteConfig, APIPartner, APICategory } from "@/lib/api";
 import { shouldUseUnoptimizedImage } from "@/lib/images";
 import { sectionImages } from "@/lib/sectionImages";
 
@@ -651,6 +651,7 @@ interface HomeClientProps {
   testimonials: Testimonial[];
   siteConfig?: SiteConfig | null;
   partners?: APIPartner[];
+  featuredCategories?: APICategory[];
 }
 
 /* ─── Certificates & Partners Section ─── */
@@ -682,7 +683,7 @@ function CertificatesPartnersSection({ partners }: { partners: APIPartner[] }) {
                       src={partner.logo}
                       alt={partner.name}
                       fill
-                      className="object-contain grayscale transition-all duration-300 group-hover:grayscale-0"
+                      className="object-contain transition-opacity duration-300"
                       sizes="128px"
                       loading="lazy"
                       quality={80}
@@ -719,7 +720,7 @@ function CertificatesPartnersSection({ partners }: { partners: APIPartner[] }) {
   );
 }
 
-export default function HomeClient({ tours, events, testimonials, siteConfig, partners = [] }: HomeClientProps) {
+export default function HomeClient({ tours, events, testimonials, siteConfig, partners = [], featuredCategories = [] }: HomeClientProps) {
   const trustReasons = [
     {
       icon: "M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z",
@@ -913,7 +914,34 @@ export default function HomeClient({ tours, events, testimonials, siteConfig, pa
           </MotionWrapper>
 
           <StaggerContainer className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4" staggerDelay={0.08}>
-            {categories.map((cat) => (
+            {(featuredCategories && featuredCategories.length > 0 ? featuredCategories : []).map((cat) => (
+              <StaggerItem key={cat.id}>
+                <Link
+                  href={`/tours?category=${encodeURIComponent(cat.name)}`}
+                  className="block text-center p-7 rounded-2xl bg-white/90 backdrop-blur-xl hover:bg-white hover:shadow-[0_12px_32px_-8px_rgba(0,0,0,0.1)] transition-all duration-500 cursor-pointer border border-gray-100/60 group hover:-translate-y-2 hover:border-brand-blue/20"
+                >
+                  {cat.image ? (
+                    <span className="relative block w-14 h-14 mx-auto mb-3 group-hover:scale-110 transition-transform duration-300">
+                      <Image
+                        src={cat.image}
+                        alt={cat.name}
+                        fill
+                        className="object-contain"
+                        sizes="56px"
+                        unoptimized={shouldUseUnoptimizedImage(cat.image)}
+                      />
+                    </span>
+                  ) : (
+                    <span className="text-4xl block mb-3 group-hover:scale-125 transition-transform duration-300">{cat.icon || "✨"}</span>
+                  )}
+                  <h3 className="font-bold text-brand-navy text-sm mb-1 group-hover:text-brand-blue transition-colors duration-300">{cat.name}</h3>
+                  {cat.description ? (
+                    <p className="text-gray-400 text-xs line-clamp-2">{cat.description}</p>
+                  ) : null}
+                </Link>
+              </StaggerItem>
+            ))}
+            {(!featuredCategories || featuredCategories.length === 0) && categories.map((cat) => (
               <StaggerItem key={cat.label}>
                 <div
                   className="text-center p-7 rounded-2xl bg-white/90 backdrop-blur-xl hover:bg-white hover:shadow-[0_12px_32px_-8px_rgba(0,0,0,0.1)] transition-all duration-500 cursor-pointer border border-gray-100/60 group hover:-translate-y-2 hover:border-brand-blue/20"

@@ -5,12 +5,13 @@ from .models import AboutStat, Value, Leader, Milestone, PageBanner, Partner, Ca
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = ("name", "kind", "parent", "order", "is_active", "updated_at")
-    list_filter = ("kind", "is_active")
+    list_display = ("name", "kind", "parent", "icon", "is_featured", "order", "is_active", "updated_at")
+    list_filter = ("kind", "is_active", "is_featured")
     search_fields = ("name", "parent__name")
-    list_editable = ("order", "is_active")
+    list_editable = ("order", "is_active", "is_featured")
     autocomplete_fields = ("parent",)
     ordering = ("kind", "order", "name")
+    fields = ("kind", "name", "parent", "icon", "image", "description", "is_featured", "order", "is_active")
 
 
 @admin.register(SiteConfig)
@@ -35,6 +36,15 @@ class SiteConfigAdmin(admin.ModelAdmin):
                 "home_portfolio_image_4",
                 "home_portfolio_image_5",
             )
+        }),
+        ("About Page — 'Who We Are' content", {
+            "fields": (
+                "about_eyebrow",
+                "about_title",
+                "about_paragraph_1",
+                "about_paragraph_2",
+            ),
+            "description": "Shown in the About page 'Who We Are' section. The stat numbers (10K+, 150+, 50+) are managed under 'About Stats'.",
         }),
         ("Footer", {
             "fields": ("footer_text",)

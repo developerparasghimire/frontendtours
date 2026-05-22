@@ -5,8 +5,8 @@ import AdminShell from "../AdminShell";
 import { EditButton, DeleteButton, CancelButton } from "../components/ActionButtons";
 import {
   getCategories,
-  createCategory,
-  updateCategory,
+  createCategoryWithImage,
+  updateCategoryWithImage,
   deleteCategory,
   type APICategory,
 } from "@/lib/api";
@@ -19,6 +19,11 @@ type CategoryForm = {
   parent: number | null;
   order: number;
   is_active: boolean;
+  icon: string;
+  description: string;
+  is_featured: boolean;
+  imageFile: File | null;
+  removeImage: boolean;
 };
 
 const emptyForm: CategoryForm = {
@@ -27,6 +32,11 @@ const emptyForm: CategoryForm = {
   parent: null,
   order: 0,
   is_active: true,
+  icon: "",
+  description: "",
+  is_featured: false,
+  imageFile: null,
+  removeImage: false,
 };
 
 const inputCls =
@@ -88,6 +98,11 @@ export default function AdminCategoriesPage() {
       parent: cat.parent,
       order: cat.order,
       is_active: cat.is_active,
+      icon: cat.icon || "",
+      description: cat.description || "",
+      is_featured: !!cat.is_featured,
+      imageFile: null,
+      removeImage: false,
     });
     setError("");
     if (typeof window !== "undefined") {
@@ -106,17 +121,22 @@ export default function AdminCategoriesPage() {
     setSaving(true);
     setError("");
     try {
-      const payload = {
-        kind: form.kind,
-        name: trimmed,
-        parent: form.parent,
-        order: Number(form.order) || 0,
-        is_active: form.is_active,
-      };
+      const fd = new FormData();
+      fd.append("kind", form.kind);
+      fd.append("name", trimmed);
+      if (form.parent !== null) fd.append("parent", String(form.parent));
+      else fd.append("parent", "");
+      fd.append("order", String(Number(form.order) || 0));
+      fd.append("is_active", form.is_active ? "true" : "false");
+      fd.append("is_featured", form.is_featured ? "true" : "false");
+      fd.append("icon", form.icon);
+      fd.append("description", form.description);
+      if (form.imageFile) fd.append("image_file", form.imageFile);
+      else if (form.removeImage) fd.append("image_file", "");
       if (editing) {
-        await updateCategory(editing.id, payload, token);
+        await updateCategoryWithImage(editing.id, fd, token);
       } else {
-        await createCategory(payload, token);
+        await createCategoryWithImage(fd, token);
       }
       resetForm(form.kind);
       load();
@@ -218,6 +238,52 @@ export default function AdminCategoriesPage() {
             </div>
           </div>
 
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">Icon (emoji)</label>
+              <input
+                className={inputCls}
+                value={form.icon}
+                onChange={(e) => setForm({ ...form, icon: e.target.value })}
+                placeholder="🏔️"
+                maxLength={10}
+              />
+            </div>
+            <div className="md:col-span-3">
+              <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">Short description</label>
+              <input
+                className={inputCls}
+                value={form.description}
+                onChange={(e) => setForm({ ...form, description: e.target.value })}
+                placeholder="Optional one-line description shown under the title on the home page"
+                maxLength={255}
+              />
+            </div>
+            <div className="md:col-span-4">
+              <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">Image (optional)</label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setForm({ ...form, imageFile: e.target.files?.[0] || null, removeImage: false })}
+                className="text-sm"
+              />
+              {editing?.image && !form.imageFile && (
+                <div className="mt-2 flex items-center gap-3">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={editing.image} alt="" className="w-12 h-12 object-contain rounded border" />
+                  <label className="inline-flex items-center gap-2 text-xs text-gray-600">
+                    <input
+                      type="checkbox"
+                      checked={form.removeImage}
+                      onChange={(e) => setForm({ ...form, removeImage: e.target.checked })}
+                    />
+                    Remove current image
+                  </label>
+                </div>
+              )}
+            </div>
+          </div>
+
           <div className="flex flex-wrap items-center gap-4">
             <label className="inline-flex items-center gap-2 text-sm text-gray-700">
               <input
@@ -227,6 +293,15 @@ export default function AdminCategoriesPage() {
                 className="rounded border-gray-300 text-brand-navy focus:ring-brand-navy"
               />
               Active (show in filters / dropdowns)
+            </label>
+            <label className="inline-flex items-center gap-2 text-sm text-gray-700">
+              <input
+                type="checkbox"
+                checked={form.is_featured}
+                onChange={(e) => setForm({ ...form, is_featured: e.target.checked })}
+                className="rounded border-gray-300 text-brand-navy focus:ring-brand-navy"
+              />
+              Featured (latest 6 shown on home page &ldquo;Find Your Adventure&rdquo;)
             </label>
             <span className="text-xs text-gray-400">Kind: <span className="font-semibold uppercase">{form.kind}</span></span>
           </div>
@@ -266,9 +341,18 @@ export default function AdminCategoriesPage() {
                     {cat.parent !== null && (
                       <span className="text-gray-300 select-none">↳</span>
                     )}
+                    {cat.image ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={cat.image} alt="" className="w-9 h-9 object-contain rounded border shrink-0" />
+                    ) : cat.icon ? (
+                      <span className="text-2xl shrink-0">{cat.icon}</span>
+                    ) : null}
                     <div className="min-w-0">
                       <p className="font-medium text-brand-navy truncate">
                         {cat.name}
+                        {cat.is_featured && (
+                          <span className="ml-2 text-[10px] uppercase font-bold tracking-wider text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded">Featured</span>
+                        )}
                         {!cat.is_active && (
                           <span className="ml-2 text-[10px] uppercase font-bold tracking-wider text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded">Inactive</span>
                         )}
