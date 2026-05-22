@@ -137,6 +137,93 @@ export default function TourDetailClient({ tour }: { tour: Tour }) {
               )}
             </MotionWrapper>
 
+            {/* Info Grid */}
+            {(tour.location || tour.duration || tour.difficulty || tour.category || tour.bestSeason || tour.rating) && (
+              <MotionWrapper delay={0.05}>
+                <div className="bg-[#eef2f7] rounded-2xl p-5 sm:p-6 grid grid-cols-2 gap-x-6 gap-y-5">
+                  {tour.location && (
+                    <div className="flex items-start gap-3">
+                      <span className="w-9 h-9 rounded-lg bg-white flex items-center justify-center flex-shrink-0 shadow-sm">
+                        <svg className="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                          <circle cx="12" cy="12" r="10"/><path strokeLinecap="round" strokeLinejoin="round" d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/>
+                        </svg>
+                      </span>
+                      <div>
+                        <p className="text-[11px] text-gray-400 font-medium uppercase tracking-wide">Country</p>
+                        <p className="text-brand-navy font-semibold text-sm mt-0.5">{tour.location}</p>
+                      </div>
+                    </div>
+                  )}
+                  {tour.duration && (
+                    <div className="flex items-start gap-3">
+                      <span className="w-9 h-9 rounded-lg bg-white flex items-center justify-center flex-shrink-0 shadow-sm">
+                        <svg className="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                        </svg>
+                      </span>
+                      <div>
+                        <p className="text-[11px] text-gray-400 font-medium uppercase tracking-wide">Duration</p>
+                        <p className="text-brand-navy font-semibold text-sm mt-0.5">{tour.duration}</p>
+                      </div>
+                    </div>
+                  )}
+                  {tour.difficulty && (
+                    <div className="flex items-start gap-3">
+                      <span className="w-9 h-9 rounded-lg bg-white flex items-center justify-center flex-shrink-0 shadow-sm">
+                        <svg className="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 20h.01M8.5 15.5A5 5 0 0112 7a5 5 0 013.5 8.5"/>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M6 20a6 6 0 0012 0"/>
+                        </svg>
+                      </span>
+                      <div>
+                        <p className="text-[11px] text-gray-400 font-medium uppercase tracking-wide">Difficulty</p>
+                        <p className="text-brand-navy font-semibold text-sm mt-0.5">{tour.difficulty}</p>
+                      </div>
+                    </div>
+                  )}
+                  {tour.category && (
+                    <div className="flex items-start gap-3">
+                      <span className="w-9 h-9 rounded-lg bg-white flex items-center justify-center flex-shrink-0 shadow-sm">
+                        <svg className="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                      </span>
+                      <div>
+                        <p className="text-[11px] text-gray-400 font-medium uppercase tracking-wide">Activity</p>
+                        <p className="text-brand-navy font-semibold text-sm mt-0.5">{tour.subcategory ? `${tour.category} / ${tour.subcategory}` : tour.category}</p>
+                      </div>
+                    </div>
+                  )}
+                  {tour.bestSeason && (
+                    <div className="flex items-start gap-3">
+                      <span className="w-9 h-9 rounded-lg bg-white flex items-center justify-center flex-shrink-0 shadow-sm">
+                        <svg className="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"/>
+                        </svg>
+                      </span>
+                      <div>
+                        <p className="text-[11px] text-gray-400 font-medium uppercase tracking-wide">Best Season</p>
+                        <p className="text-brand-navy font-semibold text-sm mt-0.5">{tour.bestSeason}</p>
+                      </div>
+                    </div>
+                  )}
+                  {tour.rating && (
+                    <div className="flex items-start gap-3">
+                      <span className="w-9 h-9 rounded-lg bg-white flex items-center justify-center flex-shrink-0 shadow-sm">
+                        <svg className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                        </svg>
+                      </span>
+                      <div>
+                        <p className="text-[11px] text-gray-400 font-medium uppercase tracking-wide">Rating</p>
+                        <p className="text-brand-navy font-semibold text-sm mt-0.5">{tour.rating} / 5</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </MotionWrapper>
+            )}
+
             {/* Highlights */}
             <MotionWrapper delay={0.1}>
               <h2 className="text-xl sm:text-2xl font-bold text-brand-navy mb-4">Tour Highlights</h2>

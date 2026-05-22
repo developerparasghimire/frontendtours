@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import MotionWrapper, { StaggerContainer, StaggerItem } from "@/components/shared/MotionWrapper";
+import MotionWrapper from "@/components/shared/MotionWrapper";
 import ReviewSection from "@/components/shared/ReviewSection";
 import type { Event } from "@/types";
 import { shouldUseUnoptimizedImage } from "@/lib/images";
@@ -107,65 +107,57 @@ export default function EventDetailClient({ event }: { event: Event & { longDesc
               </MotionWrapper>
             )}
 
-            {/* Event Details Grid */}
+            {/* Info Grid */}
             <MotionWrapper delay={0.2}>
-              <h2 className="text-xl sm:text-2xl font-bold text-brand-navy mb-4">Event Details</h2>
-              <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <StaggerItem>
-                  <div className="bg-gray-50 rounded-xl p-4 flex items-start gap-3">
-                    <div className="w-10 h-10 bg-brand-blue/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <svg className="w-5 h-5 text-brand-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Date</p>
-                      <p className="text-brand-navy font-semibold mt-0.5">{event.date}</p>
-                    </div>
+              <div className="bg-[#eef2f7] rounded-2xl p-5 sm:p-6 grid grid-cols-2 gap-x-6 gap-y-5">
+                <div className="flex items-start gap-3">
+                  <span className="w-9 h-9 rounded-lg bg-white flex items-center justify-center flex-shrink-0 shadow-sm">
+                    <svg className="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                  </span>
+                  <div>
+                    <p className="text-[11px] text-gray-400 font-medium uppercase tracking-wide">Date</p>
+                    <p className="text-brand-navy font-semibold text-sm mt-0.5">{event.date}</p>
                   </div>
-                </StaggerItem>
-                <StaggerItem>
-                  <div className="bg-gray-50 rounded-xl p-4 flex items-start gap-3">
-                    <div className="w-10 h-10 bg-brand-blue/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <svg className="w-5 h-5 text-brand-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Time</p>
-                      <p className="text-brand-navy font-semibold mt-0.5">{event.time}</p>
-                    </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="w-9 h-9 rounded-lg bg-white flex items-center justify-center flex-shrink-0 shadow-sm">
+                    <svg className="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                  </span>
+                  <div>
+                    <p className="text-[11px] text-gray-400 font-medium uppercase tracking-wide">Time</p>
+                    <p className="text-brand-navy font-semibold text-sm mt-0.5">{event.time}</p>
                   </div>
-                </StaggerItem>
+                </div>
                 {event.location && (
-                  <StaggerItem>
-                    <div className="bg-gray-50 rounded-xl p-4 flex items-start gap-3">
-                      <div className="w-10 h-10 bg-brand-blue/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <svg className="w-5 h-5 text-brand-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        </svg>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Venue</p>
-                        <p className="text-brand-navy font-semibold mt-0.5">{event.location}</p>
-                      </div>
-                    </div>
-                  </StaggerItem>
-                )}
-                <StaggerItem>
-                  <div className="bg-gray-50 rounded-xl p-4 flex items-start gap-3">
-                    <div className="w-10 h-10 bg-brand-blue/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <svg className="w-5 h-5 text-brand-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
+                  <div className="flex items-start gap-3">
+                    <span className="w-9 h-9 rounded-lg bg-white flex items-center justify-center flex-shrink-0 shadow-sm">
+                      <svg className="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
                       </svg>
-                    </div>
+                    </span>
                     <div>
-                      <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Category</p>
-                      <p className="text-brand-navy font-semibold mt-0.5">{event.category}</p>
+                      <p className="text-[11px] text-gray-400 font-medium uppercase tracking-wide">Venue</p>
+                      <p className="text-brand-navy font-semibold text-sm mt-0.5">{event.location}</p>
                     </div>
                   </div>
-                </StaggerItem>
-              </StaggerContainer>
+                )}
+                <div className="flex items-start gap-3">
+                  <span className="w-9 h-9 rounded-lg bg-white flex items-center justify-center flex-shrink-0 shadow-sm">
+                    <svg className="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                    </svg>
+                  </span>
+                  <div>
+                    <p className="text-[11px] text-gray-400 font-medium uppercase tracking-wide">Category</p>
+                    <p className="text-brand-navy font-semibold text-sm mt-0.5">{event.category}</p>
+                  </div>
+                </div>
+              </div>
             </MotionWrapper>
           </div>
 
