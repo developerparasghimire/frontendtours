@@ -30,8 +30,6 @@ from .views import (
     categories_list_view,
     category_create_view,
     category_detail_view,
-    trigger_deploy_view,
-    deploy_status_view,
 )
 
 urlpatterns = [
@@ -65,6 +63,4 @@ urlpatterns = [
     path('categories/', categories_list_view, name='categories-list'),
     path('categories/create/', category_create_view, name='category-create'),
     path('categories/<int:pk>/', category_detail_view, name='category-detail'),
-    path('admin/deploy/', trigger_deploy_view, name='admin-trigger-deploy'),
-    path('admin/deploy/status/', deploy_status_view, name='admin-deploy-status'),
 ]

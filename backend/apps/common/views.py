@@ -1,7 +1,5 @@
 import logging
 import json as _json
-import urllib.request
-import urllib.error
 
 from django.conf import settings
 from django.core.mail import EmailMessage
@@ -545,79 +543,3 @@ def category_detail_view(request, pk):
         serializer.save()
         return Response(serializer.data)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-# ──────────────── Deployment (admin-only) ────────────────
-
-def _trigger_deploy_hook(url):
-    """POST to a Vercel/Heroku/GitHub deploy-hook URL. Returns (ok, status_code, message)."""
-    if not url:
-        return False, 0, "Not configured"
-    try:
-        req = urllib.request.Request(url, data=b'{}', method='POST', headers={'Content-Type': 'application/json'})
-        with urllib.request.urlopen(req, timeout=15) as resp:
-            body = resp.read(2048).decode('utf-8', errors='replace')
-            return (200 <= resp.status < 300), resp.status, body[:500]
-    except urllib.error.HTTPError as exc:
-        return False, exc.code, str(exc)[:500]
-    except Exception as exc:  # noqa: BLE001
-        return False, 0, str(exc)[:500]
-
-
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def trigger_deploy_view(request):
-    """Trigger configured Vercel + Heroku (+ optional GitHub) deploy hooks. SUPER_ADMIN only.
-
-    Deploy-hook URLs MUST be configured as environment variables on the server:
-      VERCEL_DEPLOY_HOOK_URL   — from Vercel → Project Settings → Git → Deploy Hooks
-      HEROKU_DEPLOY_HOOK_URL   — from Heroku → App → Deploy → Deploy Hooks (or 'Deploy: webhook')
-      GITHUB_DEPLOY_HOOK_URL   — optional: GitHub Actions repository_dispatch / workflow_dispatch URL
-
-    Storing tokens inside the DB is intentionally avoided to limit blast radius if the DB
-    is dumped or backups leak. Rotate hook URLs in Vercel/Heroku to revoke access.
-    """
-    if not hasattr(request.user, 'role') or request.user.role != 'SUPER_ADMIN':
-        return Response({'error': 'Forbidden — SUPER_ADMIN only'}, status=status.HTTP_403_FORBIDDEN)
-
-    requested = request.data.get('targets') or ['vercel', 'heroku']
-    if isinstance(requested, str):
-        requested = [requested]
-    requested = [str(t).lower() for t in requested]
-
-    targets = {
-        'vercel': getattr(settings, 'VERCEL_DEPLOY_HOOK_URL', '') or '',
-        'heroku': getattr(settings, 'HEROKU_DEPLOY_HOOK_URL', '') or '',
-        'github': getattr(settings, 'GITHUB_DEPLOY_HOOK_URL', '') or '',
-    }
-
-    results = {}
-    overall_ok = True
-    for name in requested:
-        url = targets.get(name, '')
-        ok, code, msg = _trigger_deploy_hook(url)
-        results[name] = {
-            'ok': ok,
-            'status': code,
-            'configured': bool(url),
-            'message': msg if not ok or not url else 'Triggered',
-        }
-        if not ok:
-            overall_ok = False
-
-    logger.info("Deploy trigger by user=%s targets=%s ok=%s", request.user.pk, requested, overall_ok)
-    http_status = status.HTTP_200_OK if overall_ok else status.HTTP_502_BAD_GATEWAY
-    return Response({'ok': overall_ok, 'results': results}, status=http_status)
-
-
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def deploy_status_view(request):
-    """Return which deploy hooks are configured (booleans only, never the URLs). SUPER_ADMIN only."""
-    if not hasattr(request.user, 'role') or request.user.role != 'SUPER_ADMIN':
-        return Response({'error': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)
-    return Response({
-        'vercel': bool(getattr(settings, 'VERCEL_DEPLOY_HOOK_URL', '')),
-        'heroku': bool(getattr(settings, 'HEROKU_DEPLOY_HOOK_URL', '')),
-        'github': bool(getattr(settings, 'GITHUB_DEPLOY_HOOK_URL', '')),
-    })
