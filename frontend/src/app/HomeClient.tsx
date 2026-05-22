@@ -917,7 +917,7 @@ export default function HomeClient({ tours, events, testimonials, siteConfig, pa
             {(featuredCategories && featuredCategories.length > 0 ? featuredCategories : []).map((cat) => (
               <StaggerItem key={cat.id}>
                 <Link
-                  href={`/tours?category=${encodeURIComponent(cat.name)}`}
+                  href={`/${cat.kind === "event" ? "events" : "tours"}?category=${encodeURIComponent(cat.name)}`}
                   className="block text-center p-7 rounded-2xl bg-white/90 backdrop-blur-xl hover:bg-white hover:shadow-[0_12px_32px_-8px_rgba(0,0,0,0.1)] transition-all duration-500 cursor-pointer border border-gray-100/60 group hover:-translate-y-2 hover:border-brand-blue/20"
                 >
                   {cat.image ? (

@@ -24,7 +24,7 @@ export default async function Home() {
       getTestimonials().catch(() => []),
       getSiteConfig().catch(() => null),
       getPartners().catch(() => []),
-      getCategories({ kind: "tour", is_active: true, is_featured: true, ordering: "-created_at", limit: 6 }).catch(() => [] as APICategory[]),
+      getCategories({ is_active: true, is_featured: true, ordering: "order", limit: 6 }).catch(() => [] as APICategory[]),
     ]);
     siteConfig = apiConfig;
     partners = apiPartners;
