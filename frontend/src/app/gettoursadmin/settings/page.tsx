@@ -42,7 +42,6 @@ export default function AdminSettingsPage() {
     const textFields: (keyof SiteConfig)[] = [
       "site_name", "site_tagline", "site_description",
       "home_about_heading",
-      "about_eyebrow", "about_title", "about_paragraph_1", "about_paragraph_2",
       "home_portfolio_link_label", "home_portfolio_link_url",
       "footer_text", "phone", "email", "address",
       "facebook_url", "twitter_url", "instagram_url",
@@ -214,47 +213,10 @@ export default function AdminSettingsPage() {
                   />
                   <p className="text-xs text-gray-500 -mt-2">
                     Main heading shown in the &ldquo;About Us&rdquo; section on the home page.
-                    The description below it uses the <em>Site Description</em> field above.
                   </p>
-
-                  <h3 className="text-base font-bold text-brand-navy border-b border-gray-100 pb-3 pt-2">
-                    About Page &mdash; &ldquo;Who We Are&rdquo; section
-                  </h3>
-                  <Field
-                    label="Eyebrow (small uppercase label)"
-                    value={config.about_eyebrow || ""}
-                    onChange={(v) => setField("about_eyebrow", v)}
-                    placeholder="Who We Are"
-                  />
-                  <Field
-                    label="Heading"
-                    value={config.about_title || ""}
-                    onChange={(v) => setField("about_title", v)}
-                    placeholder="We Make Every Trek Meaningful"
-                  />
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">First paragraph</label>
-                    <textarea
-                      rows={4}
-                      value={config.about_paragraph_1 || ""}
-                      onChange={(e) => setField("about_paragraph_1", e.target.value)}
-                      placeholder="Get Tours was founded in 2018..."
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-navy focus:border-transparent outline-none text-sm"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Second paragraph</label>
-                    <textarea
-                      rows={4}
-                      value={config.about_paragraph_2 || ""}
-                      onChange={(e) => setField("about_paragraph_2", e.target.value)}
-                      placeholder="We believe trekking should be more than reaching a summit..."
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-navy focus:border-transparent outline-none text-sm"
-                    />
-                  </div>
                   <p className="text-xs text-gray-500">
-                    The 3 stats next to this section (e.g. <em>10K+ Trekkers</em>, <em>150+ Routes</em>, <em>50+ Peaks</em>) are managed in
-                    <a href="/gettoursadmin/about" className="text-brand-blue hover:underline ml-1">About Page Content</a>.
+                    The &ldquo;Who We Are&rdquo; text (eyebrow, heading, paragraphs) and stats are managed in{" "}
+                    <a href="/gettoursadmin/about" className="text-brand-blue hover:underline">About Page Content</a>.
                   </p>
                 </>
               )}

@@ -8,10 +8,11 @@ import {
   getValues, createValue, updateValue, deleteValue,
   getLeaders, createLeader, updateLeader, deleteLeader,
   getMilestones, createMilestone, updateMilestone, deleteMilestone,
-  type APIAboutStat, type APIValue, type APILeader, type APIMilestone,
+  getSiteConfig, updateSiteConfig,
+  type APIAboutStat, type APIValue, type APILeader, type APIMilestone, type SiteConfig,
 } from "@/lib/api";
 
-type Tab = "stats" | "values" | "leaders" | "milestones";
+type Tab = "who-we-are" | "stats" | "values" | "leaders" | "milestones";
 
 export default function AdminAboutPage() {
   return (
@@ -22,10 +23,11 @@ export default function AdminAboutPage() {
 }
 
 function AboutContent() {
-  const [tab, setTab] = useState<Tab>("stats");
+  const [tab, setTab] = useState<Tab>("who-we-are");
   const token = typeof window !== "undefined" ? localStorage.getItem("admin_token") : null;
 
   const tabs: { key: Tab; label: string }[] = [
+    { key: "who-we-are", label: "Who We Are" },
     { key: "stats", label: "Stats" },
     { key: "values", label: "Values" },
     { key: "leaders", label: "Leaders" },
@@ -34,7 +36,7 @@ function AboutContent() {
 
   return (
     <div>
-      <div className="flex gap-2 mb-6 border-b border-gray-200 pb-3">
+      <div className="flex gap-2 mb-6 border-b border-gray-200 pb-3 flex-wrap">
         {tabs.map((t) => (
           <button
             key={t.key}
@@ -47,10 +49,119 @@ function AboutContent() {
           </button>
         ))}
       </div>
+      {tab === "who-we-are" && <WhoWeAreSection token={token} />}
       {tab === "stats" && <StatsSection token={token} />}
       {tab === "values" && <ValuesSection token={token} />}
       {tab === "leaders" && <LeadersSection token={token} />}
       {tab === "milestones" && <MilestonesSection token={token} />}
+    </div>
+  );
+}
+
+/* ═══════════════════ WHO WE ARE ═══════════════════ */
+function WhoWeAreSection({ token }: { token: string | null }) {
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [form, setForm] = useState({
+    about_eyebrow: "",
+    about_title: "",
+    about_paragraph_1: "",
+    about_paragraph_2: "",
+  });
+
+  useEffect(() => {
+    getSiteConfig()
+      .then((cfg: SiteConfig) => {
+        setForm({
+          about_eyebrow: cfg.about_eyebrow || "",
+          about_title: cfg.about_title || "",
+          about_paragraph_1: cfg.about_paragraph_1 || "",
+          about_paragraph_2: cfg.about_paragraph_2 || "",
+        });
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  const handleSave = async () => {
+    if (!token) return;
+    setSaving(true);
+    try {
+      const fd = new FormData();
+      fd.append("about_eyebrow", form.about_eyebrow);
+      fd.append("about_title", form.about_title);
+      fd.append("about_paragraph_1", form.about_paragraph_1);
+      fd.append("about_paragraph_2", form.about_paragraph_2);
+      await updateSiteConfig(fd, token);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) return <p className="text-gray-400 text-center py-8">Loading...</p>;
+
+  return (
+    <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-5 max-w-2xl">
+      <h3 className="text-lg font-bold text-brand-navy">Who We Are — Section Text</h3>
+      <p className="text-xs text-gray-500 -mt-2">
+        Controls the heading, subheading, and paragraphs in the &ldquo;Who We Are&rdquo; section on the About page. The stats below it are managed in the <strong>Stats</strong> tab.
+      </p>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Eyebrow label <span className="text-gray-400 font-normal">(small uppercase text above heading)</span></label>
+        <input
+          value={form.about_eyebrow}
+          onChange={(e) => setForm({ ...form, about_eyebrow: e.target.value })}
+          placeholder="Who We Are"
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-navy focus:border-transparent outline-none"
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Heading</label>
+        <input
+          value={form.about_title}
+          onChange={(e) => setForm({ ...form, about_title: e.target.value })}
+          placeholder="We Make Every Trek Meaningful"
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-navy focus:border-transparent outline-none"
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">First Paragraph</label>
+        <textarea
+          rows={5}
+          value={form.about_paragraph_1}
+          onChange={(e) => setForm({ ...form, about_paragraph_1: e.target.value })}
+          placeholder="Founded in the heart of Kathmandu..."
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-navy focus:border-transparent outline-none"
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Second Paragraph <span className="text-gray-400 font-normal">(optional)</span></label>
+        <textarea
+          rows={4}
+          value={form.about_paragraph_2}
+          onChange={(e) => setForm({ ...form, about_paragraph_2: e.target.value })}
+          placeholder="From the icefields of the Himalayas..."
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-navy focus:border-transparent outline-none"
+        />
+      </div>
+
+      <div className="flex items-center gap-3 pt-1">
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          className="px-6 py-2 bg-brand-navy text-white text-sm font-semibold rounded-lg hover:bg-brand-blue transition-colors disabled:opacity-60"
+        >
+          {saving ? "Saving…" : "Save"}
+        </button>
+        {saved && <span className="text-green-600 text-sm font-medium">Saved!</span>}
+      </div>
     </div>
   );
 }
