@@ -780,9 +780,13 @@ export default function HomeClient({ tours, events, testimonials, siteConfig, pa
                 {siteConfig?.home_about_heading || "Your Himalayan Adventure Awaits"}
               </h2>
               <p className="text-slate-500 text-sm leading-relaxed">
-                {siteConfig?.site_description ||
-                  "Founded in Thamel, Kathmandu in 2018, Get Tours Nepal is the Himalayas\u2019 most trusted trekking agency \u2014 crafting authentic mountain experiences for adventurers around the globe."}
+                {siteConfig?.about_paragraph_1 || "Founded in the heart of Kathmandu, our team brings 25+ years of firsthand expertise across Nepal's mountains, monasteries, and hidden valleys."}
               </p>
+              {siteConfig?.about_paragraph_2 && (
+                <p className="text-slate-500 text-sm leading-relaxed">
+                  {siteConfig.about_paragraph_2}
+                </p>
+              )}
             </div>
 
             {/* ── [Mobile order 2 / Desktop left] Image composition ── */}
@@ -842,9 +846,13 @@ export default function HomeClient({ tours, events, testimonials, siteConfig, pa
                   {siteConfig?.home_about_heading || "Your Himalayan Adventure Awaits"}
                 </h2>
                 <p className="text-slate-500 text-base sm:text-lg leading-relaxed max-w-xl">
-                  {siteConfig?.site_description ||
-                    "Founded in Thamel, Kathmandu in 2018, Get Tours Nepal is the Himalayas\u2019 most trusted trekking agency \u2014 crafting authentic mountain experiences for adventurers from around the globe."}
+                  {siteConfig?.about_paragraph_1 || "Founded in the heart of Kathmandu, our team brings 25+ years of firsthand expertise across Nepal's mountains, monasteries, and hidden valleys."}
                 </p>
+                {siteConfig?.about_paragraph_2 && (
+                  <p className="text-slate-500 text-base sm:text-lg leading-relaxed max-w-xl">
+                    {siteConfig.about_paragraph_2}
+                  </p>
+                )}
               </div>
 
               {/* Feature bullets — from admin Values */}
