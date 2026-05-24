@@ -41,6 +41,7 @@ export default function AdminSettingsPage() {
     const formData = new FormData();
     const textFields: (keyof SiteConfig)[] = [
       "site_name", "site_tagline", "site_description",
+      "home_about_heading",
       "about_eyebrow", "about_title", "about_paragraph_1", "about_paragraph_2",
       "home_portfolio_link_label", "home_portfolio_link_url",
       "footer_text", "phone", "email", "address",
@@ -203,6 +204,20 @@ export default function AdminSettingsPage() {
               {activeSection === "about" && (
                 <>
                   <h3 className="text-base font-bold text-brand-navy border-b border-gray-100 pb-3">
+                    Home Page &mdash; &ldquo;About Us&rdquo; section
+                  </h3>
+                  <Field
+                    label="Home About Heading"
+                    value={config.home_about_heading || ""}
+                    onChange={(v) => setField("home_about_heading", v)}
+                    placeholder="Your Himalayan Adventure Awaits"
+                  />
+                  <p className="text-xs text-gray-500 -mt-2">
+                    Main heading shown in the &ldquo;About Us&rdquo; section on the home page.
+                    The description below it uses the <em>Site Description</em> field above.
+                  </p>
+
+                  <h3 className="text-base font-bold text-brand-navy border-b border-gray-100 pb-3 pt-2">
                     About Page &mdash; &ldquo;Who We Are&rdquo; section
                   </h3>
                   <Field

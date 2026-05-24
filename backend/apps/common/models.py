@@ -60,6 +60,9 @@ class SiteConfig(models.Model):
     home_portfolio_image_4 = models.ImageField(upload_to="site/home/", blank=True, null=True, help_text="Homepage portfolio image 4")
     home_portfolio_image_5 = models.ImageField(upload_to="site/home/", blank=True, null=True, help_text="Homepage portfolio image 5")
 
+    # Home page — "About Us" section
+    home_about_heading = models.CharField(max_length=255, blank=True, default="Your Himalayan Adventure Awaits", help_text="Main heading in the home page About Us section.")
+
     # About page — "Who We Are" editable content
     about_eyebrow = models.CharField(max_length=120, blank=True, default="Who We Are", help_text="Small label shown above the About 'Who We Are' heading.")
     about_title = models.CharField(max_length=255, blank=True, default="We Make Every Trek Meaningful", help_text="Main heading text in the About 'Who We Are' section.")

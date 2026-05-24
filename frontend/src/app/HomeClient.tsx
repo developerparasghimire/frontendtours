@@ -777,8 +777,7 @@ export default function HomeClient({ tours, events, testimonials, siteConfig, pa
                 <span className="text-[11px] font-bold tracking-[0.2em] uppercase">About Us</span>
               </div>
               <h2 className="text-3xl font-extrabold text-brand-navy leading-[1.1] tracking-tight">
-                Your Himalayan
-                <span className="text-brand-red"> Adventure</span> Awaits
+                {siteConfig?.home_about_heading || "Your Himalayan Adventure Awaits"}
               </h2>
               <p className="text-slate-500 text-sm leading-relaxed">
                 {siteConfig?.site_description ||
@@ -840,8 +839,7 @@ export default function HomeClient({ tours, events, testimonials, siteConfig, pa
                   <span className="text-[11px] font-bold tracking-[0.2em] uppercase">About Us</span>
                 </div>
                 <h2 className="text-4xl sm:text-5xl lg:text-[3.5rem] font-extrabold text-brand-navy leading-[1.07] tracking-tight">
-                  Your Himalayan<br />
-                  <span className="text-brand-red"> Adventure</span> Awaits
+                  {siteConfig?.home_about_heading || "Your Himalayan Adventure Awaits"}
                 </h2>
                 <p className="text-slate-500 text-base sm:text-lg leading-relaxed max-w-xl">
                   {siteConfig?.site_description ||
@@ -868,22 +866,36 @@ export default function HomeClient({ tours, events, testimonials, siteConfig, pa
                 ))}
               </div>
 
-              {/* Stats — from admin AboutStats */}
-              <div className="grid grid-cols-3 gap-2 lg:gap-4 border-t border-gray-100 pt-5">
-                {(aboutStats.length > 0
-                  ? aboutStats.slice(0, 3)
+              {/* Stats — from admin AboutStats, same style as about page */}
+              {(() => {
+                const palette = [
+                  { color: "text-brand-red", bg: "bg-brand-red/6" },
+                  { color: "text-brand-orange", bg: "bg-brand-orange/6" },
+                  { color: "text-brand-blue", bg: "bg-brand-blue/6" },
+                  { color: "text-brand-green", bg: "bg-brand-green/6" },
+                ];
+                const stats = aboutStats.length > 0
+                  ? aboutStats.slice(0, 4)
                   : [
-                      { id: 0, value: "10K+", label: "Happy Trekkers", order: 0 },
-                      { id: 1, value: "150+", label: "Verified Routes", order: 1 },
-                      { id: 2, value: "98%", label: "Satisfaction", order: 2 },
-                    ]
-                ).map((s) => (
-                  <div key={s.id} className="text-center bg-slate-50 lg:bg-transparent rounded-2xl py-3 lg:py-0">
-                    <p className="text-2xl lg:text-3xl font-extrabold text-brand-navy">{s.value}</p>
-                    <p className="text-[11px] lg:text-xs text-slate-400 mt-1 font-medium">{s.label}</p>
+                      { id: 0, value: "100%", label: "Tailor-Made Journeys", order: 0 },
+                      { id: 1, value: "24/7", label: "On-Ground Support", order: 1 },
+                      { id: 2, value: "25+", label: "Years of Himalayan Expertise", order: 2 },
+                      { id: 3, value: "∞", label: "Stories Waiting for You", order: 3 },
+                    ];
+                return (
+                  <div className={`grid gap-3 border-t border-gray-100 pt-5 ${stats.length >= 4 ? "grid-cols-2" : `grid-cols-${Math.min(stats.length, 3)}`}`}>
+                    {stats.map((s, idx) => {
+                      const c = palette[idx % palette.length];
+                      return (
+                        <div key={s.id} className={`${c.bg} rounded-2xl p-4 border border-white`}>
+                          <p className={`text-2xl font-black ${c.color} leading-none`}>{s.value}</p>
+                          <p className="text-slate-500 text-xs font-medium mt-1.5">{s.label}</p>
+                        </div>
+                      );
+                    })}
                   </div>
-                ))}
-              </div>
+                );
+              })()}
 
               {/* CTAs — full width on mobile */}
               <div className="flex flex-col sm:flex-row gap-3 pt-1">
