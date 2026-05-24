@@ -804,7 +804,7 @@ export default function HomeClient({ tours, events, testimonials, siteConfig, pa
                     Himalayan Expeditions
                   </span>
                   <span className="rounded-full bg-brand-red text-white px-3 py-1 text-[11px] font-bold">
-                    Since 2018
+                    25+ Years
                   </span>
                 </div>
               </div>
@@ -824,7 +824,7 @@ export default function HomeClient({ tours, events, testimonials, siteConfig, pa
 
               {/* Experience badge — top left */}
               <div className="absolute -top-4 -left-3 sm:-top-6 sm:-left-6 bg-brand-red text-white rounded-2xl px-4 py-4 sm:px-5 sm:py-5 shadow-2xl text-center z-10">
-                <p className="text-3xl sm:text-4xl font-extrabold leading-none">7+</p>
+                <p className="text-3xl sm:text-4xl font-extrabold leading-none">25+</p>
                 <p className="text-[10px] sm:text-[11px] font-bold mt-1 opacity-90 tracking-wider uppercase">Years Expert</p>
               </div>
 

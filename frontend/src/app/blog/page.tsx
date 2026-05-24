@@ -3,7 +3,7 @@ import ClientBlogPage from "./ClientBlogPage";
 export const metadata = {
   title: "Nepal Travel Blog — Trekking Guides, Tips & Stories | Get Tours Nepal",
   description:
-    "Explore expert trekking guides, Nepal travel tips, cultural stories, packing lists, and first-hand adventure accounts. Insights from local Sherpa guides with 8+ years on the Himalayan trails.",
+    "Explore expert trekking guides, Nepal travel tips, cultural stories, packing lists, and first-hand adventure accounts. Insights from local Sherpa guides with 25+ years on the Himalayan trails.",
   keywords: [
     "Nepal travel blog",
     "trekking guides Nepal",

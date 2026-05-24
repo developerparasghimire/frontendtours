@@ -23,9 +23,9 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/about" },
   openGraph: {
-    title: "About Get Tours Nepal — Himalayan Trekking Specialists Since 2018",
+    title: "About Get Tours Nepal — 25+ Years of Himalayan Trekking Excellence",
     description:
-      "Nepal's most trusted trekking agency. Expert Sherpa guides, 150+ routes, 10,000+ happy trekkers. Founded in Thamel, Kathmandu in 2018.",
+      "Nepal's most trusted trekking agency. 25+ years of experience, expert Sherpa guides, 150+ routes, 10,000+ happy trekkers.",
     url: "/about",
     images: [
       {
@@ -138,7 +138,7 @@ export default async function AboutPage() {
                   <div className="absolute inset-0 bg-gradient-to-t from-brand-navy/70 via-transparent to-transparent" />
                   {/* Bottom label */}
                   <div className="absolute bottom-0 inset-x-0 p-7">
-                    <p className="text-white/50 text-xs font-bold uppercase tracking-[0.2em] mb-1">Since 2018</p>
+                    <p className="text-white/50 text-xs font-bold uppercase tracking-[0.2em] mb-1">25+ Years Experience</p>
                     <p className="text-white text-xl font-extrabold leading-tight">Thamel, Kathmandu<br/>Nepal</p>
                   </div>
                 </div>
@@ -151,7 +151,7 @@ export default async function AboutPage() {
                     </svg>
                   </div>
                   <div>
-                    <p className="text-brand-navy font-black text-lg leading-none">8+</p>
+                    <p className="text-brand-navy font-black text-lg leading-none">25+</p>
                     <p className="text-slate-400 text-xs font-medium mt-0.5">Years of Excellence</p>
                   </div>
                 </div>
