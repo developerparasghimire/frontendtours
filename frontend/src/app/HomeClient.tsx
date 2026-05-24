@@ -10,7 +10,7 @@ import SubscribeForm from "@/components/shared/SubscribeForm";
 import ZoomSection from "@/components/ui/ZoomSection";
 import TourImagePlaceholder from "@/components/shared/TourImagePlaceholder";
 import type { Tour, Event, Testimonial } from "@/types";
-import type { SiteConfig, APIPartner, APICategory, APIAboutStat, APIValue } from "@/lib/api";
+import type { SiteConfig, APIPartner, APICategory, APIAboutStat } from "@/lib/api";
 import { shouldUseUnoptimizedImage } from "@/lib/images";
 import { sectionImages } from "@/lib/sectionImages";
 
@@ -653,7 +653,6 @@ interface HomeClientProps {
   partners?: APIPartner[];
   featuredCategories?: APICategory[];
   aboutStats?: APIAboutStat[];
-  aboutValues?: APIValue[];
 }
 
 /* ─── Certificates & Partners Section ─── */
@@ -722,7 +721,7 @@ function CertificatesPartnersSection({ partners }: { partners: APIPartner[] }) {
   );
 }
 
-export default function HomeClient({ tours, events, testimonials, siteConfig, partners = [], featuredCategories = [], aboutStats = [], aboutValues = [] }: HomeClientProps) {
+export default function HomeClient({ tours, events, testimonials, siteConfig, partners = [], featuredCategories = [], aboutStats = [] }: HomeClientProps) {
   const trustReasons = [
     {
       icon: "M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z",
@@ -855,24 +854,6 @@ export default function HomeClient({ tours, events, testimonials, siteConfig, pa
                 )}
               </div>
 
-              {/* Feature bullets — from admin Values */}
-              <div className="flex flex-col gap-3 lg:gap-4">
-                {(aboutValues.length > 0
-                  ? aboutValues.slice(0, 3)
-                  : [
-                      { id: 0, title: "Expert Sherpa Guides", description: "Certified guides with 25+ years of Himalayan expertise ensure your safety and enrich every step.", icon_svg_path: "", order: 0 },
-                      { id: 1, title: "Safety First Approach", description: "Full acclimatisation support, emergency protocols, and 24/7 assistance on every trek.", icon_svg_path: "", order: 1 },
-                      { id: 2, title: "Responsible Tourism", description: "Leave-No-Trace practices, fair wages for local staff, and community reinvestment programs.", icon_svg_path: "", order: 2 },
-                    ]
-                ).map((f) => (
-                  <div key={f.id} className="group bg-white rounded-2xl p-3.5 lg:p-0 lg:bg-transparent border border-slate-100 lg:border-0 shadow-sm lg:shadow-none">
-                    <div className="pt-0.5">
-                      <h4 className="font-bold text-brand-navy text-sm">{f.title}</h4>
-                      <p className="text-slate-400 text-xs sm:text-sm leading-relaxed mt-0.5">{f.description}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
 
               {/* Stats — from admin AboutStats, same style as about page */}
               {(() => {

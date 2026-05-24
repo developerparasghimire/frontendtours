@@ -1,4 +1,4 @@
-import { getTours, getEvents, getTestimonials, getSiteConfig, getPartners, getCategories, getAboutStats, getValues, type SiteConfig, type APIPartner, type APICategory, type APIAboutStat, type APIValue } from "@/lib/api";
+import { getTours, getEvents, getTestimonials, getSiteConfig, getPartners, getCategories, getAboutStats, type SiteConfig, type APIPartner, type APICategory, type APIAboutStat } from "@/lib/api";
 import { mapAPITour, mapAPIEvent } from "@/lib/mappers";
 import type { Tour, Event, Testimonial } from "@/types";
 import HomeClient from "./HomeClient";
@@ -17,10 +17,9 @@ export default async function Home() {
   let partners: APIPartner[] = [];
   let featuredCategories: APICategory[] = [];
   let aboutStats: APIAboutStat[] = [];
-  let aboutValues: APIValue[] = [];
 
   try {
-    const [apiTours, apiEvents, apiTestimonials, apiConfig, apiPartners, apiCategories, apiStats, apiValues] = await Promise.all([
+    const [apiTours, apiEvents, apiTestimonials, apiConfig, apiPartners, apiCategories, apiStats] = await Promise.all([
       getTours({ is_latest: true }).catch(() => []),
       getEvents({ is_latest: true }).catch(() => []),
       getTestimonials().catch(() => []),
@@ -28,13 +27,11 @@ export default async function Home() {
       getPartners().catch(() => []),
       getCategories({ is_active: true, is_featured: true, ordering: "order", limit: 6 }).catch(() => [] as APICategory[]),
       getAboutStats().catch(() => [] as APIAboutStat[]),
-      getValues().catch(() => [] as APIValue[]),
     ]);
     siteConfig = apiConfig;
     partners = apiPartners;
     featuredCategories = apiCategories;
     aboutStats = apiStats;
-    aboutValues = apiValues;
     tours = apiTours.map(mapAPITour);
     events = apiEvents.map(mapAPIEvent);
     testimonials = apiTestimonials.map((t) => ({
@@ -75,7 +72,7 @@ export default async function Home() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <HomeClient tours={tours} events={events} testimonials={testimonials} siteConfig={siteConfig} partners={partners} featuredCategories={featuredCategories} aboutStats={aboutStats} aboutValues={aboutValues} />
+      <HomeClient tours={tours} events={events} testimonials={testimonials} siteConfig={siteConfig} partners={partners} featuredCategories={featuredCategories} aboutStats={aboutStats} />
     </>
   );
 }
