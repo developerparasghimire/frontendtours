@@ -145,11 +145,11 @@ export default function TourDetailClient({ tour }: { tour: Tour }) {
                     <div className="flex items-start gap-3">
                       <span className="w-9 h-9 rounded-lg bg-white flex items-center justify-center flex-shrink-0 shadow-sm">
                         <svg className="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                          <circle cx="12" cy="12" r="10"/><path strokeLinecap="round" strokeLinejoin="round" d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5z"/>
                         </svg>
                       </span>
                       <div>
-                        <p className="text-[11px] text-gray-400 font-medium uppercase tracking-wide">Country</p>
+                        <p className="text-[11px] text-gray-400 font-medium uppercase tracking-wide">Destination</p>
                         <p className="text-brand-navy font-semibold text-sm mt-0.5">{tour.location}</p>
                       </div>
                     </div>
