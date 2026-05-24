@@ -773,17 +773,17 @@ export default function HomeClient({ tours, events, testimonials, siteConfig, pa
             {/* ── [Mobile order 1] Label + Heading + Description ── */}
             <div className="flex flex-col gap-4 lg:hidden">
               <div className="inline-flex items-center gap-2 self-start bg-brand-orange/10 text-brand-orange rounded-full px-4 py-2">
-                <span className="text-[11px] font-bold tracking-[0.2em] uppercase">About Us</span>
+                {siteConfig?.home_about_eyebrow || "About Us"}
               </div>
               <h2 className="text-3xl font-extrabold text-brand-navy leading-[1.1] tracking-tight">
                 {siteConfig?.home_about_heading || "Your Himalayan Adventure Awaits"}
               </h2>
               <p className="text-slate-500 text-sm leading-relaxed">
-                {siteConfig?.about_paragraph_1 || "Founded in the heart of Kathmandu, our team brings 25+ years of firsthand expertise across Nepal's mountains, monasteries, and hidden valleys."}
+                {siteConfig?.home_about_paragraph_1 || "Founded in the heart of Kathmandu, our team brings 25+ years of firsthand expertise across Nepal's mountains, monasteries, and hidden valleys."}
               </p>
-              {siteConfig?.about_paragraph_2 && (
+              {siteConfig?.home_about_paragraph_2 && (
                 <p className="text-slate-500 text-sm leading-relaxed">
-                  {siteConfig.about_paragraph_2}
+                  {siteConfig.home_about_paragraph_2}
                 </p>
               )}
             </div>
@@ -839,17 +839,17 @@ export default function HomeClient({ tours, events, testimonials, siteConfig, pa
               {/* Label + heading + desc — desktop only (shown above image on mobile) */}
               <div className="hidden lg:flex flex-col gap-5">
                 <div className="inline-flex items-center gap-2 self-start bg-brand-orange/10 text-brand-orange rounded-full px-4 py-2">
-                  <span className="text-[11px] font-bold tracking-[0.2em] uppercase">About Us</span>
+                  {siteConfig?.home_about_eyebrow || "About Us"}
                 </div>
                 <h2 className="text-4xl sm:text-5xl lg:text-[3.5rem] font-extrabold text-brand-navy leading-[1.07] tracking-tight">
                   {siteConfig?.home_about_heading || "Your Himalayan Adventure Awaits"}
                 </h2>
                 <p className="text-slate-500 text-base sm:text-lg leading-relaxed max-w-xl">
-                  {siteConfig?.about_paragraph_1 || "Founded in the heart of Kathmandu, our team brings 25+ years of firsthand expertise across Nepal's mountains, monasteries, and hidden valleys."}
+                  {siteConfig?.home_about_paragraph_1 || "Founded in the heart of Kathmandu, our team brings 25+ years of firsthand expertise across Nepal's mountains, monasteries, and hidden valleys."}
                 </p>
-                {siteConfig?.about_paragraph_2 && (
+                {siteConfig?.home_about_paragraph_2 && (
                   <p className="text-slate-500 text-base sm:text-lg leading-relaxed max-w-xl">
-                    {siteConfig.about_paragraph_2}
+                    {siteConfig.home_about_paragraph_2}
                   </p>
                 )}
               </div>

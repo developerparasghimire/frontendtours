@@ -34,7 +34,7 @@ class SiteConfigSerializer(serializers.ModelSerializer):
             'home_portfolio_image_4', 'home_portfolio_image_5',
             'home_portfolio_image_1_upload', 'home_portfolio_image_2_upload', 'home_portfolio_image_3_upload',
             'home_portfolio_image_4_upload', 'home_portfolio_image_5_upload',
-            'home_about_heading',
+            'home_about_heading', 'home_about_eyebrow', 'home_about_paragraph_1', 'home_about_paragraph_2',
             'about_eyebrow', 'about_title', 'about_paragraph_1', 'about_paragraph_2',
             'privacy_policy_url', 'terms_of_service_url', 'updated_at'
         ]

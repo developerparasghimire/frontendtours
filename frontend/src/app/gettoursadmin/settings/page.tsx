@@ -203,20 +203,11 @@ export default function AdminSettingsPage() {
               {activeSection === "about" && (
                 <>
                   <h3 className="text-base font-bold text-brand-navy border-b border-gray-100 pb-3">
-                    Home Page &mdash; &ldquo;About Us&rdquo; section
+                    About Us Content
                   </h3>
-                  <Field
-                    label="Home About Heading"
-                    value={config.home_about_heading || ""}
-                    onChange={(v) => setField("home_about_heading", v)}
-                    placeholder="Your Himalayan Adventure Awaits"
-                  />
-                  <p className="text-xs text-gray-500 -mt-2">
-                    Main heading shown in the &ldquo;About Us&rdquo; section on the home page.
-                  </p>
                   <p className="text-xs text-gray-500">
-                    The &ldquo;Who We Are&rdquo; text (eyebrow, heading, paragraphs) and stats are managed in{" "}
-                    <a href="/gettoursadmin/about" className="text-brand-blue hover:underline">About Page Content</a>.
+                    The home page &ldquo;About Us&rdquo; and about page &ldquo;Who We Are&rdquo; text and stats are managed in{" "}
+                    <a href="/gettoursadmin/about" className="text-brand-blue hover:underline font-semibold">About Page Content &rarr;</a>
                   </p>
                 </>
               )}

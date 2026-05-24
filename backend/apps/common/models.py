@@ -62,6 +62,9 @@ class SiteConfig(models.Model):
 
     # Home page — "About Us" section
     home_about_heading = models.CharField(max_length=255, blank=True, default="Your Himalayan Adventure Awaits", help_text="Main heading in the home page About Us section.")
+    home_about_eyebrow = models.CharField(max_length=120, blank=True, default="About Us", help_text="Small uppercase label above the home page About Us heading.")
+    home_about_paragraph_1 = models.TextField(blank=True, default="", help_text="First paragraph in the home page About Us section.")
+    home_about_paragraph_2 = models.TextField(blank=True, default="", help_text="Second paragraph in the home page About Us section (optional).")
 
     # About page — "Who We Are" editable content
     about_eyebrow = models.CharField(max_length=120, blank=True, default="Who We Are", help_text="Small label shown above the About 'Who We Are' heading.")

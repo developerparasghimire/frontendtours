@@ -817,6 +817,9 @@ export interface SiteConfig {
   site_tagline: string;
   site_description: string;
   home_about_heading: string;
+  home_about_eyebrow: string;
+  home_about_paragraph_1: string;
+  home_about_paragraph_2: string;
   about_eyebrow: string;
   about_title: string;
   about_paragraph_1: string;

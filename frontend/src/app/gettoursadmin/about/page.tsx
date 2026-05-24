@@ -60,20 +60,24 @@ function AboutContent() {
 
 /* ═══════════════════ WHO WE ARE ═══════════════════ */
 function WhoWeAreSection({ token }: { token: string | null }) {
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [form, setForm] = useState({
-    about_eyebrow: "",
-    about_title: "",
-    about_paragraph_1: "",
-    about_paragraph_2: "",
-  });
+  const [homeForm, setHomeForm] = useState({ home_about_eyebrow: "", home_about_heading: "", home_about_paragraph_1: "", home_about_paragraph_2: "" });
+  const [aboutForm, setAboutForm] = useState({ about_eyebrow: "", about_title: "", about_paragraph_1: "", about_paragraph_2: "" });
+  const [homeSaving, setHomeSaving] = useState(false);
+  const [homeSaved, setHomeSaved] = useState(false);
+  const [aboutSaving, setAboutSaving] = useState(false);
+  const [aboutSaved, setAboutSaved] = useState(false);
 
   useEffect(() => {
     getSiteConfig()
       .then((cfg: SiteConfig) => {
-        setForm({
+        setHomeForm({
+          home_about_eyebrow: cfg.home_about_eyebrow || "",
+          home_about_heading: cfg.home_about_heading || "",
+          home_about_paragraph_1: cfg.home_about_paragraph_1 || "",
+          home_about_paragraph_2: cfg.home_about_paragraph_2 || "",
+        });
+        setAboutForm({
           about_eyebrow: cfg.about_eyebrow || "",
           about_title: cfg.about_title || "",
           about_paragraph_1: cfg.about_paragraph_1 || "",
@@ -84,84 +88,103 @@ function WhoWeAreSection({ token }: { token: string | null }) {
       .finally(() => setLoading(false));
   }, []);
 
-  const handleSave = async () => {
+  const saveHome = async () => {
     if (!token) return;
-    setSaving(true);
+    setHomeSaving(true);
     try {
       const fd = new FormData();
-      fd.append("about_eyebrow", form.about_eyebrow);
-      fd.append("about_title", form.about_title);
-      fd.append("about_paragraph_1", form.about_paragraph_1);
-      fd.append("about_paragraph_2", form.about_paragraph_2);
+      Object.entries(homeForm).forEach(([k, v]) => fd.append(k, v));
       await updateSiteConfig(fd, token);
-      setSaved(true);
-      setTimeout(() => setSaved(false), 2500);
+      setHomeSaved(true);
+      setTimeout(() => setHomeSaved(false), 2500);
     } finally {
-      setSaving(false);
+      setHomeSaving(false);
+    }
+  };
+
+  const saveAbout = async () => {
+    if (!token) return;
+    setAboutSaving(true);
+    try {
+      const fd = new FormData();
+      Object.entries(aboutForm).forEach(([k, v]) => fd.append(k, v));
+      await updateSiteConfig(fd, token);
+      setAboutSaved(true);
+      setTimeout(() => setAboutSaved(false), 2500);
+    } finally {
+      setAboutSaving(false);
     }
   };
 
   if (loading) return <p className="text-gray-400 text-center py-8">Loading...</p>;
 
+  const inputCls = "w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-navy focus:border-transparent outline-none";
+
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-5 max-w-2xl">
-      <h3 className="text-lg font-bold text-brand-navy">Who We Are — Section Text</h3>
-      <p className="text-xs text-gray-500 -mt-2">
-        Controls the heading, subheading, and paragraphs in the &ldquo;Who We Are&rdquo; section on the About page. The stats below it are managed in the <strong>Stats</strong> tab.
-      </p>
+    <div className="space-y-8 max-w-2xl">
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Eyebrow label <span className="text-gray-400 font-normal">(small uppercase text above heading)</span></label>
-        <input
-          value={form.about_eyebrow}
-          onChange={(e) => setForm({ ...form, about_eyebrow: e.target.value })}
-          placeholder="Who We Are"
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-navy focus:border-transparent outline-none"
-        />
+      {/* ── Home page About Us ── */}
+      <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-5">
+        <div>
+          <h3 className="text-lg font-bold text-brand-navy">Home Page — &ldquo;About Us&rdquo; section</h3>
+          <p className="text-xs text-gray-500 mt-1">Shown on the home page. Stats are shared with the About page and managed in the <strong>Stats</strong> tab.</p>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Eyebrow label <span className="text-gray-400 font-normal">(small uppercase badge)</span></label>
+          <input value={homeForm.home_about_eyebrow} onChange={(e) => setHomeForm({ ...homeForm, home_about_eyebrow: e.target.value })} placeholder="About Us" className={inputCls} />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Heading</label>
+          <input value={homeForm.home_about_heading} onChange={(e) => setHomeForm({ ...homeForm, home_about_heading: e.target.value })} placeholder="Your Himalayan Adventure Awaits" className={inputCls} />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">First Paragraph</label>
+          <textarea rows={5} value={homeForm.home_about_paragraph_1} onChange={(e) => setHomeForm({ ...homeForm, home_about_paragraph_1: e.target.value })} placeholder="Founded in the heart of Kathmandu..." className={inputCls} />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Second Paragraph <span className="text-gray-400 font-normal">(optional)</span></label>
+          <textarea rows={4} value={homeForm.home_about_paragraph_2} onChange={(e) => setHomeForm({ ...homeForm, home_about_paragraph_2: e.target.value })} placeholder="From the icefields of the Himalayas..." className={inputCls} />
+        </div>
+        <div className="flex items-center gap-3 pt-1">
+          <button onClick={saveHome} disabled={homeSaving} className="px-6 py-2 bg-brand-navy text-white text-sm font-semibold rounded-lg hover:bg-brand-blue transition-colors disabled:opacity-60">
+            {homeSaving ? "Saving…" : "Save"}
+          </button>
+          {homeSaved && <span className="text-green-600 text-sm font-medium">Saved!</span>}
+        </div>
       </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Heading</label>
-        <input
-          value={form.about_title}
-          onChange={(e) => setForm({ ...form, about_title: e.target.value })}
-          placeholder="We Make Every Trek Meaningful"
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-navy focus:border-transparent outline-none"
-        />
+      {/* ── About page Who We Are ── */}
+      <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-5">
+        <div>
+          <h3 className="text-lg font-bold text-brand-navy">About Page — &ldquo;Who We Are&rdquo; section</h3>
+          <p className="text-xs text-gray-500 mt-1">Shown on the About page alongside the stat cards.</p>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Eyebrow label <span className="text-gray-400 font-normal">(small uppercase text above heading)</span></label>
+          <input value={aboutForm.about_eyebrow} onChange={(e) => setAboutForm({ ...aboutForm, about_eyebrow: e.target.value })} placeholder="Who We Are" className={inputCls} />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Heading</label>
+          <input value={aboutForm.about_title} onChange={(e) => setAboutForm({ ...aboutForm, about_title: e.target.value })} placeholder="We Make Every Trek Meaningful" className={inputCls} />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">First Paragraph</label>
+          <textarea rows={5} value={aboutForm.about_paragraph_1} onChange={(e) => setAboutForm({ ...aboutForm, about_paragraph_1: e.target.value })} placeholder="Founded in the heart of Kathmandu..." className={inputCls} />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Second Paragraph <span className="text-gray-400 font-normal">(optional)</span></label>
+          <textarea rows={4} value={aboutForm.about_paragraph_2} onChange={(e) => setAboutForm({ ...aboutForm, about_paragraph_2: e.target.value })} placeholder="From the icefields of the Himalayas..." className={inputCls} />
+        </div>
+        <div className="flex items-center gap-3 pt-1">
+          <button onClick={saveAbout} disabled={aboutSaving} className="px-6 py-2 bg-brand-navy text-white text-sm font-semibold rounded-lg hover:bg-brand-blue transition-colors disabled:opacity-60">
+            {aboutSaving ? "Saving…" : "Save"}
+          </button>
+          {aboutSaved && <span className="text-green-600 text-sm font-medium">Saved!</span>}
+        </div>
       </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">First Paragraph</label>
-        <textarea
-          rows={5}
-          value={form.about_paragraph_1}
-          onChange={(e) => setForm({ ...form, about_paragraph_1: e.target.value })}
-          placeholder="Founded in the heart of Kathmandu..."
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-navy focus:border-transparent outline-none"
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Second Paragraph <span className="text-gray-400 font-normal">(optional)</span></label>
-        <textarea
-          rows={4}
-          value={form.about_paragraph_2}
-          onChange={(e) => setForm({ ...form, about_paragraph_2: e.target.value })}
-          placeholder="From the icefields of the Himalayas..."
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-navy focus:border-transparent outline-none"
-        />
-      </div>
-
-      <div className="flex items-center gap-3 pt-1">
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          className="px-6 py-2 bg-brand-navy text-white text-sm font-semibold rounded-lg hover:bg-brand-blue transition-colors disabled:opacity-60"
-        >
-          {saving ? "Saving…" : "Save"}
-        </button>
-        {saved && <span className="text-green-600 text-sm font-medium">Saved!</span>}
-      </div>
     </div>
   );
 }
