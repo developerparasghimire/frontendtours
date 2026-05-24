@@ -10,7 +10,7 @@ import SubscribeForm from "@/components/shared/SubscribeForm";
 import ZoomSection from "@/components/ui/ZoomSection";
 import TourImagePlaceholder from "@/components/shared/TourImagePlaceholder";
 import type { Tour, Event, Testimonial } from "@/types";
-import type { SiteConfig, APIPartner, APICategory } from "@/lib/api";
+import type { SiteConfig, APIPartner, APICategory, APIAboutStat, APIValue } from "@/lib/api";
 import { shouldUseUnoptimizedImage } from "@/lib/images";
 import { sectionImages } from "@/lib/sectionImages";
 
@@ -652,6 +652,8 @@ interface HomeClientProps {
   siteConfig?: SiteConfig | null;
   partners?: APIPartner[];
   featuredCategories?: APICategory[];
+  aboutStats?: APIAboutStat[];
+  aboutValues?: APIValue[];
 }
 
 /* ─── Certificates & Partners Section ─── */
@@ -720,7 +722,7 @@ function CertificatesPartnersSection({ partners }: { partners: APIPartner[] }) {
   );
 }
 
-export default function HomeClient({ tours, events, testimonials, siteConfig, partners = [], featuredCategories = [] }: HomeClientProps) {
+export default function HomeClient({ tours, events, testimonials, siteConfig, partners = [], featuredCategories = [], aboutStats = [], aboutValues = [] }: HomeClientProps) {
   const trustReasons = [
     {
       icon: "M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z",
@@ -847,30 +849,36 @@ export default function HomeClient({ tours, events, testimonials, siteConfig, pa
                 </p>
               </div>
 
-              {/* Feature bullets */}
+              {/* Feature bullets — from admin Values */}
               <div className="flex flex-col gap-3 lg:gap-4">
-                {[
-                  { title: "Expert Sherpa Guides", desc: "Certified guides with 10\u201325 years of Himalayan expertise ensure your safety and enrich every step." },
-                  { title: "Safety First Approach", desc: "Full acclimatisation support, emergency protocols, and 24/7 assistance on every trek." },
-                  { title: "Responsible Tourism", desc: "Leave-No-Trace practices, fair wages for local staff, and community reinvestment programs." },
-                ].map((f) => (
-                  <div key={f.title} className="group bg-white rounded-2xl p-3.5 lg:p-0 lg:bg-transparent border border-slate-100 lg:border-0 shadow-sm lg:shadow-none">
+                {(aboutValues.length > 0
+                  ? aboutValues.slice(0, 3)
+                  : [
+                      { id: 0, title: "Expert Sherpa Guides", description: "Certified guides with 25+ years of Himalayan expertise ensure your safety and enrich every step.", icon_svg_path: "", order: 0 },
+                      { id: 1, title: "Safety First Approach", description: "Full acclimatisation support, emergency protocols, and 24/7 assistance on every trek.", icon_svg_path: "", order: 1 },
+                      { id: 2, title: "Responsible Tourism", description: "Leave-No-Trace practices, fair wages for local staff, and community reinvestment programs.", icon_svg_path: "", order: 2 },
+                    ]
+                ).map((f) => (
+                  <div key={f.id} className="group bg-white rounded-2xl p-3.5 lg:p-0 lg:bg-transparent border border-slate-100 lg:border-0 shadow-sm lg:shadow-none">
                     <div className="pt-0.5">
                       <h4 className="font-bold text-brand-navy text-sm">{f.title}</h4>
-                      <p className="text-slate-400 text-xs sm:text-sm leading-relaxed mt-0.5">{f.desc}</p>
+                      <p className="text-slate-400 text-xs sm:text-sm leading-relaxed mt-0.5">{f.description}</p>
                     </div>
                   </div>
                 ))}
               </div>
 
-              {/* Stats — mobile: horizontal scrollable pill row; desktop: 3-col grid */}
+              {/* Stats — from admin AboutStats */}
               <div className="grid grid-cols-3 gap-2 lg:gap-4 border-t border-gray-100 pt-5">
-                {[
-                  { value: "10K+", label: "Happy Trekkers" },
-                  { value: "150+", label: "Verified Routes" },
-                  { value: "98%", label: "Satisfaction" },
-                ].map((s) => (
-                  <div key={s.label} className="text-center bg-slate-50 lg:bg-transparent rounded-2xl py-3 lg:py-0">
+                {(aboutStats.length > 0
+                  ? aboutStats.slice(0, 3)
+                  : [
+                      { id: 0, value: "10K+", label: "Happy Trekkers", order: 0 },
+                      { id: 1, value: "150+", label: "Verified Routes", order: 1 },
+                      { id: 2, value: "98%", label: "Satisfaction", order: 2 },
+                    ]
+                ).map((s) => (
+                  <div key={s.id} className="text-center bg-slate-50 lg:bg-transparent rounded-2xl py-3 lg:py-0">
                     <p className="text-2xl lg:text-3xl font-extrabold text-brand-navy">{s.value}</p>
                     <p className="text-[11px] lg:text-xs text-slate-400 mt-1 font-medium">{s.label}</p>
                   </div>
