@@ -224,6 +224,79 @@ export default function TourDetailClient({ tour }: { tour: Tour }) {
               </MotionWrapper>
             )}
 
+            {/* Guide */}
+            {tour.guide && (
+              <MotionWrapper delay={0.08}>
+                <div className="rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
+                  {/* Header */}
+                  <div className="bg-brand-navy px-5 py-3 flex items-center gap-2">
+                    <svg className="w-4 h-4 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                    </svg>
+                    <h2 className="text-sm font-bold text-white uppercase tracking-widest">Your Guide</h2>
+                  </div>
+
+                  <div className="bg-white p-5 sm:p-6">
+                    <div className="flex items-start gap-4 sm:gap-5">
+                      {/* Photo */}
+                      {tour.guide.photo ? (
+                        <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden flex-shrink-0 shadow-md">
+                          <Image
+                            src={tour.guide.photo}
+                            alt={tour.guide.name}
+                            fill
+                            className="object-cover"
+                            sizes="96px"
+                            unoptimized={shouldUseUnoptimizedImage(tour.guide.photo)}
+                          />
+                        </div>
+                      ) : (
+                        <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-brand-navy/10 flex items-center justify-center flex-shrink-0">
+                          <svg className="w-10 h-10 text-brand-navy/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                          </svg>
+                        </div>
+                      )}
+
+                      {/* Name + bio */}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-base sm:text-lg font-bold text-brand-navy">{tour.guide.name}</p>
+                        {tour.guide.bio && (
+                          <p className="text-gray-500 text-sm leading-relaxed mt-1">{tour.guide.bio}</p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Languages */}
+                    {tour.guide.languages && tour.guide.languages.length > 0 && (
+                      <div className="mt-5 pt-5 border-t border-gray-100">
+                        <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Languages</p>
+                        <div className="flex flex-col gap-2.5">
+                          {tour.guide.languages.map((lang) => (
+                            <div key={lang.id} className="flex items-center justify-between gap-4">
+                              <span className="text-sm font-medium text-brand-navy">{lang.language}</span>
+                              <div className="flex items-center gap-0.5">
+                                {[1, 2, 3, 4, 5].map((star) => (
+                                  <svg
+                                    key={star}
+                                    className={`w-4 h-4 ${star <= lang.rating ? "text-yellow-400" : "text-gray-200"}`}
+                                    fill="currentColor"
+                                    viewBox="0 0 20 20"
+                                  >
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                  </svg>
+                                ))}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </MotionWrapper>
+            )}
+
             {/* Highlights */}
             <MotionWrapper delay={0.1}>
               <h2 className="text-xl sm:text-2xl font-bold text-brand-navy mb-4">Tour Highlights</h2>

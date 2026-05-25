@@ -388,6 +388,20 @@ async function fetchDelete(
 
 /* ──────────────── Tour API ──────────────── */
 
+export interface APITourGuideLanguage {
+  id: number;
+  language: string;
+  rating: number;
+}
+
+export interface APITourGuide {
+  id: number;
+  name: string;
+  bio: string;
+  photo: string | null;
+  languages: APITourGuideLanguage[];
+}
+
 export interface APITour {
   id: number;
   title: string;
@@ -412,6 +426,7 @@ export interface APITour {
   is_active: boolean;
   is_latest: boolean;
   booking_count?: number;
+  guide?: APITourGuide | null;
   created_at: string;
   updated_at: string;
 }
@@ -774,6 +789,36 @@ export async function updateTour(slug: string, data: FormData, token: string): P
 
 export async function deleteTour(slug: string, token: string): Promise<void> {
   return fetchDelete(`/tours/${slug}/`, token);
+}
+
+// Tour Guide CRUD (admin)
+export async function getTourGuide(tourSlug: string): Promise<APITourGuide | null> {
+  const results = await fetchAPI<APITourGuide[]>(`/tours/guides/?tour_slug=${tourSlug}`);
+  return results.length > 0 ? results[0] : null;
+}
+
+export async function createTourGuide(data: FormData, token: string): Promise<APITourGuide> {
+  return fetchFormData<APITourGuide>("/tours/guides/", "POST", data, token);
+}
+
+export async function updateTourGuide(id: number, data: FormData, token: string): Promise<APITourGuide> {
+  return fetchFormData<APITourGuide>(`/tours/guides/${id}/`, "PATCH", data, token);
+}
+
+export async function deleteTourGuide(id: number, token: string): Promise<void> {
+  return fetchDelete(`/tours/guides/${id}/`, token);
+}
+
+export async function addGuideLanguage(data: { guide: number; language: string; rating: number }, token: string): Promise<APITourGuideLanguage> {
+  return fetchAPI<APITourGuideLanguage>("/tours/guide-languages/", { method: "POST", body: JSON.stringify(data), headers: { Authorization: `Bearer ${token}` } });
+}
+
+export async function updateGuideLanguage(id: number, data: { language?: string; rating?: number }, token: string): Promise<APITourGuideLanguage> {
+  return fetchAPI<APITourGuideLanguage>(`/tours/guide-languages/${id}/`, { method: "PATCH", body: JSON.stringify(data), headers: { Authorization: `Bearer ${token}` } });
+}
+
+export async function deleteGuideLanguage(id: number, token: string): Promise<void> {
+  return fetchDelete(`/tours/guide-languages/${id}/`, token);
 }
 
 // Event CRUD (admin) — uses FormData to support image file uploads

@@ -1,3 +1,17 @@
+export interface TourGuideLanguage {
+  id: number;
+  language: string;
+  rating: number;
+}
+
+export interface TourGuide {
+  id: number;
+  name: string;
+  bio: string;
+  photo: string | null;
+  languages: TourGuideLanguage[];
+}
+
 export interface Tour {
   id: string;
   numericId?: number;
@@ -18,6 +32,7 @@ export interface Tour {
   includes?: string[];
   gallery?: string[];
   maxGroup?: number;
+  guide?: TourGuide | null;
 }
 
 export interface Event {

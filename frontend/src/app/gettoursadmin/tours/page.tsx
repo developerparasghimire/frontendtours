@@ -11,8 +11,17 @@ import {
   updateTour,
   deleteTour,
   getCategories,
+  getTourGuide,
+  createTourGuide,
+  updateTourGuide,
+  deleteTourGuide,
+  addGuideLanguage,
+  updateGuideLanguage,
+  deleteGuideLanguage,
   type APITour,
   type APICategory,
+  type APITourGuide,
+  type APITourGuideLanguage,
 } from "@/lib/api";
 import { shouldUseUnoptimizedImage } from "@/lib/images";
 
@@ -79,6 +88,8 @@ export default function AdminToursPage() {
   const [form, setForm] = useState<TourForm>(emptyForm);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+
+  const [guideModalTour, setGuideModalTour] = useState<APITour | null>(null);
 
   const token = typeof window !== "undefined" ? localStorage.getItem("admin_token") : null;
 
@@ -309,6 +320,13 @@ export default function AdminToursPage() {
                       </td>
                       <td className="px-4 py-3 text-right">
                         <div className="flex items-center justify-end gap-2">
+                          <button
+                            onClick={() => setGuideModalTour(t)}
+                            title="Manage Guide"
+                            className="p-1.5 rounded-lg text-brand-blue hover:bg-brand-blue/10 transition-colors"
+                          >
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                          </button>
                           <EditButton onClick={() => openEdit(t)} />
                           <DeleteButton onClick={() => handleDelete(t.slug)} />
                         </div>
@@ -356,6 +374,10 @@ export default function AdminToursPage() {
                     </div>
                   </div>
                   <div className="flex gap-2 mt-3 pt-3 border-t border-gray-100">
+                    <button onClick={() => setGuideModalTour(t)} className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 text-sm font-medium text-brand-blue border border-brand-blue/30 rounded-lg hover:bg-brand-blue/5 transition-colors">
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                      Guide
+                    </button>
                     <EditButton onClick={() => openEdit(t)} className="flex-1 justify-center" />
                     <DeleteButton onClick={() => handleDelete(t.slug)} className="flex-1 justify-center" />
                   </div>
@@ -617,7 +639,214 @@ export default function AdminToursPage() {
           </div>
         </div>
       )}
+      {/* Guide Modal */}
+      {guideModalTour && (
+        <GuideModal
+          tour={guideModalTour}
+          token={token}
+          onClose={() => { setGuideModalTour(null); loadTours(); }}
+        />
+      )}
     </AdminShell>
+  );
+}
+
+/* ═══════════════════ GUIDE MODAL ═══════════════════ */
+function GuideModal({ tour, token, onClose }: { tour: APITour; token: string | null; onClose: () => void }) {
+  const [guide, setGuide] = useState<APITourGuide | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [form, setForm] = useState({ name: "", bio: "" });
+  const [langForm, setLangForm] = useState({ language: "", rating: 5 });
+  const [editingLang, setEditingLang] = useState<APITourGuideLanguage | null>(null);
+  const [langSaving, setLangSaving] = useState(false);
+  const inputCls = "w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-navy focus:border-transparent outline-none";
+
+  const loadGuide = useCallback(async () => {
+    setLoading(true);
+    try {
+      const g = await getTourGuide(tour.slug);
+      setGuide(g);
+      if (g) setForm({ name: g.name, bio: g.bio });
+    } catch { /* empty */ } finally {
+      setLoading(false);
+    }
+  }, [tour.slug]);
+
+  useEffect(() => { loadGuide(); }, [loadGuide]);
+
+  const handleSaveGuide = async () => {
+    if (!token) return;
+    setSaving(true);
+    try {
+      const fd = new FormData();
+      fd.append("name", form.name);
+      fd.append("bio", form.bio);
+      if (!guide) fd.append("tour_slug", tour.slug);
+      if (photoFile) fd.append("photo_file", photoFile);
+      if (guide) {
+        await updateTourGuide(guide.id, fd, token);
+      } else {
+        await createTourGuide(fd, token);
+      }
+      setPhotoFile(null);
+      await loadGuide();
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "Failed to save guide");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDeleteGuide = async () => {
+    if (!token || !guide || !confirm("Remove this guide from the tour?")) return;
+    setDeleting(true);
+    try {
+      await deleteTourGuide(guide.id, token);
+      setGuide(null);
+      setForm({ name: "", bio: "" });
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const handleSaveLang = async () => {
+    if (!token || !guide) return;
+    setLangSaving(true);
+    try {
+      if (editingLang) {
+        await updateGuideLanguage(editingLang.id, { language: langForm.language, rating: langForm.rating }, token);
+      } else {
+        await addGuideLanguage({ guide: guide.id, language: langForm.language, rating: langForm.rating }, token);
+      }
+      setLangForm({ language: "", rating: 5 });
+      setEditingLang(null);
+      await loadGuide();
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "Failed to save language");
+    } finally {
+      setLangSaving(false);
+    }
+  };
+
+  const handleDeleteLang = async (id: number) => {
+    if (!token || !confirm("Remove this language?")) return;
+    await deleteGuideLanguage(id, token);
+    await loadGuide();
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+        {/* Header */}
+        <div className="sticky top-0 bg-white flex items-center justify-between px-6 py-4 border-b border-gray-100 z-10">
+          <div>
+            <h3 className="text-base font-bold text-brand-navy">Guide</h3>
+            <p className="text-xs text-gray-400 truncate max-w-[240px]">{tour.title}</p>
+          </div>
+          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-500 transition-colors text-lg">×</button>
+        </div>
+
+        <div className="p-6 space-y-6">
+          {loading ? (
+            <p className="text-gray-400 text-center py-6">Loading…</p>
+          ) : (
+            <>
+              {/* Guide form */}
+              <div className="space-y-4">
+                <h4 className="text-sm font-semibold text-brand-navy">{guide ? "Edit Guide" : "Add Guide"}</h4>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Name</label>
+                  <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g. Dorje Sherpa" className={inputCls} />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Bio</label>
+                  <textarea rows={3} value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} placeholder="Short description about the guide…" className={inputCls} />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Photo {guide?.photo && <span className="text-gray-400 font-normal">(upload to replace)</span>}</label>
+                  <input type="file" accept="image/*" onChange={(e) => setPhotoFile(e.target.files?.[0] || null)} className="text-sm" />
+                  {guide?.photo && !photoFile && (
+                    <div className="mt-2 relative w-16 h-16 rounded-xl overflow-hidden border border-gray-200">
+                      <img src={guide.photo} alt={guide.name} className="w-full h-full object-cover" />
+                    </div>
+                  )}
+                </div>
+                <div className="flex items-center gap-3">
+                  <button onClick={handleSaveGuide} disabled={saving || !form.name} className="px-4 py-2 bg-brand-navy text-white text-sm font-semibold rounded-lg hover:bg-brand-blue transition-colors disabled:opacity-50">
+                    {saving ? "Saving…" : guide ? "Update Guide" : "Add Guide"}
+                  </button>
+                  {guide && (
+                    <button onClick={handleDeleteGuide} disabled={deleting} className="px-4 py-2 bg-red-50 text-red-600 text-sm font-semibold rounded-lg hover:bg-red-100 transition-colors disabled:opacity-50">
+                      {deleting ? "Removing…" : "Remove Guide"}
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Languages — only if guide exists */}
+              {guide && (
+                <div className="space-y-4 pt-4 border-t border-gray-100">
+                  <h4 className="text-sm font-semibold text-brand-navy">Languages</h4>
+
+                  {/* Existing languages */}
+                  {guide.languages.length > 0 && (
+                    <div className="space-y-2">
+                      {guide.languages.map((lang) => (
+                        <div key={lang.id} className="flex items-center justify-between gap-2 bg-gray-50 rounded-lg px-3 py-2">
+                          <span className="text-sm font-medium text-brand-navy">{lang.language}</span>
+                          <div className="flex items-center gap-2">
+                            <div className="flex gap-0.5">
+                              {[1,2,3,4,5].map((s) => (
+                                <svg key={s} className={`w-3.5 h-3.5 ${s <= lang.rating ? "text-yellow-400" : "text-gray-200"}`} fill="currentColor" viewBox="0 0 20 20">
+                                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                </svg>
+                              ))}
+                            </div>
+                            <button onClick={() => { setEditingLang(lang); setLangForm({ language: lang.language, rating: lang.rating }); }} className="text-brand-blue hover:text-brand-navy text-xs font-medium">Edit</button>
+                            <button onClick={() => handleDeleteLang(lang.id)} className="text-red-500 hover:text-red-700 text-xs font-medium">×</button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Add/Edit language form */}
+                  <div className="bg-gray-50 rounded-xl p-4 space-y-3">
+                    <p className="text-xs font-semibold text-gray-500">{editingLang ? "Edit language" : "Add language"}</p>
+                    <input value={langForm.language} onChange={(e) => setLangForm({ ...langForm, language: e.target.value })} placeholder="e.g. English, Nepali, French" className={inputCls} />
+                    <div>
+                      <label className="block text-xs font-medium text-gray-600 mb-2">Proficiency rating</label>
+                      <div className="flex gap-1.5">
+                        {[1,2,3,4,5].map((s) => (
+                          <button key={s} type="button" onClick={() => setLangForm({ ...langForm, rating: s })} className="focus:outline-none">
+                            <svg className={`w-7 h-7 transition-colors ${s <= langForm.rating ? "text-yellow-400" : "text-gray-200 hover:text-yellow-200"}`} fill="currentColor" viewBox="0 0 20 20">
+                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                            </svg>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <button onClick={handleSaveLang} disabled={langSaving || !langForm.language} className="px-4 py-1.5 bg-brand-navy text-white text-xs font-semibold rounded-lg hover:bg-brand-blue transition-colors disabled:opacity-50">
+                        {langSaving ? "Saving…" : editingLang ? "Update" : "Add"}
+                      </button>
+                      {editingLang && (
+                        <button onClick={() => { setEditingLang(null); setLangForm({ language: "", rating: 5 }); }} className="px-4 py-1.5 text-gray-500 text-xs font-semibold rounded-lg hover:bg-gray-100 transition-colors">
+                          Cancel
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }
 

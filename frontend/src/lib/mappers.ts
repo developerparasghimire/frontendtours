@@ -43,6 +43,7 @@ export function mapAPITour(t: APITour): Tour {
     includes: t.includes || [],
     gallery: t.gallery || [],
     maxGroup: t.max_capacity,
+    guide: t.guide ?? null,
   };
 }
 
