@@ -160,9 +160,11 @@ class TourSerializer(serializers.ModelSerializer):
 
 
 class TourGuideLanguageSerializer(serializers.ModelSerializer):
+    guide = serializers.PrimaryKeyRelatedField(queryset=TourGuide.objects.all(), write_only=True)
+
     class Meta:
         model = TourGuideLanguage
-        fields = ['id', 'language', 'rating']
+        fields = ['id', 'guide', 'language', 'rating']
 
 
 class TourGuideSerializer(serializers.ModelSerializer):
