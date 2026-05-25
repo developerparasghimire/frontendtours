@@ -169,7 +169,7 @@ export default function AdminToursPage() {
     setShowModal(true);
   }
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!token) return;
     setSaving(true);
@@ -322,10 +322,10 @@ export default function AdminToursPage() {
                         <div className="flex items-center justify-end gap-2">
                           <button
                             onClick={() => setGuideModalTour(t)}
-                            title="Manage Guide"
-                            className="p-1.5 rounded-lg text-brand-blue hover:bg-brand-blue/10 transition-colors"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border border-green-200 bg-green-50 text-green-700 hover:bg-green-600 hover:text-white hover:border-green-600 transition-all"
                           >
-                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                            <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                            Guide
                           </button>
                           <EditButton onClick={() => openEdit(t)} />
                           <DeleteButton onClick={() => handleDelete(t.slug)} />
