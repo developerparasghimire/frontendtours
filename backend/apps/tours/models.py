@@ -52,6 +52,29 @@ class Tour(TimeStampedModel):
         return self.title
 
 
+class TourGuide(models.Model):
+    tour = models.OneToOneField(Tour, on_delete=models.CASCADE, related_name='guide')
+    name = models.CharField(max_length=200)
+    bio = models.TextField(blank=True)
+    photo = models.ImageField(upload_to='tours/guides/', blank=True, null=True)
+
+    def __str__(self):
+        return f"Guide: {self.name} ({self.tour.title})"
+
+
+class TourGuideLanguage(models.Model):
+    guide = models.ForeignKey(TourGuide, on_delete=models.CASCADE, related_name='languages')
+    language = models.CharField(max_length=100)
+    rating = models.PositiveSmallIntegerField(default=5, help_text="Proficiency rating 1–5 stars")
+
+    class Meta:
+        ordering = ['-rating', 'language']
+        unique_together = [('guide', 'language')]
+
+    def __str__(self):
+        return f"{self.language} ({self.rating}/5)"
+
+
 class TourGalleryImage(models.Model):
     """Gallery images uploaded via the Django admin for a tour."""
     tour = models.ForeignKey(Tour, on_delete=models.CASCADE, related_name='gallery_images')

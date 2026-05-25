@@ -3,8 +3,8 @@ from django.db.models.deletion import ProtectedError
 from rest_framework import viewsets, permissions, filters, status
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
-from .models import Tour
-from .serializers import TourSerializer
+from .models import Tour, TourGuide, TourGuideLanguage
+from .serializers import TourSerializer, TourGuideSerializer, TourGuideLanguageSerializer
 from apps.common.permissions import IsAdminOrStaff
 
 class TourViewSet(viewsets.ModelViewSet):
@@ -46,3 +46,43 @@ class TourViewSet(viewsets.ModelViewSet):
             )
 
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class TourGuideViewSet(viewsets.ModelViewSet):
+    serializer_class = TourGuideSerializer
+    permission_classes = [IsAdminOrStaff]
+    queryset = TourGuide.objects.all()
+
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            return [permissions.AllowAny()]
+        return [IsAdminOrStaff()]
+
+    def get_queryset(self):
+        qs = TourGuide.objects.prefetch_related('languages')
+        tour_slug = self.request.query_params.get('tour_slug')
+        if tour_slug:
+            qs = qs.filter(tour__slug=tour_slug)
+        return qs
+
+    def get_serializer_context(self):
+        ctx = super().get_serializer_context()
+        ctx['request'] = self.request
+        return ctx
+
+
+class TourGuideLanguageViewSet(viewsets.ModelViewSet):
+    serializer_class = TourGuideLanguageSerializer
+    queryset = TourGuideLanguage.objects.all()
+
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            return [permissions.AllowAny()]
+        return [IsAdminOrStaff()]
+
+    def get_queryset(self):
+        qs = TourGuideLanguage.objects.all()
+        guide_id = self.request.query_params.get('guide')
+        if guide_id:
+            qs = qs.filter(guide_id=guide_id)
+        return qs

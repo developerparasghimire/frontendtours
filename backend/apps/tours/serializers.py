@@ -2,7 +2,7 @@ import json
 from django.core.files.storage import default_storage
 from django.core.validators import FileExtensionValidator
 from rest_framework import serializers
-from .models import Tour, TourGalleryImage
+from .models import Tour, TourGalleryImage, TourGuide, TourGuideLanguage
 
 # H6: limit upload size to mitigate abuse / OOM in image processing.
 MAX_IMAGE_BYTES = 5 * 1024 * 1024  # 5 MB
@@ -114,6 +114,12 @@ class TourSerializer(serializers.ModelSerializer):
                 model_gallery_urls.append(gi.image.url)
         combined = list(json_gallery) + model_gallery_urls
         data['gallery'] = self._get_absolute_gallery(combined)
+        # Include guide if exists
+        try:
+            guide = instance.guide
+            data['guide'] = TourGuideSerializer(guide, context=self.context).data
+        except TourGuide.DoesNotExist:
+            data['guide'] = None
         return data
 
     def validate_highlights(self, value):
@@ -151,3 +157,28 @@ class TourSerializer(serializers.ModelSerializer):
         instance = super().update(instance, validated_data)
         self._handle_gallery_files(instance)
         return instance
+
+
+class TourGuideLanguageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TourGuideLanguage
+        fields = ['id', 'language', 'rating']
+
+
+class TourGuideSerializer(serializers.ModelSerializer):
+    photo = serializers.SerializerMethodField()
+    photo_file = serializers.ImageField(source='photo', write_only=True, required=False)
+    languages = TourGuideLanguageSerializer(many=True, read_only=True)
+    tour_slug = serializers.SlugRelatedField(source='tour', slug_field='slug', queryset=Tour.objects.all(), write_only=True)
+
+    class Meta:
+        model = TourGuide
+        fields = ['id', 'tour_slug', 'name', 'bio', 'photo', 'photo_file', 'languages']
+
+    def get_photo(self, obj):
+        if obj.photo:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.photo.url)
+            return obj.photo.url
+        return None
