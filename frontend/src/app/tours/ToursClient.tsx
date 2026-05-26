@@ -6,7 +6,6 @@ import TourCard from "@/components/shared/TourCard";
 import type { Tour } from "@/types";
 import type { APICategory } from "@/lib/api";
 import PageHero from "@/components/sections/PageHero";
-import ZoomSection from "@/components/ui/ZoomSection";
 import { sectionImages } from "@/lib/sectionImages";
 
 const tourCardOffsets = ["xl:translate-y-6", "xl:-translate-y-8", "xl:translate-y-10", "xl:-translate-y-4"] as const;
@@ -212,23 +211,21 @@ export default function ToursClient({
       {/* ═══════════ TOURS GRID ═══════════ */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 sm:pb-24 pt-1 sm:pt-4 w-full">
         {filteredTours.length > 0 ? (
-          <ZoomSection>
-            <div className={`grid gap-5 ${
-              filteredTours.length === 1
-                ? "grid-cols-1 max-w-sm mx-auto"
-                : filteredTours.length === 2
-                ? "grid-cols-1 sm:grid-cols-2 max-w-2xl mx-auto sm:gap-6"
-                : filteredTours.length === 3
-                ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 sm:gap-6 max-w-5xl mx-auto"
-                : "grid-cols-1 sm:grid-cols-2 sm:gap-6 xl:grid-cols-4 xl:gap-8"
-            }`}>
-              {filteredTours.map((tour, index) => (
-                <div key={tour.id} className={filteredTours.length >= 4 ? `${tourCardOffsets[index % tourCardOffsets.length]} transition-opacity duration-300` : "transition-opacity duration-300"}>
-                  <TourCard {...tour} />
-                </div>
-              ))}
-            </div>
-          </ZoomSection>
+          <div className={`grid gap-5 ${
+            filteredTours.length === 1
+              ? "grid-cols-1 max-w-sm mx-auto"
+              : filteredTours.length === 2
+              ? "grid-cols-1 sm:grid-cols-2 max-w-2xl mx-auto sm:gap-6"
+              : filteredTours.length === 3
+              ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 sm:gap-6 max-w-5xl mx-auto"
+              : "grid-cols-1 sm:grid-cols-2 sm:gap-6 xl:grid-cols-4 xl:gap-8"
+          }`}>
+            {filteredTours.map((tour, index) => (
+              <div key={tour.id} className={filteredTours.length >= 4 ? `${tourCardOffsets[index % tourCardOffsets.length]} transition-opacity duration-300` : "transition-opacity duration-300"}>
+                <TourCard {...tour} />
+              </div>
+            ))}
+          </div>
         ) : (
           <div className="text-center py-20">
             <p className="text-gray-400 text-6xl mb-4">🏔️</p>
