@@ -103,7 +103,7 @@ export default function ToursClient({
       />
 
       {/* ═══════════ CATEGORY FILTER + RESULTS COUNT ═══════════ */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-10 pb-2 w-full">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-10 pb-1 sm:pb-2 w-full">
         {categories.length > 1 && (
           <div className="mb-5">
             {/* Pills for sm+ */}
@@ -210,7 +210,7 @@ export default function ToursClient({
       </div>
 
       {/* ═══════════ TOURS GRID ═══════════ */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 sm:pb-24 pt-4 w-full">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 sm:pb-24 pt-1 sm:pt-4 w-full">
         {filteredTours.length > 0 ? (
           <ZoomSection>
             <div className={`grid gap-5 ${

@@ -70,7 +70,7 @@ export default function EventsClient({
       />
 
       {/* ═══════════ EVENT GRID ═══════════ */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 w-full">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-10 sm:py-16 w-full">
         {categories.length > 1 && (
           <div className="mb-5">
             {/* Pills for sm+ */}
@@ -115,7 +115,7 @@ export default function EventsClient({
           </div>
         )}
 
-        <div className="mb-8">
+        <div className="mb-2 sm:mb-8">
           <p className="text-gray-500 text-sm">
             Showing <span className="font-bold text-brand-navy">{filteredEvents.length}</span> event{filteredEvents.length !== 1 ? "s" : ""}
             {selectedCategory !== ALL && (
