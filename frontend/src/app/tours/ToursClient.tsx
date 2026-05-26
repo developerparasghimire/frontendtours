@@ -103,7 +103,7 @@ export default function ToursClient({
       />
 
       {/* ═══════════ CATEGORY FILTER + RESULTS COUNT ═══════════ */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-2 w-full">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-10 pb-2 w-full">
         {categories.length > 1 && (
           <div className="mb-5">
             {/* Pills for sm+ */}

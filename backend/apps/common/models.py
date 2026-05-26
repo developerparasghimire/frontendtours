@@ -60,6 +60,16 @@ class SiteConfig(models.Model):
     home_portfolio_image_4 = models.ImageField(upload_to="site/home/", blank=True, null=True, help_text="Homepage portfolio image 4")
     home_portfolio_image_5 = models.ImageField(upload_to="site/home/", blank=True, null=True, help_text="Homepage portfolio image 5")
 
+    # Home page — full-width gallery slider
+    home_gallery_image_1 = models.ImageField(upload_to="site/gallery/", blank=True, null=True, help_text="Gallery slider image 1")
+    home_gallery_image_2 = models.ImageField(upload_to="site/gallery/", blank=True, null=True, help_text="Gallery slider image 2")
+    home_gallery_image_3 = models.ImageField(upload_to="site/gallery/", blank=True, null=True, help_text="Gallery slider image 3")
+    home_gallery_image_4 = models.ImageField(upload_to="site/gallery/", blank=True, null=True, help_text="Gallery slider image 4")
+    home_gallery_image_5 = models.ImageField(upload_to="site/gallery/", blank=True, null=True, help_text="Gallery slider image 5")
+    home_gallery_image_6 = models.ImageField(upload_to="site/gallery/", blank=True, null=True, help_text="Gallery slider image 6")
+    home_gallery_image_7 = models.ImageField(upload_to="site/gallery/", blank=True, null=True, help_text="Gallery slider image 7")
+    home_gallery_image_8 = models.ImageField(upload_to="site/gallery/", blank=True, null=True, help_text="Gallery slider image 8")
+
     # Home page — "About Us" section
     home_about_heading = models.CharField(max_length=255, blank=True, default="Your Himalayan Adventure Awaits", help_text="Main heading in the home page About Us section.")
     home_about_eyebrow = models.CharField(max_length=120, blank=True, default="About Us", help_text="Small uppercase label above the home page About Us heading.")

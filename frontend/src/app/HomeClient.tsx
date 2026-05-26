@@ -431,6 +431,245 @@ function ToursSlider({
   );
 }
 
+function GalleryLightbox({
+  src,
+  total,
+  index,
+  onClose,
+  onPrev,
+  onNext,
+}: {
+  src: string;
+  total: number;
+  index: number;
+  onClose: () => void;
+  onPrev: () => void;
+  onNext: () => void;
+}) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+      if (e.key === "ArrowLeft") onPrev();
+      if (e.key === "ArrowRight") onNext();
+    };
+    document.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
+  }, [onClose, onPrev, onNext]);
+
+  return (
+    <div
+      className="fixed inset-0 z-[9999] flex items-center justify-center"
+      style={{ animation: "gallery-lb-in 0.25s ease-out forwards" }}
+      onClick={onClose}
+    >
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-black/90 backdrop-blur-sm" />
+
+      {/* Image container */}
+      <div
+        className="relative z-10 max-w-[92vw] max-h-[88vh] flex items-center justify-center"
+        style={{ animation: "gallery-lb-scale 0.3s cubic-bezier(0.22,1,0.36,1) forwards" }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <img
+          src={src}
+          alt=""
+          className="max-w-full max-h-[88vh] w-auto h-auto rounded-2xl shadow-2xl object-contain"
+          style={{ display: "block" }}
+        />
+        {/* Counter */}
+        <span className="absolute bottom-3 left-1/2 -translate-x-1/2 text-white/70 text-xs font-mono tracking-widest">
+          {index + 1} / {total}
+        </span>
+      </div>
+
+      {/* Close */}
+      <button
+        type="button"
+        onClick={onClose}
+        aria-label="Close"
+        className="absolute top-4 right-4 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/25 transition-colors backdrop-blur-sm"
+      >
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+
+      {/* Prev */}
+      {total > 1 && (
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); onPrev(); }}
+          aria-label="Previous"
+          className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-20 flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/25 transition-colors backdrop-blur-sm"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+      )}
+
+      {/* Next */}
+      {total > 1 && (
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); onNext(); }}
+          aria-label="Next"
+          className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-20 flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/25 transition-colors backdrop-blur-sm"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+      )}
+    </div>
+  );
+}
+
+function HomeGallerySlider({ siteConfig }: { siteConfig?: SiteConfig | null }) {
+  const images = [
+    siteConfig?.home_gallery_image_1,
+    siteConfig?.home_gallery_image_2,
+    siteConfig?.home_gallery_image_3,
+    siteConfig?.home_gallery_image_4,
+    siteConfig?.home_gallery_image_5,
+    siteConfig?.home_gallery_image_6,
+    siteConfig?.home_gallery_image_7,
+    siteConfig?.home_gallery_image_8,
+  ].filter(Boolean) as string[];
+
+  const [row1Paused, setRow1Paused] = useState(false);
+  const [row2Paused, setRow2Paused] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+
+  if (images.length === 0) return null;
+
+  const openLightbox = (src: string) => {
+    const idx = images.indexOf(src);
+    setLightboxIndex(idx >= 0 ? idx : 0);
+    setRow1Paused(true);
+    setRow2Paused(true);
+  };
+  const closeLightbox = () => {
+    setLightboxIndex(null);
+    setRow1Paused(false);
+    setRow2Paused(false);
+  };
+  const prevImage = () => setLightboxIndex((i) => i === null ? 0 : (i - 1 + images.length) % images.length);
+  const nextImage = () => setLightboxIndex((i) => i === null ? 0 : (i + 1) % images.length);
+
+  // Duplicate so that at -50% translateX the loop is seamless
+  const row1 = [...images, ...images];
+  const row2 = [...[...images].reverse(), ...[...images].reverse()];
+
+  return (
+    <section className="py-14 sm:py-20 bg-white overflow-hidden">
+      {/* Heading */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-10 text-center">
+        <p className="font-mono text-[11px] tracking-[0.34em] text-brand-orange uppercase">Our Adventures</p>
+        <h2 className="mt-3 text-3xl sm:text-4xl font-semibold tracking-[-0.04em] text-brand-navy">
+          Life in the Mountains
+        </h2>
+      </div>
+
+      {/* Row 1 — scrolls LEFT */}
+      <div className="overflow-hidden mb-3 sm:mb-4">
+        <div
+          className="flex gap-3 sm:gap-4 w-max"
+          style={{
+            animation: "gallery-scroll-left 25s linear infinite",
+            animationPlayState: row1Paused ? "paused" : "running",
+            willChange: "transform",
+          }}
+          onMouseEnter={() => lightboxIndex === null && setRow1Paused(true)}
+          onMouseLeave={() => lightboxIndex === null && setRow1Paused(false)}
+        >
+          {row1.map((src, i) => (
+            <button
+              type="button"
+              key={`r1-${i}`}
+              onClick={() => openLightbox(src)}
+              className="relative flex-shrink-0 rounded-2xl overflow-hidden group cursor-zoom-in border-0 p-0"
+              style={{ height: "clamp(160px, 22vw, 300px)", aspectRatio: "4/3" }}
+              aria-label="View image"
+            >
+              <Image
+                src={src}
+                alt=""
+                fill
+                className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-110"
+                sizes="(max-width: 640px) 240px, 400px"
+                unoptimized={shouldUseUnoptimizedImage(src)}
+              />
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-400 flex items-center justify-center">
+                <svg className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 drop-shadow-lg" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16zm2-8H9m2-2v4" />
+                </svg>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Row 2 — scrolls RIGHT */}
+      <div className="overflow-hidden">
+        <div
+          className="flex gap-3 sm:gap-4 w-max"
+          style={{
+            animation: "gallery-scroll-right 20s linear infinite",
+            animationPlayState: row2Paused ? "paused" : "running",
+            willChange: "transform",
+            transform: "translateX(-50%)",
+          }}
+          onMouseEnter={() => lightboxIndex === null && setRow2Paused(true)}
+          onMouseLeave={() => lightboxIndex === null && setRow2Paused(false)}
+        >
+          {row2.map((src, i) => (
+            <button
+              type="button"
+              key={`r2-${i}`}
+              onClick={() => openLightbox(src)}
+              className="relative flex-shrink-0 rounded-2xl overflow-hidden group cursor-zoom-in border-0 p-0"
+              style={{ height: "clamp(140px, 18vw, 240px)", aspectRatio: "16/9" }}
+              aria-label="View image"
+            >
+              <Image
+                src={src}
+                alt=""
+                fill
+                className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-110"
+                sizes="(max-width: 640px) 280px, 480px"
+                unoptimized={shouldUseUnoptimizedImage(src)}
+              />
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-400 flex items-center justify-center">
+                <svg className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 drop-shadow-lg" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16zm2-8H9m2-2v4" />
+                </svg>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Lightbox */}
+      {lightboxIndex !== null && (
+        <GalleryLightbox
+          src={images[lightboxIndex]}
+          total={images.length}
+          index={lightboxIndex}
+          onClose={closeLightbox}
+          onPrev={prevImage}
+          onNext={nextImage}
+        />
+      )}
+    </section>
+  );
+}
+
 function HomePortfolioShowcase({ siteConfig }: { siteConfig?: SiteConfig | null }) {
   const portfolioLinkLabel = siteConfig?.home_portfolio_link_label || "View portfolio";
   const portfolioLinkUrl = siteConfig?.home_portfolio_link_url || "/tours";
@@ -1095,6 +1334,9 @@ export default function HomeClient({ tours, events, testimonials, siteConfig, pa
 
       {/* ═══════════ CERTIFICATES & PARTNERS ═══════════ */}
       <CertificatesPartnersSection partners={partners} />
+
+      {/* ═══════════ GALLERY SLIDER ═══════════ */}
+      <HomeGallerySlider siteConfig={siteConfig} />
 
       {/* ═══════════ NEWSLETTER BANNER ═══════════ */}
       <section className="bg-white pb-20 pt-6 sm:pb-24">

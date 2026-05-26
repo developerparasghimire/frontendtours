@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import AdminShell from "../AdminShell";
 import { getSiteConfig, updateSiteConfig, type SiteConfig } from "@/lib/api";
 
-type Section = "branding" | "homepage" | "about" | "contact" | "social" | "footer";
+type Section = "branding" | "homepage" | "gallery" | "about" | "contact" | "social" | "footer";
 
 export default function AdminSettingsPage() {
   const [config, setConfig] = useState<Partial<SiteConfig>>({});
@@ -67,6 +67,11 @@ export default function AdminSettingsPage() {
       const file = input?.files?.[0];
       if (file) formData.append(`home_portfolio_image_${i}_upload`, file);
     }
+    for (let i = 1; i <= 8; i += 1) {
+      const input = document.getElementById(`home_gallery_image_${i}_upload`) as HTMLInputElement;
+      const file = input?.files?.[0];
+      if (file) formData.append(`home_gallery_image_${i}_upload`, file);
+    }
 
     try {
       const updated = await updateSiteConfig(formData, token);
@@ -83,6 +88,7 @@ export default function AdminSettingsPage() {
   const sections: { key: Section; label: string; icon: string }[] = [
     { key: "branding", label: "Branding & Logo", icon: "M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" },
     { key: "homepage", label: "Homepage Media", icon: "M5 3h14a2 2 0 012 2v14l-5-3-4 2-4-2-6 3V5a2 2 0 012-2z" },
+    { key: "gallery", label: "Gallery Slider", icon: "M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" },
     { key: "about", label: "About Page", icon: "M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" },
     { key: "contact", label: "Contact Info", icon: "M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" },
     { key: "social", label: "Social Media", icon: "M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" },
@@ -195,6 +201,24 @@ export default function AdminSettingsPage() {
                       label={`Portfolio Image ${slot}`}
                       currentUrl={(config[`home_portfolio_image_${slot}` as keyof SiteConfig] as string) || null}
                       helpText="Upload an image for the homepage portfolio collage"
+                    />
+                  ))}
+                </>
+              )}
+
+              {activeSection === "gallery" && (
+                <>
+                  <h3 className="text-base font-bold text-brand-navy border-b border-gray-100 pb-3">Gallery Slider Images</h3>
+                  <p className="text-xs text-gray-500 -mt-2">
+                    These images appear in the full-width gallery slider on the home page. Upload up to 8 images. Leave slots empty to skip them.
+                  </p>
+                  {[1, 2, 3, 4, 5, 6, 7, 8].map((slot) => (
+                    <ImageUploadField
+                      key={slot}
+                      id={`home_gallery_image_${slot}_upload`}
+                      label={`Gallery Image ${slot}`}
+                      currentUrl={(config[`home_gallery_image_${slot}` as keyof SiteConfig] as string) || null}
+                      helpText="Upload a landscape image for the home page gallery slider"
                     />
                   ))}
                 </>
