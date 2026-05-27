@@ -67,7 +67,7 @@ export default function AdminSettingsPage() {
       const file = input?.files?.[0];
       if (file) formData.append(`home_portfolio_image_${i}_upload`, file);
     }
-    for (let i = 1; i <= 8; i += 1) {
+    for (let i = 1; i <= 12; i += 1) {
       const input = document.getElementById(`home_gallery_image_${i}_upload`) as HTMLInputElement;
       const file = input?.files?.[0];
       if (file) formData.append(`home_gallery_image_${i}_upload`, file);
@@ -212,7 +212,7 @@ export default function AdminSettingsPage() {
                   <p className="text-xs text-gray-500 -mt-2">
                     These images appear in the full-width gallery slider on the home page. Upload up to 8 images. Leave slots empty to skip them.
                   </p>
-                  {[1, 2, 3, 4, 5, 6, 7, 8].map((slot) => (
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((slot) => (
                     <ImageUploadField
                       key={slot}
                       id={`home_gallery_image_${slot}_upload`}

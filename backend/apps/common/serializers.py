@@ -18,6 +18,10 @@ class SiteConfigSerializer(serializers.ModelSerializer):
     home_gallery_image_6 = serializers.SerializerMethodField()
     home_gallery_image_7 = serializers.SerializerMethodField()
     home_gallery_image_8 = serializers.SerializerMethodField()
+    home_gallery_image_9 = serializers.SerializerMethodField()
+    home_gallery_image_10 = serializers.SerializerMethodField()
+    home_gallery_image_11 = serializers.SerializerMethodField()
+    home_gallery_image_12 = serializers.SerializerMethodField()
 
     logo_upload = serializers.ImageField(source='logo', write_only=True, required=False)
     logo_dark_upload = serializers.ImageField(source='logo_dark', write_only=True, required=False)
@@ -35,6 +39,10 @@ class SiteConfigSerializer(serializers.ModelSerializer):
     home_gallery_image_6_upload = serializers.ImageField(source='home_gallery_image_6', write_only=True, required=False)
     home_gallery_image_7_upload = serializers.ImageField(source='home_gallery_image_7', write_only=True, required=False)
     home_gallery_image_8_upload = serializers.ImageField(source='home_gallery_image_8', write_only=True, required=False)
+    home_gallery_image_9_upload = serializers.ImageField(source='home_gallery_image_9', write_only=True, required=False)
+    home_gallery_image_10_upload = serializers.ImageField(source='home_gallery_image_10', write_only=True, required=False)
+    home_gallery_image_11_upload = serializers.ImageField(source='home_gallery_image_11', write_only=True, required=False)
+    home_gallery_image_12_upload = serializers.ImageField(source='home_gallery_image_12', write_only=True, required=False)
 
     class Meta:
         model = SiteConfig
@@ -52,9 +60,12 @@ class SiteConfigSerializer(serializers.ModelSerializer):
             'home_portfolio_image_4_upload', 'home_portfolio_image_5_upload',
             'home_gallery_image_1', 'home_gallery_image_2', 'home_gallery_image_3', 'home_gallery_image_4',
             'home_gallery_image_5', 'home_gallery_image_6', 'home_gallery_image_7', 'home_gallery_image_8',
+            'home_gallery_image_9', 'home_gallery_image_10', 'home_gallery_image_11', 'home_gallery_image_12',
             'home_gallery_image_1_upload', 'home_gallery_image_2_upload', 'home_gallery_image_3_upload',
             'home_gallery_image_4_upload', 'home_gallery_image_5_upload', 'home_gallery_image_6_upload',
             'home_gallery_image_7_upload', 'home_gallery_image_8_upload',
+            'home_gallery_image_9_upload', 'home_gallery_image_10_upload',
+            'home_gallery_image_11_upload', 'home_gallery_image_12_upload',
             'home_about_heading', 'home_about_eyebrow', 'home_about_paragraph_1', 'home_about_paragraph_2',
             'about_eyebrow', 'about_title', 'about_paragraph_1', 'about_paragraph_2',
             'privacy_policy_url', 'terms_of_service_url', 'updated_at'
@@ -101,6 +112,10 @@ class SiteConfigSerializer(serializers.ModelSerializer):
     def get_home_gallery_image_6(self, obj): return self._get_image_url(obj.home_gallery_image_6)
     def get_home_gallery_image_7(self, obj): return self._get_image_url(obj.home_gallery_image_7)
     def get_home_gallery_image_8(self, obj): return self._get_image_url(obj.home_gallery_image_8)
+    def get_home_gallery_image_9(self, obj): return self._get_image_url(obj.home_gallery_image_9)
+    def get_home_gallery_image_10(self, obj): return self._get_image_url(obj.home_gallery_image_10)
+    def get_home_gallery_image_11(self, obj): return self._get_image_url(obj.home_gallery_image_11)
+    def get_home_gallery_image_12(self, obj): return self._get_image_url(obj.home_gallery_image_12)
 
 
 class ContactSubmissionSerializer(serializers.ModelSerializer):

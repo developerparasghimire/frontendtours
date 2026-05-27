@@ -540,6 +540,10 @@ function HomeGallerySlider({ siteConfig }: { siteConfig?: SiteConfig | null }) {
     siteConfig?.home_gallery_image_6,
     siteConfig?.home_gallery_image_7,
     siteConfig?.home_gallery_image_8,
+    siteConfig?.home_gallery_image_9,
+    siteConfig?.home_gallery_image_10,
+    siteConfig?.home_gallery_image_11,
+    siteConfig?.home_gallery_image_12,
   ].filter(Boolean) as string[];
 
   const [row1Paused, setRow1Paused] = useState(false);
@@ -581,7 +585,7 @@ function HomeGallerySlider({ siteConfig }: { siteConfig?: SiteConfig | null }) {
         <div
           className="flex gap-3 sm:gap-4 w-max"
           style={{
-            animation: "gallery-scroll-left 25s linear infinite",
+            animation: "gallery-scroll-left 40s linear infinite",
             animationPlayState: row1Paused ? "paused" : "running",
             willChange: "transform",
           }}
@@ -620,7 +624,7 @@ function HomeGallerySlider({ siteConfig }: { siteConfig?: SiteConfig | null }) {
         <div
           className="flex gap-3 sm:gap-4 w-max"
           style={{
-            animation: "gallery-scroll-right 20s linear infinite",
+            animation: "gallery-scroll-right 32s linear infinite",
             animationPlayState: row2Paused ? "paused" : "running",
             willChange: "transform",
             transform: "translateX(-50%)",
@@ -1151,6 +1155,9 @@ export default function HomeClient({ tours, events, testimonials, siteConfig, pa
 
       <LatestEventsSlider events={events} />
 
+      {/* ═══════════ GALLERY SLIDER ═══════════ */}
+      <HomeGallerySlider siteConfig={siteConfig} />
+
       {/* ═══════════ TRAVEL CATEGORIES ═══════════ */}
       <section className="bg-white py-16 sm:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -1334,9 +1341,6 @@ export default function HomeClient({ tours, events, testimonials, siteConfig, pa
 
       {/* ═══════════ CERTIFICATES & PARTNERS ═══════════ */}
       <CertificatesPartnersSection partners={partners} />
-
-      {/* ═══════════ GALLERY SLIDER ═══════════ */}
-      <HomeGallerySlider siteConfig={siteConfig} />
 
       {/* ═══════════ NEWSLETTER BANNER ═══════════ */}
       <section className="bg-white pb-20 pt-6 sm:pb-24">

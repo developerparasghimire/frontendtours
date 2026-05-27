@@ -887,6 +887,10 @@ export interface SiteConfig {
   home_gallery_image_6: string | null;
   home_gallery_image_7: string | null;
   home_gallery_image_8: string | null;
+  home_gallery_image_9: string | null;
+  home_gallery_image_10: string | null;
+  home_gallery_image_11: string | null;
+  home_gallery_image_12: string | null;
   footer_text: string;
   phone: string;
   email: string;
