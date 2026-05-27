@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import AdminShell from "../AdminShell";
-import { getSiteConfig, updateSiteConfig, type SiteConfig } from "@/lib/api";
+import { getSiteConfig, updateSiteConfig, clearSiteConfigImage, type SiteConfig } from "@/lib/api";
 
 type Section = "branding" | "homepage" | "gallery" | "about" | "contact" | "social" | "footer";
 
@@ -219,6 +219,11 @@ export default function AdminSettingsPage() {
                       label={`Gallery Image ${slot}`}
                       currentUrl={(config[`home_gallery_image_${slot}` as keyof SiteConfig] as string) || null}
                       helpText="Upload a landscape image for the home page gallery slider"
+                      onRemove={async () => {
+                        if (!token) return;
+                        await clearSiteConfigImage(`home_gallery_image_${slot}`, token);
+                        setConfig((prev) => ({ ...prev, [`home_gallery_image_${slot}`]: null }));
+                      }}
                     />
                   ))}
                 </>
@@ -346,23 +351,58 @@ function Field({
 }
 
 function ImageUploadField({
-  id, label, currentUrl, helpText,
+  id, label, currentUrl, helpText, onRemove,
 }: {
-  id: string; label: string; currentUrl: string | null; helpText?: string;
+  id: string; label: string; currentUrl: string | null; helpText?: string; onRemove?: () => Promise<void>;
 }) {
   const [preview, setPreview] = useState<string | null>(currentUrl);
+  const [removing, setRemoving] = useState(false);
+
+  useEffect(() => { setPreview(currentUrl); }, [currentUrl]);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (file) setPreview(URL.createObjectURL(file));
   }
 
+  async function handleRemove() {
+    if (!onRemove) return;
+    setRemoving(true);
+    try {
+      await onRemove();
+      setPreview(null);
+      const input = document.getElementById(id) as HTMLInputElement;
+      if (input) input.value = "";
+    } finally {
+      setRemoving(false);
+    }
+  }
+
   return (
     <div>
       <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
       {preview && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={preview} alt={label} className="h-16 object-contain mb-2 rounded border border-gray-200 p-1 bg-gray-50" />
+        <div className="flex items-center gap-2 mb-2">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={preview} alt={label} className="h-16 w-24 object-cover rounded border border-gray-200 bg-gray-50" />
+          {onRemove && (
+            <button
+              type="button"
+              onClick={handleRemove}
+              disabled={removing}
+              className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-red-50 text-red-600 text-xs font-semibold border border-red-200 hover:bg-red-100 transition-colors disabled:opacity-50"
+            >
+              {removing ? (
+                <span className="inline-block w-3 h-3 border-2 border-red-400 border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              )}
+              {removing ? "Removing…" : "Remove"}
+            </button>
+          )}
+        </div>
       )}
       <input
         id={id}

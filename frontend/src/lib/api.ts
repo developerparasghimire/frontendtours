@@ -915,6 +915,14 @@ export async function updateSiteConfig(data: FormData, token: string): Promise<S
   return fetchFormData<SiteConfig>("/common/config/update/", "PATCH", data, token);
 }
 
+export async function clearSiteConfigImage(field: string, token: string): Promise<void> {
+  await fetchAPI("/common/config/clear-image/", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ field }),
+  });
+}
+
 /* ──────────────── Page Banners API ──────────────── */
 
 export interface PageBanner {

@@ -61,6 +61,26 @@ def site_config_update_view(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+_CLEARABLE_IMAGE_FIELDS = {f'home_gallery_image_{i}' for i in range(1, 13)} | {
+    'logo', 'logo_dark', 'footer_logo',
+    *{f'home_portfolio_image_{i}' for i in range(1, 6)},
+}
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def site_config_clear_image_view(request):
+    """Clear a single image field on SiteConfig."""
+    if not hasattr(request.user, 'role') or request.user.role not in ('SUPER_ADMIN', 'ADMIN'):
+        return Response({'error': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)
+    field = request.data.get('field', '')
+    if field not in _CLEARABLE_IMAGE_FIELDS:
+        return Response({'error': 'Invalid field name.'}, status=status.HTTP_400_BAD_REQUEST)
+    cfg, _ = SiteConfig.objects.get_or_create(pk=1)
+    setattr(cfg, field, None)
+    cfg.save(update_fields=[field])
+    return Response({'success': True, 'field': field})
+
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def upload_image_view(request):
