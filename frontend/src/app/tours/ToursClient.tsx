@@ -102,7 +102,7 @@ export default function ToursClient({
       />
 
       {/* ═══════════ CATEGORY FILTER + RESULTS COUNT ═══════════ */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-10 pb-4 sm:pb-2 w-full">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-10 pb-0 sm:pb-0 w-full">
         {categories.length > 1 && (
           <div className="mb-5">
             {/* Pills for sm+ */}
@@ -193,7 +193,11 @@ export default function ToursClient({
           </div>
         )}
 
-        <p className="text-gray-500 text-sm">
+      </div>
+
+      {/* ═══════════ TOURS GRID ═══════════ */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 sm:pb-24 pt-4 sm:pt-6 w-full">
+        <p className="text-gray-500 text-sm mb-5">
           Showing <span className="font-bold text-brand-navy">{filteredTours.length}</span> tour{filteredTours.length !== 1 ? "s" : ""}
           {selectedCategory !== ALL && (
             <>
@@ -206,10 +210,6 @@ export default function ToursClient({
             </>
           )}
         </p>
-      </div>
-
-      {/* ═══════════ TOURS GRID ═══════════ */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 sm:pb-24 pt-2 sm:pt-4 w-full">
         {filteredTours.length > 0 ? (
           <div className={`grid gap-5 ${
             filteredTours.length === 1
