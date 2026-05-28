@@ -114,7 +114,7 @@ export default function EventsClient({
           </div>
         )}
 
-        <div className="mb-2 sm:mb-8">
+        <div className="mb-4 sm:mb-8">
           <p className="text-gray-500 text-sm">
             Showing <span className="font-bold text-brand-navy">{filteredEvents.length}</span> event{filteredEvents.length !== 1 ? "s" : ""}
             {selectedCategory !== ALL && (
