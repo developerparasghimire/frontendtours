@@ -8,7 +8,7 @@ import type { APICategory } from "@/lib/api";
 import PageHero from "@/components/sections/PageHero";
 import { sectionImages } from "@/lib/sectionImages";
 
-const eventCardOffsets = ["xl:translate-y-6", "xl:-translate-y-8", "xl:translate-y-10", "xl:-translate-y-4"] as const;
+const eventCardOffsets = ["xl:translate-y-2", "xl:-translate-y-2", "xl:translate-y-3", "xl:-translate-y-1"] as const;
 const ALL = "All";
 
 export default function EventsClient({
