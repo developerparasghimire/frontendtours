@@ -1,5 +1,6 @@
 {
   "framework": "nextjs",
-  "buildCommand": "npm install --legacy-peer-deps && npm run build",
+  "installCommand": "npm install --legacy-peer-deps --no-audit --prefer-offline",
+  "buildCommand": "npm run build",
   "outputDirectory": ".next"
 }
