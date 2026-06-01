@@ -11,6 +11,7 @@ import QRCode from "qrcode";
 import { useAuth } from "@/lib/auth";
 import { createEventBooking, createTourBooking, guestCreateTourBooking, guestCreateEventBooking } from "@/lib/api";
 import { shouldUseUnoptimizedImage } from "@/lib/images";
+import { useCurrency } from "@/context/CurrencyContext";
 
 type SavedBooking = {
   id: number;
@@ -51,10 +52,10 @@ function BookingContent({ tours, events }: { tours: Tour[]; events: Event[] }) {
   const userName = form.name || (user ? `${user.first_name} ${user.last_name}`.trim() : "");
   const userEmail = form.email || (user ? user.email : "");
 
+  const { formatPrice } = useCurrency();
   const travelers = parseInt(form.travelers) || 1;
-  const rawPrice = isEvent ? selectedItem?.price : selectedItem?.price;
-  const basePrice = parseFloat((rawPrice || "0").replace(/[^\d.]/g, "")) || 0;
-  const total = basePrice * travelers;
+  const basePriceUsd = selectedItem?.basePrice ?? (parseFloat((selectedItem?.price || "0").replace(/[^\d.]/g, "")) || 0);
+  const total = basePriceUsd * travelers;
   const formatUsd = (n: number) =>
     `$${n.toLocaleString(undefined, { maximumFractionDigits: 2 })} USD`;
   const today = new Date();
@@ -425,7 +426,7 @@ function BookingContent({ tours, events }: { tours: Tour[]; events: Event[] }) {
                 {step === 2 && (
                   <div className="text-center py-10">
                     <h2 className="text-2xl font-bold text-brand-navy mb-4">Confirm Your Booking</h2>
-                    <p className="text-gray-600 mb-6">Please review your total: <strong className="text-brand-green">{formatUsd(total)}</strong></p>
+                    <p className="text-gray-600 mb-6">Please review your total: <strong className="text-brand-green">{formatPrice(total)}</strong></p>
 
                     <div className="bg-gray-50 border border-gray-200 rounded-xl p-6 mb-8 max-w-sm mx-auto text-left space-y-3">
                        <div className="flex justify-between text-sm">
@@ -444,7 +445,7 @@ function BookingContent({ tours, events }: { tours: Tour[]; events: Event[] }) {
                        )}
                        <div className="border-t border-gray-200 pt-3 flex justify-between">
                          <span className="font-bold text-brand-navy">Total Amount</span>
-                         <span className="font-extrabold text-brand-green">{formatUsd(total)}</span>
+                         <span className="font-extrabold text-brand-green">{formatPrice(total)}</span>
                        </div>
                        <p className="text-xs text-gray-400 pt-2">You will be redirected to the secure Mastercard payment page to complete your purchase.</p>
                     </div>
@@ -456,7 +457,7 @@ function BookingContent({ tours, events }: { tours: Tour[]; events: Event[] }) {
                         submitting ? "opacity-60 cursor-not-allowed" : "hover:bg-brand-blue"
                       }`}
                     >
-                      {submitting ? "Redirecting to Payment…" : `Pay Securely ${formatUsd(total)}`}
+                      {submitting ? "Redirecting to Payment…" : `Pay Securely ${formatPrice(total)}`}
                     </button>
 
                     <button
@@ -577,7 +578,7 @@ function BookingContent({ tours, events }: { tours: Tour[]; events: Event[] }) {
                 <div className="border-t border-gray-100 pt-4 space-y-2">
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-500">{isEvent ? 'Ticket Price' : 'Price per person'}</span>
-                    <span className="font-semibold text-brand-navy">{selectedItem.price}</span>
+                    <span className="font-semibold text-brand-navy">{formatPrice(basePriceUsd)}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-500">{isEvent ? 'Tickets' : 'Travelers'}</span>
@@ -585,7 +586,7 @@ function BookingContent({ tours, events }: { tours: Tour[]; events: Event[] }) {
                   </div>
                   <div className="border-t border-gray-100 pt-2 flex justify-between">
                     <span className="font-bold text-brand-navy">Total</span>
-                    <span className="font-extrabold text-brand-green text-lg sm:text-xl">{formatUsd(total)}</span>
+                    <span className="font-extrabold text-brand-green text-lg sm:text-xl">{formatPrice(total)}</span>
                   </div>
                 </div>
 

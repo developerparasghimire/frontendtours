@@ -13,6 +13,7 @@ import type { Tour, Event, Testimonial } from "@/types";
 import type { SiteConfig, APIPartner, APICategory, APIAboutStat } from "@/lib/api";
 import { shouldUseUnoptimizedImage } from "@/lib/images";
 import { sectionImages } from "@/lib/sectionImages";
+import { useCurrency } from "@/context/CurrencyContext";
 
 const categories = [
   { icon: "🏔️", label: "Trekking", count: 12 },
@@ -40,6 +41,8 @@ function getEventDateParts(dateLabel: string) {
 
 function LatestEventFeatureCard({ event, index, noStagger }: { event: Event; index: number; noStagger?: boolean }) {
   const dateParts = getEventDateParts(event.date);
+  const { formatPrice } = useCurrency();
+  const displayPrice = event.basePrice ? formatPrice(event.basePrice) : event.price;
   const staggerClasses = [
     "xl:translate-y-4",
     "xl:-translate-y-6",
@@ -70,7 +73,7 @@ function LatestEventFeatureCard({ event, index, noStagger }: { event: Event; ind
                 {event.category}
               </span>
               <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-white/80 backdrop-blur-sm">
-                {event.price}
+                {displayPrice}
               </span>
             </div>
 
@@ -241,6 +244,8 @@ function FeaturedTourCard({
   noStagger?: boolean;
 }) {
   const durationParts = getTourDurationParts(tour.duration);
+  const { formatPrice } = useCurrency();
+  const displayPrice = tour.basePrice ? formatPrice(tour.basePrice) : tour.price;
   const staggerClasses = [
     "xl:translate-y-4",
     "xl:-translate-y-6",
@@ -275,7 +280,7 @@ function FeaturedTourCard({
                 {tour.badge || tour.category || "Journey"}
               </span>
               <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-white/80 backdrop-blur-sm">
-                {tour.price}
+                {displayPrice}
               </span>
             </div>
 
@@ -965,6 +970,7 @@ function CertificatesPartnersSection({ partners }: { partners: APIPartner[] }) {
 }
 
 export default function HomeClient({ tours, events, testimonials, siteConfig, partners = [], featuredCategories = [], aboutStats = [] }: HomeClientProps) {
+  const { formatPrice } = useCurrency();
   const trustReasons = [
     {
       icon: "M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z",
