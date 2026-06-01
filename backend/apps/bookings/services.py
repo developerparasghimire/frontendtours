@@ -22,23 +22,6 @@ def create_tour_booking(
     if user is None and not guest_email:
         raise ValidationError("Email is required to complete booking.")
 
-    # Enforce one active tour booking per user (or per guest email)
-    active_statuses = [BookingStatus.PENDING, BookingStatus.CONFIRMED]
-    if user is not None:
-        existing_active = TourBooking.objects.filter(
-            user=user, status__in=active_statuses
-        ).exists()
-    else:
-        existing_active = TourBooking.objects.filter(
-            user__isnull=True,
-            guest_email__iexact=guest_email,
-            status__in=active_statuses,
-        ).exists()
-    if existing_active:
-        raise ValidationError(
-            "You already have an active tour booking. Please complete or cancel it before booking another package."
-        )
-
     try:
         tour = Tour.objects.select_for_update().get(id=tour_id, is_active=True)
     except Tour.DoesNotExist:
