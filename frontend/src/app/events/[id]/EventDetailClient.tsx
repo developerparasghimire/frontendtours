@@ -7,12 +7,15 @@ import ReviewSection from "@/components/shared/ReviewSection";
 import type { Event } from "@/types";
 import { shouldUseUnoptimizedImage } from "@/lib/images";
 import { sanitizeHTML } from "@/lib/sanitize";
+import { useCurrency } from "@/context/CurrencyContext";
 
 export default function EventDetailClient({ event }: { event: Event & { longDescription?: string; highlights?: string[]; availableTickets?: number; totalTickets?: number; numericId?: number } }) {
   const soldOut = event.availableTickets === 0;
+  const { formatPrice } = useCurrency();
+  const displayPrice = event.basePrice ? formatPrice(event.basePrice) : event.price;
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col pb-20 lg:pb-0">
       {/* ═══════════ HERO with Brand Colors ═══════════ */}
       <section className="relative min-h-[380px] sm:min-h-[440px] flex items-end overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-[#0b1820] via-[#0f2230] to-[#0a1820]" />
@@ -178,7 +181,7 @@ export default function EventDetailClient({ event }: { event: Event & { longDesc
               <div className="p-5 sm:p-6 space-y-5">
                 <div>
                   <p className="text-sm text-gray-500 uppercase tracking-wider">Entry Price</p>
-                  <p className="text-2xl sm:text-4xl font-extrabold text-brand-green">{event.price}</p>
+                  <p className="text-2xl sm:text-4xl font-extrabold text-brand-green">{displayPrice}</p>
                   <p className="text-gray-500 text-sm">per ticket</p>
                 </div>
 
@@ -231,6 +234,22 @@ export default function EventDetailClient({ event }: { event: Event & { longDesc
           <ReviewSection eventId={event.numericId} />
         </MotionWrapper>
       </section>
+
+      {/* ═══════════ STICKY MOBILE BOOK BAR ═══════════ */}
+      {!soldOut && (
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 px-4 py-3 flex items-center gap-3 shadow-2xl">
+          <div className="flex-1 min-w-0">
+            <p className="text-xs text-gray-400 leading-none">Entry price</p>
+            <p className="text-lg font-extrabold text-brand-green leading-tight">{displayPrice}</p>
+          </div>
+          <Link
+            href={`/booking?type=event&id=${event.id}`}
+            className="flex-shrink-0 bg-brand-red text-white font-bold px-6 py-3 rounded-xl hover:bg-red-700 transition-colors active:scale-95 text-sm"
+          >
+            Book Tickets
+          </Link>
+        </div>
+      )}
 
       {/* ═══════════ BACK LINK ═══════════ */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 w-full">

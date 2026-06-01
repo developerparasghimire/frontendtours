@@ -47,9 +47,23 @@ class Tour(TimeStampedModel):
     max_capacity = models.PositiveIntegerField()
     is_active = models.BooleanField(default=True)
     is_latest = models.BooleanField(default=False, help_text="Show on the home page as a featured latest tour.")
-    
+    pdf = models.FileField(upload_to='tours/pdfs/', blank=True, null=True, help_text="Downloadable tour plan PDF (optional)")
+
     def __str__(self):
         return self.title
+
+
+class TourPDFLead(models.Model):
+    email = models.EmailField()
+    tour = models.ForeignKey(Tour, on_delete=models.CASCADE, related_name='pdf_leads')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        unique_together = [('email', 'tour')]
+
+    def __str__(self):
+        return f"{self.email} — {self.tour.title}"
 
 
 class TourGuide(models.Model):

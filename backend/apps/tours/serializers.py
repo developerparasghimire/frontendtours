@@ -2,7 +2,7 @@ import json
 from django.core.files.storage import default_storage
 from django.core.validators import FileExtensionValidator
 from rest_framework import serializers
-from .models import Tour, TourGalleryImage, TourGuide, TourGuideLanguage
+from .models import Tour, TourGalleryImage, TourGuide, TourGuideLanguage, TourPDFLead
 
 # H6: limit upload size to mitigate abuse / OOM in image processing.
 MAX_IMAGE_BYTES = 5 * 1024 * 1024  # 5 MB
@@ -64,6 +64,7 @@ class TourSerializer(serializers.ModelSerializer):
         source='image',
         validators=[FileExtensionValidator(allowed_extensions=ALLOWED_IMAGE_EXTS)],
     )
+    pdf_url = serializers.SerializerMethodField()
     booking_count = serializers.IntegerField(read_only=True, default=0)
 
     def validate_image_file(self, value):
@@ -76,7 +77,7 @@ class TourSerializer(serializers.ModelSerializer):
             'image', 'image_file', 'gallery', 'base_price', 'currency',
             'duration_days', 'category', 'subcategory', 'difficulty', 'rating', 'badge', 'best_season',
             'highlights', 'includes', 'max_capacity', 'is_active', 'is_latest',
-            'booking_count',
+            'pdf_url', 'booking_count',
             'created_at', 'updated_at',
         ]
         read_only_fields = ['id', 'booking_count', 'created_at', 'updated_at']
@@ -87,6 +88,14 @@ class TourSerializer(serializers.ModelSerializer):
             if request:
                 return request.build_absolute_uri(obj.image.url)
             return obj.image.url
+        return None
+
+    def get_pdf_url(self, obj):
+        if obj.pdf:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.pdf.url)
+            return obj.pdf.url
         return None
 
     def _get_absolute_gallery(self, gallery):

@@ -1,11 +1,30 @@
 from django.db.models import Count
 from django.db.models.deletion import ProtectedError
 from rest_framework import viewsets, permissions, filters, status
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
-from .models import Tour, TourGuide, TourGuideLanguage
+from .models import Tour, TourGuide, TourGuideLanguage, TourPDFLead
 from .serializers import TourSerializer, TourGuideSerializer, TourGuideLanguageSerializer
 from apps.common.permissions import IsAdminOrStaff
+
+
+@api_view(['POST'])
+@permission_classes([permissions.AllowAny])
+def tour_pdf_lead_view(request):
+    email = request.data.get('email', '').strip()
+    tour_id = request.data.get('tour_id')
+
+    if not email or '@' not in email or '.' not in email.split('@')[-1]:
+        return Response({'error': 'Valid email address required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        tour = Tour.objects.get(pk=tour_id)
+    except (Tour.DoesNotExist, TypeError, ValueError):
+        return Response({'error': 'Tour not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+    TourPDFLead.objects.get_or_create(email=email, tour=tour)
+    return Response({'success': True})
 
 class TourViewSet(viewsets.ModelViewSet):
     serializer_class = TourSerializer

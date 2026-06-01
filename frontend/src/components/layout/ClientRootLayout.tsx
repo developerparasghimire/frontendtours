@@ -5,7 +5,9 @@ import { usePathname } from "next/navigation";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import { AuthProvider } from "@/lib/auth";
+import { CurrencyProvider } from "@/context/CurrencyContext";
 import ScrollToTop from "@/components/shared/ScrollToTop";
+import WhatsAppWidget from "@/components/shared/WhatsAppWidget";
 import useSmoothScroll from "@/hooks/useSmoothScroll";
 
 function useStaleServiceWorkerCleanup() {
@@ -51,6 +53,7 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
       <main>{children}</main>
       {showChrome && <Footer />}
       <ScrollToTop />
+      {showChrome && <WhatsAppWidget />}
     </>
   );
 }
@@ -58,7 +61,9 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
 export default function ClientRootLayout({ children }: { children: React.ReactNode }) {
   return (
     <AuthProvider>
-      <LayoutInner>{children}</LayoutInner>
+      <CurrencyProvider>
+        <LayoutInner>{children}</LayoutInner>
+      </CurrencyProvider>
     </AuthProvider>
   );
 }

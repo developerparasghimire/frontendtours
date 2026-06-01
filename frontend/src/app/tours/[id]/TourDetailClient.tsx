@@ -8,10 +8,102 @@ import type { Tour } from "@/types";
 import ReviewSection from "@/components/shared/ReviewSection";
 import { shouldUseUnoptimizedImage } from "@/lib/images";
 import { sanitizeHTML } from "@/lib/sanitize";
+import { useCurrency } from "@/context/CurrencyContext";
+import { tourPdfLead } from "@/lib/api";
+
+function PDFDownloadModal({ pdfUrl, tourId, onClose }: { pdfUrl: string; tourId: number; onClose: () => void }) {
+  const [email, setEmail] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    const trimmed = email.trim();
+    if (!trimmed || !trimmed.includes("@") || !trimmed.split("@")[1]?.includes(".")) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+    setSubmitting(true);
+    setError("");
+    try {
+      await tourPdfLead(trimmed, tourId);
+      const a = document.createElement("a");
+      a.href = pdfUrl;
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      onClose();
+    } catch {
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      className="fixed inset-0 z-[110] bg-black/60 flex items-center justify-center p-4"
+      onClick={onClose}
+    >
+      <div className="relative bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl" onClick={(e) => e.stopPropagation()}>
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute top-3 right-4 text-gray-400 hover:text-gray-600 text-2xl leading-none"
+          aria-label="Close"
+        >×</button>
+        <div className="text-center mb-5">
+          <div className="w-12 h-12 bg-brand-red/10 rounded-full flex items-center justify-center mx-auto mb-3">
+            <svg className="w-6 h-6 text-brand-red" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+          </div>
+          <h3 className="text-xl font-bold text-brand-navy">Download Tour Plan</h3>
+          <p className="text-gray-500 text-sm mt-1">Enter your email to receive the detailed tour plan PDF.</p>
+        </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-semibold text-brand-navy mb-1">Email Address</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
+              className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-red/40 text-brand-navy"
+              required
+              autoFocus
+            />
+            {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
+          </div>
+          <button
+            type="submit"
+            disabled={submitting}
+            className="w-full bg-brand-red text-white font-bold py-3 rounded-xl hover:bg-red-700 transition-colors disabled:opacity-60"
+          >
+            {submitting ? "Please wait…" : "Download PDF"}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
 
 export default function TourDetailClient({ tour }: { tour: Tour }) {
   const gallery = tour.gallery || [];
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [pdfModalOpen, setPdfModalOpen] = useState(false);
+  const { formatPrice } = useCurrency();
+  const displayPrice = tour.basePrice ? formatPrice(tour.basePrice) : tour.price;
   const closeLightbox = useCallback(() => setLightboxIndex(null), []);
   const showPrev = useCallback(
     () => setLightboxIndex((i) => (i === null ? null : (i - 1 + gallery.length) % gallery.length)),
@@ -39,7 +131,7 @@ export default function TourDetailClient({ tour }: { tour: Tour }) {
   }, [lightboxIndex, closeLightbox, showPrev, showNext]);
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col pb-20 lg:pb-0">
       {/* ═══════════ HERO ═══════════ */}
       <section className="relative min-h-[380px] sm:min-h-[440px] flex items-end overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-[#1a1610] via-[#1c1308] to-[#0d1a24]" />
@@ -352,7 +444,7 @@ export default function TourDetailClient({ tour }: { tour: Tour }) {
             >
               <div>
                 <p className="text-sm text-gray-500 uppercase tracking-wider">Starting from</p>
-                <p className="text-2xl sm:text-4xl font-extrabold text-brand-green">{tour.price}</p>
+                <p className="text-2xl sm:text-4xl font-extrabold text-brand-green">{displayPrice}</p>
                 <p className="text-gray-500 text-sm">per person</p>
               </div>
 
@@ -381,6 +473,19 @@ export default function TourDetailClient({ tour }: { tour: Tour }) {
               >
                 Book This Tour
               </Link>
+
+              {tour.pdfUrl && (
+                <button
+                  type="button"
+                  onClick={() => setPdfModalOpen(true)}
+                  className="flex items-center justify-center gap-2 w-full border-2 border-brand-navy text-brand-navy font-bold py-3 rounded-xl hover:bg-brand-navy hover:text-white transition-all duration-200 mb-3"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  Download Tour Plan
+                </button>
+              )}
 
               {/* Includes */}
               <div className="border-t-2 border-gray-100 pt-4">
@@ -430,6 +535,29 @@ export default function TourDetailClient({ tour }: { tour: Tour }) {
           </Link>
         </div>
       </section>
+
+      {/* ═══════════ STICKY MOBILE BOOK BAR ═══════════ */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 px-4 py-3 flex items-center gap-3 shadow-2xl">
+        <div className="flex-1 min-w-0">
+          <p className="text-xs text-gray-400 leading-none">Starting from</p>
+          <p className="text-lg font-extrabold text-brand-green leading-tight">{displayPrice}</p>
+        </div>
+        <Link
+          href={`/booking?type=tour&id=${tour.id}`}
+          className="flex-shrink-0 bg-brand-red text-white font-bold px-6 py-3 rounded-xl hover:bg-red-700 transition-colors active:scale-95 text-sm"
+        >
+          Book Now
+        </Link>
+      </div>
+
+      {/* ═══════════ PDF MODAL ═══════════ */}
+      {pdfModalOpen && tour.pdfUrl && tour.numericId && (
+        <PDFDownloadModal
+          pdfUrl={tour.pdfUrl}
+          tourId={tour.numericId}
+          onClose={() => setPdfModalOpen(false)}
+        />
+      )}
 
       {/* ═══════════ GALLERY LIGHTBOX ═══════════ */}
       {lightboxIndex !== null && gallery[lightboxIndex] && (

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Tour, TourGalleryImage
+from .models import Tour, TourGalleryImage, TourPDFLead
 
 
 class TourGalleryImageInline(admin.TabularInline):
@@ -33,6 +33,16 @@ class TourAdmin(admin.ModelAdmin):
         }),
         ("Tour Content", {"fields": ("highlights", "includes"), "description": "Enter as JSON arrays, e.g. [\"Item one\", \"Item two\"]"}),
         ("Pricing", {"fields": ("base_price", "currency")}),
+        ("Tour Plan PDF", {"fields": ("pdf",), "description": "Upload a PDF of the detailed tour itinerary. Users will enter their email before downloading."}),
         ("Status", {"fields": ("is_active",)}),
         ("Timestamps", {"fields": ("created_at", "updated_at"), "classes": ("collapse",)}),
     )
+
+
+@admin.register(TourPDFLead)
+class TourPDFLeadAdmin(admin.ModelAdmin):
+    list_display = ("email", "tour", "created_at")
+    list_filter = ("tour",)
+    search_fields = ("email",)
+    readonly_fields = ("email", "tour", "created_at")
+    ordering = ("-created_at",)

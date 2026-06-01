@@ -425,6 +425,7 @@ export interface APITour {
   max_capacity: number;
   is_active: boolean;
   is_latest: boolean;
+  pdf_url?: string | null;
   booking_count?: number;
   guide?: APITourGuide | null;
   created_at: string;
@@ -452,6 +453,14 @@ export async function getTours(params?: {
 
 export async function getTourBySlug(slug: string): Promise<APITour> {
   return fetchAPI<APITour>(`/tours/${slug}/`);
+}
+
+export async function tourPdfLead(email: string, tourId: number): Promise<void> {
+  await fetchAPI("/tours/pdf-lead/", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, tour_id: tourId }),
+  });
 }
 
 /* ──────────────── Event API ──────────────── */

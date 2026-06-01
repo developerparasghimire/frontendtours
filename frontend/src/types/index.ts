@@ -20,6 +20,8 @@ export interface Tour {
   longDescription?: string;
   image: string;
   price: string;
+  basePrice?: number;
+  pdfUrl?: string | null;
   duration?: string;
   location?: string;
   rating?: number;
@@ -46,6 +48,7 @@ export interface Event {
   time: string;
   category: string;
   price: string;
+  basePrice?: number;
   location?: string;
   highlights?: string[];
   availableTickets?: number;

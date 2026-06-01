@@ -6,6 +6,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/lib/auth";
+import { useCurrency, CURRENCIES } from "@/context/CurrencyContext";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -19,11 +20,14 @@ const navLinks = [
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [currencyMenuOpen, setCurrencyMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const navRef = useRef<HTMLElement | null>(null);
   const pathname = usePathname();
   const { user, isAuthenticated, logout, loading } = useAuth();
+  const { currency, setCurrency, currencyInfo } = useCurrency();
   const userMenuRef = useRef<HTMLDivElement>(null);
+  const currencyMenuRef = useRef<HTMLDivElement>(null);
   const isHome = pathname === "/";
   const isOverlayNav = isHome && !scrolled && !isMobileMenuOpen;
   const showBrandText = !scrolled;
@@ -38,11 +42,14 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Close user menu on outside click
+  // Close menus on outside click
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
       if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
         setUserMenuOpen(false);
+      }
+      if (currencyMenuRef.current && !currencyMenuRef.current.contains(e.target as Node)) {
+        setCurrencyMenuOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClick);
@@ -144,6 +151,46 @@ export default function Navbar() {
                 </Link>
               );
             })}
+            </div>
+
+            {/* Currency Selector */}
+            <div className="relative ml-2" ref={currencyMenuRef}>
+              <button
+                onClick={() => setCurrencyMenuOpen((o) => !o)}
+                className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
+                  isOverlayNav
+                    ? "text-white/80 hover:bg-white/10"
+                    : "text-brand-navy hover:bg-brand-navy/5 border border-gray-200"
+                }`}
+                aria-label="Select currency"
+              >
+                {currencyInfo.symbol} {currency}
+                <svg className={`w-3 h-3 transition-transform ${currencyMenuOpen ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              {currencyMenuOpen && (
+                <div className="absolute right-0 top-full mt-2 w-40 bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden z-50">
+                  {CURRENCIES.map((c) => (
+                    <button
+                      key={c.code}
+                      onClick={() => { setCurrency(c.code); setCurrencyMenuOpen(false); }}
+                      className={`w-full flex items-center justify-between px-4 py-2.5 text-sm transition-colors ${
+                        currency === c.code
+                          ? "bg-brand-navy/5 text-brand-navy font-bold"
+                          : "text-gray-700 hover:bg-gray-50"
+                      }`}
+                    >
+                      <span>{c.label}</span>
+                      {currency === c.code && (
+                        <svg className="w-3.5 h-3.5 text-brand-navy" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Separator + Auth */}
@@ -284,6 +331,26 @@ export default function Navbar() {
                 </Link>
               );
             })}
+          </div>
+
+          {/* Mobile Currency Selector */}
+          <div className="border-t border-gray-100 mt-3 pt-3">
+            <p className="px-4 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-gray-400">Currency</p>
+            <div className="flex flex-wrap gap-2 px-4 pb-2">
+              {CURRENCIES.map((c) => (
+                <button
+                  key={c.code}
+                  onClick={() => { setCurrency(c.code); closeMenus(); }}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors ${
+                    currency === c.code
+                      ? "bg-brand-navy text-white border-brand-navy"
+                      : "border-gray-200 text-gray-600 hover:border-brand-navy hover:text-brand-navy"
+                  }`}
+                >
+                  {c.label}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Mobile Auth Section */}

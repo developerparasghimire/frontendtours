@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import type { Event } from "@/types";
 import { shouldUseUnoptimizedImage } from "@/lib/images";
+import { useCurrency } from "@/context/CurrencyContext";
 
 function getEventDateParts(dateLabel: string) {
   const parsed = new Date(dateLabel);
@@ -23,6 +24,8 @@ function getEventDateParts(dateLabel: string) {
 
 export default function EventCard(event: Event & { compact?: boolean }) {
   const dateParts = getEventDateParts(event.date);
+  const { formatPrice } = useCurrency();
+  const displayPrice = event.basePrice ? formatPrice(event.basePrice) : event.price;
 
   return (
     <Link href={`/events/${event.id}`} className="group block">
@@ -46,7 +49,7 @@ export default function EventCard(event: Event & { compact?: boolean }) {
               {event.category}
             </span>
             <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-white/80 backdrop-blur-sm">
-              {event.price}
+              {displayPrice}
             </span>
           </div>
 

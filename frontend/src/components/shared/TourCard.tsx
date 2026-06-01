@@ -5,6 +5,7 @@ import Image from "next/image";
 import type { Tour } from "@/types";
 import { shouldUseUnoptimizedImage } from "@/lib/images";
 import TourImagePlaceholder from "@/components/shared/TourImagePlaceholder";
+import { useCurrency } from "@/context/CurrencyContext";
 
 function getTourDurationParts(durationLabel?: string) {
   if (!durationLabel) {
@@ -24,6 +25,8 @@ function getTourDurationParts(durationLabel?: string) {
 
 export default function TourCard(tour: Tour & { compact?: boolean }) {
   const durationParts = getTourDurationParts(tour.duration);
+  const { formatPrice } = useCurrency();
+  const displayPrice = tour.basePrice ? formatPrice(tour.basePrice) : tour.price;
 
   return (
     <Link href={`/tours/${tour.id}`} className="group block">
@@ -51,7 +54,7 @@ export default function TourCard(tour: Tour & { compact?: boolean }) {
               {tour.badge || tour.category || "Journey"}
             </span>
             <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-white/80 backdrop-blur-sm">
-              {tour.price}
+              {displayPrice}
             </span>
           </div>
 
