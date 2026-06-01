@@ -21,22 +21,23 @@ export const CURRENCIES: CurrencyInfo[] = [
 
 const FALLBACK_RATES: Record<CurrencyCode, number> = {
   USD: 1,
-  INR: 83.5,
+  INR: 84.5,
   EUR: 0.92,
-  NPR: 133.5,
+  NPR: 135.0,
   GBP: 0.79,
-  AUD: 1.53,
+  AUD: 1.54,
 };
 
-const CACHE_KEY    = "gt_currency_rates";
-const CACHE_TS_KEY = "gt_currency_rates_ts";
-const CACHE_TTL    = 3 * 60 * 60 * 1000; // 3 hours
+const CACHE_KEY    = "gt_fx_rates_v2";
+const CACHE_TS_KEY = "gt_fx_rates_ts_v2";
+const CACHE_TTL    = 30 * 60 * 1000; // 30 minutes
 
 interface CurrencyContextValue {
   currency: CurrencyCode;
   setCurrency: (code: CurrencyCode) => void;
   formatPrice: (usdAmount: number) => string;
   currencyInfo: CurrencyInfo;
+  rates: Record<CurrencyCode, number>;
 }
 
 const CurrencyContext = createContext<CurrencyContextValue>({
@@ -44,12 +45,14 @@ const CurrencyContext = createContext<CurrencyContextValue>({
   setCurrency: () => {},
   formatPrice: (a) => (a ? `$${a.toLocaleString()}` : "Free"),
   currencyInfo: CURRENCIES[0],
+  rates: FALLBACK_RATES,
 });
 
 export function CurrencyProvider({ children }: { children: React.ReactNode }) {
   const [currency, setCurrencyState] = useState<CurrencyCode>("USD");
   const [rates, setRates] = useState<Record<CurrencyCode, number>>(FALLBACK_RATES);
 
+  // Restore saved currency preference
   useEffect(() => {
     try {
       const saved = localStorage.getItem("gt_currency") as CurrencyCode | null;
@@ -57,36 +60,35 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
     } catch {}
   }, []);
 
+  // Fetch live rates via internal Next.js API route (server-side fetch, no CORS)
   useEffect(() => {
-    try {
-      const cached = localStorage.getItem(CACHE_KEY);
-      const ts = Number(localStorage.getItem(CACHE_TS_KEY) || 0);
-      if (cached && Date.now() - ts < CACHE_TTL) {
-        setRates(JSON.parse(cached));
-        return;
-      }
-    } catch {}
+    async function loadRates() {
+      // Use cache if fresh
+      try {
+        const cached = localStorage.getItem(CACHE_KEY);
+        const ts = Number(localStorage.getItem(CACHE_TS_KEY) || 0);
+        if (cached && Date.now() - ts < CACHE_TTL) {
+          setRates(JSON.parse(cached));
+          return;
+        }
+      } catch {}
 
-    fetch("https://open.er-api.com/v6/latest/USD")
-      .then((r) => r.json())
-      .then((data) => {
-        if (!data?.rates) return;
-        const r = data.rates;
-        const newRates: Record<CurrencyCode, number> = {
-          USD: 1,
-          INR: r.INR ?? FALLBACK_RATES.INR,
-          EUR: r.EUR ?? FALLBACK_RATES.EUR,
-          NPR: r.NPR ?? FALLBACK_RATES.NPR,
-          GBP: r.GBP ?? FALLBACK_RATES.GBP,
-          AUD: r.AUD ?? FALLBACK_RATES.AUD,
-        };
-        setRates(newRates);
+      // Fetch from our internal API route
+      try {
+        const res = await fetch("/api/exchange-rates");
+        if (!res.ok) throw new Error("API error");
+        const data: Record<CurrencyCode, number> = await res.json();
+        setRates(data);
         try {
-          localStorage.setItem(CACHE_KEY, JSON.stringify(newRates));
+          localStorage.setItem(CACHE_KEY, JSON.stringify(data));
           localStorage.setItem(CACHE_TS_KEY, String(Date.now()));
         } catch {}
-      })
-      .catch(() => {});
+      } catch {
+        // Silently use fallback rates already set in state
+      }
+    }
+
+    loadRates();
   }, []);
 
   const setCurrency = useCallback((code: CurrencyCode) => {
@@ -100,9 +102,11 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
       const info = CURRENCIES.find((c) => c.code === currency)!;
       const converted = usdAmount * rates[currency];
       const formatted =
-        converted >= 100
+        converted >= 1000
           ? Math.round(converted).toLocaleString()
-          : converted.toFixed(2).replace(/\.00$/, "");
+          : converted >= 1
+            ? Number(converted.toFixed(2)).toLocaleString()
+            : converted.toFixed(4);
       return `${info.symbol}${formatted}`;
     },
     [currency, rates],
@@ -111,7 +115,7 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
   const currencyInfo = CURRENCIES.find((c) => c.code === currency) ?? CURRENCIES[0];
 
   return (
-    <CurrencyContext.Provider value={{ currency, setCurrency, formatPrice, currencyInfo }}>
+    <CurrencyContext.Provider value={{ currency, setCurrency, formatPrice, currencyInfo, rates }}>
       {children}
     </CurrencyContext.Provider>
   );
