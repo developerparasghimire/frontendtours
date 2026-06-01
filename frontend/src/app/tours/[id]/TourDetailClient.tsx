@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import MotionWrapper, { StaggerContainer, StaggerItem } from "@/components/shared/MotionWrapper";
@@ -102,8 +102,21 @@ export default function TourDetailClient({ tour }: { tour: Tour }) {
   const gallery = tour.gallery || [];
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [pdfModalOpen, setPdfModalOpen] = useState(false);
+  const [showStickyBar, setShowStickyBar] = useState(false);
+  const bookingCardRef = useRef<HTMLDivElement>(null);
   const { formatPrice } = useCurrency();
   const displayPrice = tour.basePrice ? formatPrice(tour.basePrice) : tour.price;
+
+  useEffect(() => {
+    const el = bookingCardRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setShowStickyBar(!entry.isIntersecting),
+      { threshold: 0.1 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
   const closeLightbox = useCallback(() => setLightboxIndex(null), []);
   const showPrev = useCallback(
     () => setLightboxIndex((i) => (i === null ? null : (i - 1 + gallery.length) % gallery.length)),
@@ -440,6 +453,7 @@ export default function TourDetailClient({ tour }: { tour: Tour }) {
           {/* Sidebar Booking Card */}
           <div className="lg:col-span-1">
             <div
+              ref={bookingCardRef}
               className="sticky top-20 sm:top-24 bg-white rounded-2xl shadow-xl border border-gray-100 p-5 sm:p-8 space-y-5 sm:space-y-6"
             >
               <div>
@@ -536,17 +550,17 @@ export default function TourDetailClient({ tour }: { tour: Tour }) {
         </div>
       </section>
 
-      {/* ═══════════ STICKY MOBILE BOOK BAR ═══════════ */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 px-4 py-3 flex items-center gap-3 shadow-2xl">
+      {/* ═══════════ STICKY BOOK BAR (appears when booking card scrolls out of view) ═══════════ */}
+      <div className={`fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 px-4 py-3 flex items-center gap-3 shadow-2xl transition-transform duration-300 ${showStickyBar ? "translate-y-0" : "translate-y-full"}`}>
         <div className="flex-1 min-w-0">
           <p className="text-xs text-gray-400 leading-none">Starting from</p>
           <p className="text-lg font-extrabold text-brand-green leading-tight">{displayPrice}</p>
         </div>
         <Link
           href={`/booking?type=tour&id=${tour.id}`}
-          className="flex-shrink-0 bg-brand-red text-white font-bold px-6 py-3 rounded-xl hover:bg-red-700 transition-colors active:scale-95 text-sm"
+          className="flex-shrink-0 bg-brand-red text-white font-bold px-5 py-3 rounded-xl hover:bg-red-700 transition-colors active:scale-95 text-sm mr-16"
         >
-          Book Now
+          Book This Tour
         </Link>
       </div>
 

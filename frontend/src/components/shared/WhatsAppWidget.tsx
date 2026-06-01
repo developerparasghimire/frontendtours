@@ -12,7 +12,7 @@ export default function WhatsAppWidget() {
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Chat with us on WhatsApp"
-      className="fixed bottom-6 right-6 z-50 flex items-center gap-2 group"
+      className="fixed bottom-[4.5rem] lg:bottom-6 right-4 z-50 flex items-center gap-2 group"
     >
       {/* Tooltip */}
       <span className="pointer-events-none hidden sm:block opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-white text-gray-800 text-sm font-semibold px-3 py-1.5 rounded-lg shadow-lg border border-gray-100 whitespace-nowrap">

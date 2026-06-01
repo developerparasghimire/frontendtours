@@ -49,6 +49,7 @@ export interface Event {
   category: string;
   price: string;
   basePrice?: number;
+  pdfUrl?: string | null;
   location?: string;
   highlights?: string[];
   availableTickets?: number;

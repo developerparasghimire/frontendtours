@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import MotionWrapper from "@/components/shared/MotionWrapper";
@@ -8,11 +9,104 @@ import type { Event } from "@/types";
 import { shouldUseUnoptimizedImage } from "@/lib/images";
 import { sanitizeHTML } from "@/lib/sanitize";
 import { useCurrency } from "@/context/CurrencyContext";
+import { eventPdfLead } from "@/lib/api";
+
+function PDFDownloadModal({ pdfUrl, eventId, onClose }: { pdfUrl: string; eventId: number; onClose: () => void }) {
+  const [email, setEmail] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    const trimmed = email.trim();
+    if (!trimmed || !trimmed.includes("@") || !trimmed.split("@")[1]?.includes(".")) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+    setSubmitting(true);
+    setError("");
+    try {
+      await eventPdfLead(trimmed, eventId);
+      const a = document.createElement("a");
+      a.href = pdfUrl;
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      onClose();
+    } catch {
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      className="fixed inset-0 z-[110] bg-black/60 flex items-center justify-center p-4"
+      onClick={onClose}
+    >
+      <div className="relative bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl" onClick={(e) => e.stopPropagation()}>
+        <button type="button" onClick={onClose} className="absolute top-3 right-4 text-gray-400 hover:text-gray-600 text-2xl leading-none" aria-label="Close">×</button>
+        <div className="text-center mb-5">
+          <div className="w-12 h-12 bg-brand-blue/10 rounded-full flex items-center justify-center mx-auto mb-3">
+            <svg className="w-6 h-6 text-brand-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+          </div>
+          <h3 className="text-xl font-bold text-brand-navy">Download Event Plan</h3>
+          <p className="text-gray-500 text-sm mt-1">Enter your email to receive the detailed event plan PDF.</p>
+        </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-semibold text-brand-navy mb-1">Email Address</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
+              className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-blue/40 text-brand-navy"
+              required
+              autoFocus
+            />
+            {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
+          </div>
+          <button type="submit" disabled={submitting} className="w-full bg-brand-blue text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-60">
+            {submitting ? "Please wait…" : "Download PDF"}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
 
 export default function EventDetailClient({ event }: { event: Event & { longDescription?: string; highlights?: string[]; availableTickets?: number; totalTickets?: number; numericId?: number } }) {
   const soldOut = event.availableTickets === 0;
   const { formatPrice } = useCurrency();
   const displayPrice = event.basePrice ? formatPrice(event.basePrice) : event.price;
+  const [pdfModalOpen, setPdfModalOpen] = useState(false);
+  const [showStickyBar, setShowStickyBar] = useState(false);
+  const bookingCardRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = bookingCardRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setShowStickyBar(!entry.isIntersecting),
+      { threshold: 0.1 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <div className="flex flex-col pb-20 lg:pb-0">
@@ -166,7 +260,7 @@ export default function EventDetailClient({ event }: { event: Event & { longDesc
 
           {/* Sidebar Booking Card */}
           <div className="lg:col-span-1">
-            <div className="sticky top-20 sm:top-24 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+            <div ref={bookingCardRef} className="sticky top-20 sm:top-24 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
               <div className="relative h-40 sm:h-48">
                 <Image
                   src={event.image}
@@ -216,6 +310,19 @@ export default function EventDetailClient({ event }: { event: Event & { longDesc
                   </Link>
                 )}
 
+                {event.pdfUrl && (
+                  <button
+                    type="button"
+                    onClick={() => setPdfModalOpen(true)}
+                    className="flex items-center justify-center gap-2 w-full border-2 border-brand-navy text-brand-navy font-bold py-3 rounded-xl hover:bg-brand-navy hover:text-white transition-all duration-200"
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    Download Event Plan
+                  </button>
+                )}
+
                 <div className="pt-2 border-t border-gray-100 text-center">
                   <p className="text-gray-500 text-xs">Need help with your booking?</p>
                   <Link href="/contact" className="font-bold text-brand-navy hover:text-brand-orange transition-colors">
@@ -235,20 +342,29 @@ export default function EventDetailClient({ event }: { event: Event & { longDesc
         </MotionWrapper>
       </section>
 
-      {/* ═══════════ STICKY MOBILE BOOK BAR ═══════════ */}
+      {/* ═══════════ STICKY BOOK BAR ═══════════ */}
       {!soldOut && (
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 px-4 py-3 flex items-center gap-3 shadow-2xl">
+        <div className={`fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 px-4 py-3 flex items-center gap-3 shadow-2xl transition-transform duration-300 ${showStickyBar ? "translate-y-0" : "translate-y-full"}`}>
           <div className="flex-1 min-w-0">
             <p className="text-xs text-gray-400 leading-none">Entry price</p>
             <p className="text-lg font-extrabold text-brand-green leading-tight">{displayPrice}</p>
           </div>
           <Link
             href={`/booking?type=event&id=${event.id}`}
-            className="flex-shrink-0 bg-brand-red text-white font-bold px-6 py-3 rounded-xl hover:bg-red-700 transition-colors active:scale-95 text-sm"
+            className="flex-shrink-0 bg-brand-red text-white font-bold px-5 py-3 rounded-xl hover:bg-red-700 transition-colors active:scale-95 text-sm mr-16"
           >
             Book Tickets
           </Link>
         </div>
+      )}
+
+      {/* ═══════════ PDF MODAL ═══════════ */}
+      {pdfModalOpen && event.pdfUrl && event.numericId && (
+        <PDFDownloadModal
+          pdfUrl={event.pdfUrl}
+          eventId={event.numericId}
+          onClose={() => setPdfModalOpen(false)}
+        />
       )}
 
       {/* ═══════════ BACK LINK ═══════════ */}

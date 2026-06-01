@@ -2,7 +2,7 @@ import json
 from django.core.files.storage import default_storage
 from django.core.validators import FileExtensionValidator
 from rest_framework import serializers
-from .models import Event
+from .models import Event, EventPDFLead
 
 MAX_IMAGE_BYTES = 5 * 1024 * 1024  # 5 MB
 ALLOWED_IMAGE_EXTS = ['jpg', 'jpeg', 'png', 'webp', 'gif']
@@ -60,6 +60,7 @@ class EventSerializer(serializers.ModelSerializer):
         source='image',
         validators=[FileExtensionValidator(allowed_extensions=ALLOWED_IMAGE_EXTS)],
     )
+    pdf_url = serializers.SerializerMethodField()
     booking_count = serializers.IntegerField(read_only=True, default=0)
 
     def validate_image_file(self, value):
@@ -72,7 +73,7 @@ class EventSerializer(serializers.ModelSerializer):
             'image', 'image_file', 'event_date', 'base_price', 'currency',
             'category', 'highlights', 'gallery',
             'total_tickets', 'available_tickets', 'is_active', 'is_latest',
-            'booking_count',
+            'pdf_url', 'booking_count',
             'created_at', 'updated_at',
         ]
         read_only_fields = ['id', 'booking_count', 'created_at', 'updated_at']
@@ -83,6 +84,14 @@ class EventSerializer(serializers.ModelSerializer):
             if request:
                 return request.build_absolute_uri(obj.image.url)
             return obj.image.url
+        return None
+
+    def get_pdf_url(self, obj):
+        if obj.pdf:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.pdf.url)
+            return obj.pdf.url
         return None
 
     def _get_absolute_gallery(self, gallery):

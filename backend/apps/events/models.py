@@ -23,7 +23,8 @@ class Event(TimeStampedModel):
     available_tickets = models.PositiveIntegerField()
     is_active = models.BooleanField(default=True)
     is_latest = models.BooleanField(default=False, help_text="Show on the home page as a featured latest event.")
-    
+    pdf = models.FileField(upload_to='events/pdfs/', blank=True, null=True, help_text="Downloadable event plan PDF (optional)")
+
     def __str__(self):
         return self.title
 
@@ -31,3 +32,16 @@ class Event(TimeStampedModel):
         if not self.pk:
             self.available_tickets = self.total_tickets
         super().save(*args, **kwargs)
+
+
+class EventPDFLead(models.Model):
+    email = models.EmailField()
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='pdf_leads')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        unique_together = [('email', 'event')]
+
+    def __str__(self):
+        return f"{self.email} — {self.event.title}"

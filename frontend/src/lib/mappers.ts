@@ -64,6 +64,7 @@ export function mapAPIEvent(e: APIEvent): Event {
     category: e.category || "Culture",
     price: !Number(e.base_price) ? "Free" : `$${Number(e.base_price).toLocaleString()}`,
     basePrice: Number(e.base_price) || 0,
+    pdfUrl: e.pdf_url ?? null,
     location: e.venue,
     highlights: e.highlights || [],
     availableTickets: e.available_tickets,

@@ -1,11 +1,30 @@
 from django.db.models import Count
 from django.db.models.deletion import ProtectedError
 from rest_framework import viewsets, permissions, filters, status
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
-from .models import Event
+from .models import Event, EventPDFLead
 from .serializers import EventSerializer
 from apps.common.permissions import IsAdminOrStaff
+
+
+@api_view(['POST'])
+@permission_classes([permissions.AllowAny])
+def event_pdf_lead_view(request):
+    email = request.data.get('email', '').strip()
+    event_id = request.data.get('event_id')
+
+    if not email or '@' not in email or '.' not in email.split('@')[-1]:
+        return Response({'error': 'Valid email address required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        event = Event.objects.get(pk=event_id)
+    except (Event.DoesNotExist, TypeError, ValueError):
+        return Response({'error': 'Event not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+    EventPDFLead.objects.get_or_create(email=email, event=event)
+    return Response({'success': True})
 
 class EventViewSet(viewsets.ModelViewSet):
     serializer_class = EventSerializer

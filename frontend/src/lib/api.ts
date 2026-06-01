@@ -483,9 +483,18 @@ export interface APIEvent {
   available_tickets: number;
   is_active: boolean;
   is_latest: boolean;
+  pdf_url?: string | null;
   booking_count?: number;
   created_at: string;
   updated_at: string;
+}
+
+export async function eventPdfLead(email: string, eventId: number): Promise<void> {
+  await fetchAPI("/events/pdf-lead/", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, event_id: eventId }),
+  });
 }
 
 export async function getEvents(params?: {
