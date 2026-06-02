@@ -10,8 +10,9 @@ import { shouldUseUnoptimizedImage } from "@/lib/images";
 import { sanitizeHTML } from "@/lib/sanitize";
 import { useCurrency } from "@/context/CurrencyContext";
 import { tourPdfLead } from "@/lib/api";
+import { generateTourPDF } from "@/lib/generateDetailPDF";
 
-function PDFDownloadModal({ pdfUrl, tourId, onClose }: { pdfUrl: string; tourId: number; onClose: () => void }) {
+function PDFDownloadModal({ onDownload, onClose }: { onDownload: (email: string) => Promise<void>; onClose: () => void }) {
   const [email, setEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -32,14 +33,7 @@ function PDFDownloadModal({ pdfUrl, tourId, onClose }: { pdfUrl: string; tourId:
     setSubmitting(true);
     setError("");
     try {
-      await tourPdfLead(trimmed, tourId);
-      const a = document.createElement("a");
-      a.href = pdfUrl;
-      a.target = "_blank";
-      a.rel = "noopener noreferrer";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+      await onDownload(trimmed);
       onClose();
     } catch {
       setError("Something went wrong. Please try again.");
@@ -49,48 +43,27 @@ function PDFDownloadModal({ pdfUrl, tourId, onClose }: { pdfUrl: string; tourId:
   }
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      className="fixed inset-0 z-[110] bg-black/60 flex items-center justify-center p-4"
-      onClick={onClose}
-    >
+    <div role="dialog" aria-modal="true" className="fixed inset-0 z-[110] bg-black/60 flex items-center justify-center p-4" onClick={onClose}>
       <div className="relative bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl" onClick={(e) => e.stopPropagation()}>
-        <button
-          type="button"
-          onClick={onClose}
-          className="absolute top-3 right-4 text-gray-400 hover:text-gray-600 text-2xl leading-none"
-          aria-label="Close"
-        >×</button>
+        <button type="button" onClick={onClose} className="absolute top-3 right-4 text-gray-400 hover:text-gray-600 text-2xl leading-none" aria-label="Close">×</button>
         <div className="text-center mb-5">
           <div className="w-12 h-12 bg-brand-red/10 rounded-full flex items-center justify-center mx-auto mb-3">
             <svg className="w-6 h-6 text-brand-red" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
             </svg>
           </div>
-          <h3 className="text-xl font-bold text-brand-navy">Download Tour Plan</h3>
-          <p className="text-gray-500 text-sm mt-1">Enter your email to receive the detailed tour plan PDF.</p>
+          <h3 className="text-xl font-bold text-brand-navy">Download Tour Details</h3>
+          <p className="text-gray-500 text-sm mt-1">Enter your email to download the full tour details PDF.</p>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-semibold text-brand-navy mb-1">Email Address</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
-              className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-red/40 text-brand-navy"
-              required
-              autoFocus
-            />
+            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com"
+              className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-red/40 text-brand-navy" required autoFocus />
             {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
           </div>
-          <button
-            type="submit"
-            disabled={submitting}
-            className="w-full bg-brand-red text-white font-bold py-3 rounded-xl hover:bg-red-700 transition-colors disabled:opacity-60"
-          >
-            {submitting ? "Please wait…" : "Download PDF"}
+          <button type="submit" disabled={submitting} className="w-full bg-brand-red text-white font-bold py-3 rounded-xl hover:bg-red-700 transition-colors disabled:opacity-60">
+            {submitting ? "Generating PDF…" : "Download PDF"}
           </button>
         </form>
       </div>
@@ -488,18 +461,16 @@ export default function TourDetailClient({ tour }: { tour: Tour }) {
                 Book This Tour
               </Link>
 
-              {tour.pdfUrl && (
-                <button
-                  type="button"
-                  onClick={() => setPdfModalOpen(true)}
-                  className="flex items-center justify-center gap-2 w-full border-2 border-brand-navy text-brand-navy font-bold py-3 rounded-xl hover:bg-brand-navy hover:text-white transition-all duration-200 mb-3"
-                >
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                  </svg>
-                  Download Tour Plan
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={() => setPdfModalOpen(true)}
+                className="flex items-center justify-center gap-2 w-full border-2 border-brand-navy text-brand-navy font-bold py-3 rounded-xl hover:bg-brand-navy hover:text-white transition-all duration-200 mb-3"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                Download Tour Details
+              </button>
 
               {/* Includes */}
               <div className="border-t-2 border-gray-100 pt-4">
@@ -565,11 +536,13 @@ export default function TourDetailClient({ tour }: { tour: Tour }) {
       </div>
 
       {/* ═══════════ PDF MODAL ═══════════ */}
-      {pdfModalOpen && tour.pdfUrl && tour.numericId && (
+      {pdfModalOpen && (
         <PDFDownloadModal
-          pdfUrl={tour.pdfUrl}
-          tourId={tour.numericId}
           onClose={() => setPdfModalOpen(false)}
+          onDownload={async (email) => {
+            if (tour.numericId) await tourPdfLead(email, tour.numericId);
+            await generateTourPDF(tour);
+          }}
         />
       )}
 

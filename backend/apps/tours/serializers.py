@@ -64,7 +64,6 @@ class TourSerializer(serializers.ModelSerializer):
         source='image',
         validators=[FileExtensionValidator(allowed_extensions=ALLOWED_IMAGE_EXTS)],
     )
-    pdf_url = serializers.SerializerMethodField()
     booking_count = serializers.IntegerField(read_only=True, default=0)
 
     def validate_image_file(self, value):
@@ -77,7 +76,7 @@ class TourSerializer(serializers.ModelSerializer):
             'image', 'image_file', 'gallery', 'base_price', 'currency',
             'duration_days', 'category', 'subcategory', 'difficulty', 'rating', 'badge', 'best_season',
             'highlights', 'includes', 'max_capacity', 'is_active', 'is_latest',
-            'pdf_url', 'booking_count',
+            'booking_count',
             'created_at', 'updated_at',
         ]
         read_only_fields = ['id', 'booking_count', 'created_at', 'updated_at']
@@ -88,14 +87,6 @@ class TourSerializer(serializers.ModelSerializer):
             if request:
                 return request.build_absolute_uri(obj.image.url)
             return obj.image.url
-        return None
-
-    def get_pdf_url(self, obj):
-        if obj.pdf:
-            request = self.context.get('request')
-            if request:
-                return request.build_absolute_uri(obj.pdf.url)
-            return obj.pdf.url
         return None
 
     def _get_absolute_gallery(self, gallery):

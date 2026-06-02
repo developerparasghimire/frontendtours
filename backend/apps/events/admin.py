@@ -17,7 +17,6 @@ class EventAdmin(admin.ModelAdmin):
         ("Event Details", {"fields": ("venue", "event_date", "category")}),
         ("Event Content", {"fields": ("highlights", "gallery"), "description": 'Enter as JSON array, e.g. ["Live music", "Food stalls"]'}),
         ("Tickets & Pricing", {"fields": ("base_price", "currency", "total_tickets", "available_tickets")}),
-        ("Event Plan PDF", {"fields": ("pdf",), "description": "Upload a PDF of the event program. Users will enter their email before downloading."}),
         ("Status", {"fields": ("is_active", "is_latest")}),
         ("Timestamps", {"fields": ("created_at", "updated_at"), "classes": ("collapse",)}),
     )

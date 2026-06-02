@@ -425,7 +425,6 @@ export interface APITour {
   max_capacity: number;
   is_active: boolean;
   is_latest: boolean;
-  pdf_url?: string | null;
   booking_count?: number;
   guide?: APITourGuide | null;
   created_at: string;
@@ -483,7 +482,6 @@ export interface APIEvent {
   available_tickets: number;
   is_active: boolean;
   is_latest: boolean;
-  pdf_url?: string | null;
   booking_count?: number;
   created_at: string;
   updated_at: string;

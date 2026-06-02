@@ -47,7 +47,6 @@ class Tour(TimeStampedModel):
     max_capacity = models.PositiveIntegerField()
     is_active = models.BooleanField(default=True)
     is_latest = models.BooleanField(default=False, help_text="Show on the home page as a featured latest tour.")
-    pdf = models.FileField(upload_to='tours/pdfs/', blank=True, null=True, help_text="Downloadable tour plan PDF (optional)")
 
     def __str__(self):
         return self.title

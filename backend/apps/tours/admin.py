@@ -33,7 +33,6 @@ class TourAdmin(admin.ModelAdmin):
         }),
         ("Tour Content", {"fields": ("highlights", "includes"), "description": "Enter as JSON arrays, e.g. [\"Item one\", \"Item two\"]"}),
         ("Pricing", {"fields": ("base_price", "currency")}),
-        ("Tour Plan PDF", {"fields": ("pdf",), "description": "Upload a PDF of the detailed tour itinerary. Users will enter their email before downloading."}),
         ("Status", {"fields": ("is_active",)}),
         ("Timestamps", {"fields": ("created_at", "updated_at"), "classes": ("collapse",)}),
     )

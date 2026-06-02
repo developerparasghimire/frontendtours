@@ -10,8 +10,9 @@ import { shouldUseUnoptimizedImage } from "@/lib/images";
 import { sanitizeHTML } from "@/lib/sanitize";
 import { useCurrency } from "@/context/CurrencyContext";
 import { eventPdfLead } from "@/lib/api";
+import { generateEventPDF } from "@/lib/generateDetailPDF";
 
-function PDFDownloadModal({ pdfUrl, eventId, onClose }: { pdfUrl: string; eventId: number; onClose: () => void }) {
+function PDFDownloadModal({ onDownload, onClose }: { onDownload: (email: string) => Promise<void>; onClose: () => void }) {
   const [email, setEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -32,14 +33,7 @@ function PDFDownloadModal({ pdfUrl, eventId, onClose }: { pdfUrl: string; eventI
     setSubmitting(true);
     setError("");
     try {
-      await eventPdfLead(trimmed, eventId);
-      const a = document.createElement("a");
-      a.href = pdfUrl;
-      a.target = "_blank";
-      a.rel = "noopener noreferrer";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+      await onDownload(trimmed);
       onClose();
     } catch {
       setError("Something went wrong. Please try again.");
@@ -49,12 +43,7 @@ function PDFDownloadModal({ pdfUrl, eventId, onClose }: { pdfUrl: string; eventI
   }
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      className="fixed inset-0 z-[110] bg-black/60 flex items-center justify-center p-4"
-      onClick={onClose}
-    >
+    <div role="dialog" aria-modal="true" className="fixed inset-0 z-[110] bg-black/60 flex items-center justify-center p-4" onClick={onClose}>
       <div className="relative bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl" onClick={(e) => e.stopPropagation()}>
         <button type="button" onClick={onClose} className="absolute top-3 right-4 text-gray-400 hover:text-gray-600 text-2xl leading-none" aria-label="Close">×</button>
         <div className="text-center mb-5">
@@ -63,25 +52,18 @@ function PDFDownloadModal({ pdfUrl, eventId, onClose }: { pdfUrl: string; eventI
               <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
             </svg>
           </div>
-          <h3 className="text-xl font-bold text-brand-navy">Download Event Plan</h3>
-          <p className="text-gray-500 text-sm mt-1">Enter your email to receive the detailed event plan PDF.</p>
+          <h3 className="text-xl font-bold text-brand-navy">Download Event Details</h3>
+          <p className="text-gray-500 text-sm mt-1">Enter your email to download the full event details PDF.</p>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-semibold text-brand-navy mb-1">Email Address</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
-              className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-blue/40 text-brand-navy"
-              required
-              autoFocus
-            />
+            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com"
+              className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-blue/40 text-brand-navy" required autoFocus />
             {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
           </div>
           <button type="submit" disabled={submitting} className="w-full bg-brand-blue text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-60">
-            {submitting ? "Please wait…" : "Download PDF"}
+            {submitting ? "Generating PDF…" : "Download PDF"}
           </button>
         </form>
       </div>
@@ -310,18 +292,16 @@ export default function EventDetailClient({ event }: { event: Event & { longDesc
                   </Link>
                 )}
 
-                {event.pdfUrl && (
-                  <button
-                    type="button"
-                    onClick={() => setPdfModalOpen(true)}
-                    className="flex items-center justify-center gap-2 w-full border-2 border-brand-navy text-brand-navy font-bold py-3 rounded-xl hover:bg-brand-navy hover:text-white transition-all duration-200"
-                  >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                    </svg>
-                    Download Event Plan
-                  </button>
-                )}
+                <button
+                  type="button"
+                  onClick={() => setPdfModalOpen(true)}
+                  className="flex items-center justify-center gap-2 w-full border-2 border-brand-navy text-brand-navy font-bold py-3 rounded-xl hover:bg-brand-navy hover:text-white transition-all duration-200"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  Download Event Details
+                </button>
 
                 <div className="pt-2 border-t border-gray-100 text-center">
                   <p className="text-gray-500 text-xs">Need help with your booking?</p>
@@ -359,11 +339,13 @@ export default function EventDetailClient({ event }: { event: Event & { longDesc
       )}
 
       {/* ═══════════ PDF MODAL ═══════════ */}
-      {pdfModalOpen && event.pdfUrl && event.numericId && (
+      {pdfModalOpen && (
         <PDFDownloadModal
-          pdfUrl={event.pdfUrl}
-          eventId={event.numericId}
           onClose={() => setPdfModalOpen(false)}
+          onDownload={async (email) => {
+            if (event.numericId) await eventPdfLead(email, event.numericId);
+            await generateEventPDF(event);
+          }}
         />
       )}
 

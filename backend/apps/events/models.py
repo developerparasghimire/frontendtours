@@ -23,7 +23,6 @@ class Event(TimeStampedModel):
     available_tickets = models.PositiveIntegerField()
     is_active = models.BooleanField(default=True)
     is_latest = models.BooleanField(default=False, help_text="Show on the home page as a featured latest event.")
-    pdf = models.FileField(upload_to='events/pdfs/', blank=True, null=True, help_text="Downloadable event plan PDF (optional)")
 
     def __str__(self):
         return self.title
