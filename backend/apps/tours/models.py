@@ -65,6 +65,19 @@ class TourPDFLead(models.Model):
         return f"{self.email} — {self.tour.title}"
 
 
+class TourFAQ(models.Model):
+    tour = models.ForeignKey(Tour, on_delete=models.CASCADE, related_name='faqs')
+    question = models.CharField(max_length=500)
+    answer = models.TextField()
+    order = models.PositiveIntegerField(default=0, help_text="Display order (lower = first)")
+
+    class Meta:
+        ordering = ['order']
+
+    def __str__(self):
+        return f"{self.question[:60]} ({self.tour.title})"
+
+
 class TourGuide(models.Model):
     tour = models.OneToOneField(Tour, on_delete=models.CASCADE, related_name='guide')
     name = models.CharField(max_length=200)

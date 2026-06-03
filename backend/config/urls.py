@@ -11,6 +11,7 @@ admin.site.index_title = "Dashboard"
 
 urlpatterns = [
     path(settings.ADMIN_URL, admin.site.urls),
+    path('summernote/', include('django_summernote.urls')),
     # Google OAuth redirect callback (matches redirect URI configured in Google Cloud Console)
     path('api/auth/google/callback/', GoogleOAuthCallbackView.as_view(), name='google_oauth_callback'),
     path('api/v1/users/', include('apps.users.urls')),

@@ -9,6 +9,7 @@ import ReviewSection from "@/components/shared/ReviewSection";
 import { shouldUseUnoptimizedImage } from "@/lib/images";
 import { sanitizeHTML } from "@/lib/sanitize";
 import { useCurrency } from "@/context/CurrencyContext";
+import { useTranslation } from "@/context/TranslationContext";
 import { tourPdfLead } from "@/lib/api";
 import { generateTourPDF } from "@/lib/generateDetailPDF";
 
@@ -76,8 +77,10 @@ export default function TourDetailClient({ tour }: { tour: Tour }) {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [pdfModalOpen, setPdfModalOpen] = useState(false);
   const [showStickyBar, setShowStickyBar] = useState(false);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
   const bookingCardRef = useRef<HTMLDivElement>(null);
   const { formatPrice } = useCurrency();
+  const { t } = useTranslation();
   const displayPrice = tour.basePrice ? formatPrice(tour.basePrice) : tour.price;
 
   useEffect(() => {
@@ -202,7 +205,7 @@ export default function TourDetailClient({ tour }: { tour: Tour }) {
           <div className="lg:col-span-2 space-y-12">
             {/* Description */}
             <MotionWrapper>
-              <h2 className="text-xl sm:text-2xl font-bold text-brand-navy mb-4">About This Tour</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-brand-navy mb-4">{t("tour.about")}</h2>
               {tour.longDescription && /<[a-z][\s\S]*>/i.test(tour.longDescription) ? (
                 <div
                   className="text-gray-700 leading-relaxed text-base sm:text-lg [&>h1]:text-2xl [&>h1]:font-bold [&>h1]:text-brand-navy [&>h1]:mb-3 [&>h2]:text-xl [&>h2]:font-bold [&>h2]:text-brand-navy [&>h2]:mb-2 [&>h3]:text-lg [&>h3]:font-semibold [&>h3]:text-brand-navy [&>h3]:mb-2 [&>p]:mb-3 [&>ul]:list-disc [&>ul]:pl-5 [&>ul]:mb-3 [&>ol]:list-decimal [&>ol]:pl-5 [&>ol]:mb-3 [&>blockquote]:border-l-4 [&>blockquote]:border-brand-navy/30 [&>blockquote]:pl-4 [&>blockquote]:italic [&>blockquote]:text-gray-600 [&>blockquote]:mb-3 [&>img]:max-w-full [&>img]:rounded-xl [&>img]:my-4"
@@ -377,7 +380,7 @@ export default function TourDetailClient({ tour }: { tour: Tour }) {
 
             {/* Highlights */}
             <MotionWrapper delay={0.1}>
-              <h2 className="text-xl sm:text-2xl font-bold text-brand-navy mb-4">Tour Highlights</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-brand-navy mb-4">{t("tour.highlights")}</h2>
               <div className="space-y-3">
                 {tour.highlights?.map((h, i) => (
                   <div
@@ -397,7 +400,7 @@ export default function TourDetailClient({ tour }: { tour: Tour }) {
 
             {/* Gallery */}
             <MotionWrapper delay={0.2}>
-              <h2 className="text-xl sm:text-2xl font-bold text-brand-navy mb-4">Gallery</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-brand-navy mb-4">{t("tour.gallery")}</h2>
               <StaggerContainer className="grid grid-cols-2 gap-4" staggerDelay={0.1}>
                 {gallery.map((src, i) => (
                   <StaggerItem key={i}>
@@ -421,6 +424,37 @@ export default function TourDetailClient({ tour }: { tour: Tour }) {
                 ))}
               </StaggerContainer>
             </MotionWrapper>
+
+            {/* FAQ Accordion */}
+            {tour.faqs && tour.faqs.length > 0 && (
+              <MotionWrapper delay={0.25}>
+                <h2 className="text-xl sm:text-2xl font-bold text-brand-navy mb-4">{t("tour.faq")}</h2>
+                <div className="space-y-3">
+                  {tour.faqs.map((faq, i) => (
+                    <div key={faq.id} className="border border-gray-100 rounded-xl overflow-hidden">
+                      <button
+                        type="button"
+                        onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                        className="w-full flex items-center justify-between gap-4 px-5 py-4 text-left bg-white hover:bg-gray-50 transition-colors"
+                      >
+                        <span className="font-semibold text-brand-navy text-sm sm:text-base">{faq.question}</span>
+                        <svg
+                          className={`w-5 h-5 text-brand-navy flex-shrink-0 transition-transform duration-200 ${openFaq === i ? "rotate-180" : ""}`}
+                          fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </button>
+                      {openFaq === i && (
+                        <div className="px-5 pb-4 text-gray-600 text-sm leading-relaxed border-t border-gray-100 pt-3 bg-gray-50">
+                          {faq.answer}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </MotionWrapper>
+            )}
           </div>
 
           {/* Sidebar Booking Card */}
@@ -430,9 +464,25 @@ export default function TourDetailClient({ tour }: { tour: Tour }) {
               className="sticky top-20 sm:top-24 bg-white rounded-2xl shadow-xl border border-gray-100 p-5 sm:p-8 space-y-5 sm:space-y-6"
             >
               <div>
-                <p className="text-sm text-gray-500 uppercase tracking-wider">Starting from</p>
+                <p className="text-sm text-gray-500 uppercase tracking-wider">{t("tour.price_from")}</p>
                 <p className="text-2xl sm:text-4xl font-extrabold text-brand-green">{displayPrice}</p>
-                <p className="text-gray-500 text-sm">per person</p>
+                <p className="text-gray-500 text-sm">{t("tour.per_person")}</p>
+                {/* Star rating below price */}
+                {tour.rating && (
+                  <div className="flex items-center gap-1 mt-2">
+                    {[1,2,3,4,5].map((star) => {
+                      const filled = star <= Math.round(tour.rating!);
+                      const half = !filled && star - 0.5 <= tour.rating!;
+                      return (
+                        <svg key={star} className={`w-4 h-4 ${filled || half ? "text-yellow-400" : "text-gray-200"}`} fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                        </svg>
+                      );
+                    })}
+                    <span className="text-sm font-semibold text-brand-navy ml-0.5">{tour.rating}</span>
+                    <span className="text-xs text-gray-400">/ 5</span>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-4">
@@ -454,11 +504,28 @@ export default function TourDetailClient({ tour }: { tour: Tour }) {
                 </div>
               </div>
 
+              {/* Payment method icons */}
+              <div>
+                <p className="text-[10px] text-gray-400 uppercase tracking-wider mb-2">We accept</p>
+                <div className="flex flex-wrap items-center gap-2">
+                  {/* Visa */}
+                  <svg viewBox="0 0 38 24" className="h-6 w-auto" aria-label="Visa"><rect width="38" height="24" rx="4" fill="#1A1F71"/><text x="5" y="17" fontFamily="Arial" fontWeight="bold" fontSize="13" fill="white" letterSpacing="-1">VISA</text></svg>
+                  {/* Mastercard */}
+                  <svg viewBox="0 0 38 24" className="h-6 w-auto" aria-label="Mastercard"><rect width="38" height="24" rx="4" fill="#252525"/><circle cx="15" cy="12" r="7" fill="#EB001B"/><circle cx="23" cy="12" r="7" fill="#F79E1B"/><path d="M19 7.5a7 7 0 000 9A7 7 0 0019 7.5z" fill="#FF5F00"/></svg>
+                  {/* PayPal */}
+                  <svg viewBox="0 0 38 24" className="h-6 w-auto" aria-label="PayPal"><rect width="38" height="24" rx="4" fill="#003087"/><text x="6" y="16" fontFamily="Arial" fontWeight="bold" fontSize="9" fill="#009CDE">Pay</text><text x="16" y="16" fontFamily="Arial" fontWeight="bold" fontSize="9" fill="white">Pal</text></svg>
+                  {/* American Express */}
+                  <svg viewBox="0 0 38 24" className="h-6 w-auto" aria-label="American Express"><rect width="38" height="24" rx="4" fill="#2E77BC"/><text x="4" y="11" fontFamily="Arial" fontWeight="bold" fontSize="6" fill="white">AMERICAN</text><text x="4" y="18" fontFamily="Arial" fontWeight="bold" fontSize="6" fill="white">EXPRESS</text></svg>
+                  {/* Bank Transfer */}
+                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-gray-100 text-[10px] font-bold text-gray-600">🏦 Bank</span>
+                </div>
+              </div>
+
               <Link
                 href={`/booking?type=tour&id=${tour.id}`}
                 className="block w-full bg-brand-red text-white font-bold py-4 rounded-xl text-lg text-center hover:bg-red-700 transition-all duration-300 shadow-lg hover:shadow-xl active:scale-[0.98] mb-3"
               >
-                Book This Tour
+                {t("tour.book")}
               </Link>
 
               <button
@@ -469,8 +536,23 @@ export default function TourDetailClient({ tour }: { tour: Tour }) {
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                 </svg>
-                Download Tour Details
+                {t("tour.download")}
               </button>
+
+              {/* Trust Certifications */}
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { icon: "🏆", key: "trust.certified" },
+                  { icon: "🔒", key: "trust.safe" },
+                  { icon: "📞", key: "trust.support" },
+                  { icon: "💰", key: "trust.guarantee" },
+                ].map(({ icon, key }) => (
+                  <div key={key} className="flex items-center gap-1.5 bg-gray-50 rounded-lg px-2 py-1.5">
+                    <span className="text-sm">{icon}</span>
+                    <span className="text-[10px] font-semibold text-gray-600 leading-tight">{t(key)}</span>
+                  </div>
+                ))}
+              </div>
 
               {/* Includes */}
               <div className="border-t-2 border-gray-100 pt-4">
@@ -488,9 +570,9 @@ export default function TourDetailClient({ tour }: { tour: Tour }) {
               </div>
 
               <div className="pt-4 border-t border-gray-100 text-center">
-                <p className="text-gray-500 text-xs">Need help planning your trip?</p>
+                <p className="text-gray-500 text-xs">{t("common.need_help")}</p>
                 <Link href="/contact" className="font-bold text-brand-navy hover:text-brand-orange transition-colors">
-                  Contact Us
+                  {t("common.contact")}
                 </Link>
               </div>
             </div>

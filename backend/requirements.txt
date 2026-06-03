@@ -20,3 +20,4 @@ python-decouple>=3.8
 cloudinary>=1.40
 django-cloudinary-storage>=0.3
 django-anymail[brevo]>=10.0
+django-summernote>=0.8.20

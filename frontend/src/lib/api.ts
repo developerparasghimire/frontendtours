@@ -394,6 +394,13 @@ export interface APITourGuideLanguage {
   rating: number;
 }
 
+export interface APITourFAQ {
+  id: number;
+  question: string;
+  answer: string;
+  order: number;
+}
+
 export interface APITourGuide {
   id: number;
   name: string;
@@ -427,6 +434,7 @@ export interface APITour {
   is_latest: boolean;
   booking_count?: number;
   guide?: APITourGuide | null;
+  faqs?: APITourFAQ[];
   created_at: string;
   updated_at: string;
 }

@@ -6,6 +6,7 @@ import Navbar from "./Navbar";
 import Footer from "./Footer";
 import { AuthProvider } from "@/lib/auth";
 import { CurrencyProvider } from "@/context/CurrencyContext";
+import { TranslationProvider } from "@/context/TranslationContext";
 import ScrollToTop from "@/components/shared/ScrollToTop";
 import WhatsAppWidget from "@/components/shared/WhatsAppWidget";
 import useSmoothScroll from "@/hooks/useSmoothScroll";
@@ -61,9 +62,11 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
 export default function ClientRootLayout({ children }: { children: React.ReactNode }) {
   return (
     <AuthProvider>
-      <CurrencyProvider>
-        <LayoutInner>{children}</LayoutInner>
-      </CurrencyProvider>
+      <TranslationProvider>
+        <CurrencyProvider>
+          <LayoutInner>{children}</LayoutInner>
+        </CurrencyProvider>
+      </TranslationProvider>
     </AuthProvider>
   );
 }

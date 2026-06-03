@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'cloudinary',
     'cloudinary_storage',
+    'django_summernote',
 
     # Custom Apps
     'apps.users',

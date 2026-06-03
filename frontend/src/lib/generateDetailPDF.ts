@@ -57,12 +57,14 @@ function drawFooter(doc: import("jspdf").jsPDF) {
   const H = doc.internal.pageSize.getHeight();
   doc.setDrawColor(...LGRAY);
   doc.setLineWidth(0.3);
-  doc.line(MARGIN, H - 18, W - MARGIN, H - 18);
+  doc.line(MARGIN, H - 20, W - MARGIN, H - 20);
   doc.setTextColor(...LGRAY);
   doc.setFontSize(8);
   doc.setFont("helvetica", "normal");
-  doc.text("Get Tours Nepal  ·  gettoursnepal.com  ·  © 2025", MARGIN, H - 10);
-  doc.text("This document is auto-generated from live tour data.", W - MARGIN, H - 10, { align: "right" });
+  doc.text("Get Tours Nepal  ·  Thamel, Kathmandu, Nepal", MARGIN, H - 13);
+  doc.text("gettoursnepal.com  ·  WhatsApp/Call: +977 976-8510607  ·  info@gettoursnepal.com", MARGIN, H - 8);
+  const socials = "Facebook: /GetToursNepal  ·  Instagram: @gettoursnepal  ·  TikTok: @gettoursnepal";
+  doc.text(socials, W - MARGIN, H - 8, { align: "right" });
 }
 
 function sectionTitle(doc: import("jspdf").jsPDF, text: string, y: number): number {

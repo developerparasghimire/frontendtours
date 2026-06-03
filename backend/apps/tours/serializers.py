@@ -2,7 +2,7 @@ import json
 from django.core.files.storage import default_storage
 from django.core.validators import FileExtensionValidator
 from rest_framework import serializers
-from .models import Tour, TourGalleryImage, TourGuide, TourGuideLanguage, TourPDFLead
+from .models import Tour, TourGalleryImage, TourGuide, TourGuideLanguage, TourPDFLead, TourFAQ
 
 # H6: limit upload size to mitigate abuse / OOM in image processing.
 MAX_IMAGE_BYTES = 5 * 1024 * 1024  # 5 MB
@@ -56,6 +56,12 @@ def _save_gallery_files(files, upload_to='tours/gallery/'):
     return urls
 
 
+class TourFAQSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TourFAQ
+        fields = ['id', 'question', 'answer', 'order']
+
+
 class TourSerializer(serializers.ModelSerializer):
     image = serializers.SerializerMethodField()
     image_file = serializers.ImageField(
@@ -103,6 +109,7 @@ class TourSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
+        data['faqs'] = TourFAQSerializer(instance.faqs.all(), many=True).data
         # Merge JSONField gallery URLs with TourGalleryImage model images
         json_gallery = instance.gallery or []
         model_gallery_urls = []

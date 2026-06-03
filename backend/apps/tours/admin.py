@@ -1,5 +1,13 @@
 from django.contrib import admin
-from .models import Tour, TourGalleryImage, TourPDFLead
+from .models import Tour, TourGalleryImage, TourPDFLead, TourFAQ
+
+
+class TourFAQInline(admin.TabularInline):
+    model = TourFAQ
+    extra = 3
+    fields = ("order", "question", "answer")
+    verbose_name = "FAQ"
+    verbose_name_plural = "FAQs (Frequently Asked Questions)"
 
 
 class TourGalleryImageInline(admin.TabularInline):
@@ -19,7 +27,7 @@ class TourAdmin(admin.ModelAdmin):
     list_editable = ("is_active", "is_latest", "base_price", "category", "difficulty", "rating")
     ordering = ("-created_at",)
     readonly_fields = ("created_at", "updated_at")
-    inlines = [TourGalleryImageInline]
+    inlines = [TourGalleryImageInline, TourFAQInline]
     fieldsets = (
         (None, {"fields": ("title", "slug", "description", "long_description")}),
         ("Featured on Home Page", {

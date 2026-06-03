@@ -7,14 +7,15 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/lib/auth";
 import { useCurrency, CURRENCIES } from "@/context/CurrencyContext";
+import { useTranslation, LANGUAGES } from "@/context/TranslationContext";
 
-const navLinks = [
-  { href: "/", label: "Home" },
-  { href: "/about", label: "About" },
-  { href: "/events", label: "Events" },
-  { href: "/tours", label: "Tours" },
-  { href: "/blog", label: "Blogs" },
-  { href: "/contact", label: "Contact" },
+const NAV_KEYS = [
+  { href: "/",        key: "nav.home"    },
+  { href: "/about",   key: "nav.about"   },
+  { href: "/events",  key: "nav.events"  },
+  { href: "/tours",   key: "nav.tours"   },
+  { href: "/blog",    key: "nav.blogs"   },
+  { href: "/contact", key: "nav.contact" },
 ];
 
 export default function Navbar() {
@@ -26,8 +27,11 @@ export default function Navbar() {
   const pathname = usePathname();
   const { user, isAuthenticated, logout, loading } = useAuth();
   const { currency, setCurrency, currencyInfo } = useCurrency();
+  const { lang, setLang, t } = useTranslation();
+  const [langMenuOpen, setLangMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const currencyMenuRef = useRef<HTMLDivElement>(null);
+  const langMenuRef = useRef<HTMLDivElement>(null);
   const isHome = pathname === "/";
   const isOverlayNav = isHome && !scrolled && !isMobileMenuOpen;
   const showBrandText = !scrolled;
@@ -50,6 +54,9 @@ export default function Navbar() {
       }
       if (currencyMenuRef.current && !currencyMenuRef.current.contains(e.target as Node)) {
         setCurrencyMenuOpen(false);
+      }
+      if (langMenuRef.current && !langMenuRef.current.contains(e.target as Node)) {
+        setLangMenuOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClick);
@@ -122,7 +129,7 @@ export default function Navbar() {
                 isOverlayNav ? "bg-transparent px-0 py-0 backdrop-blur-0" : "bg-brand-navy/[0.035]"
               }`}
             >
-            {navLinks.map((link) => {
+            {NAV_KEYS.map((link) => {
               const isActive = pathname === link.href || (link.href !== "/" && pathname.startsWith(link.href));
               return (
                 <Link
@@ -139,8 +146,7 @@ export default function Navbar() {
                         : "text-gray-600 hover:text-brand-navy"
                   }`}
                 >
-                  {link.label}
-                  {/* Active / hover underline indicator */}
+                  {t(link.key)}
                   <span
                     className={`absolute bottom-0 left-1/2 -translate-x-1/2 h-0.5 rounded-full transition-all duration-300 ${
                       isOverlayNav ? "bg-white" : "bg-[linear-gradient(90deg,var(--color-brand-red),var(--color-brand-orange))]"
@@ -187,6 +193,34 @@ export default function Navbar() {
                           <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                         </svg>
                       )}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Language Selector */}
+            <div className="relative ml-1" ref={langMenuRef}>
+              <button
+                onClick={() => setLangMenuOpen((o) => !o)}
+                className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-colors ${
+                  isOverlayNav ? "text-white/80 hover:bg-white/10" : "text-brand-navy hover:bg-brand-navy/5 border border-gray-200"
+                }`}
+                aria-label="Select language"
+              >
+                {LANGUAGES.find((l) => l.code === lang)?.flag} {lang}
+                <svg className={`w-3 h-3 transition-transform ${langMenuOpen ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              {langMenuOpen && (
+                <div className="absolute right-0 top-full mt-2 w-44 bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden z-50">
+                  {LANGUAGES.map((l) => (
+                    <button key={l.code} onClick={() => { setLang(l.code); setLangMenuOpen(false); }}
+                      className={`w-full flex items-center gap-2.5 px-4 py-2.5 text-sm transition-colors ${lang === l.code ? "bg-brand-navy/5 text-brand-navy font-bold" : "text-gray-700 hover:bg-gray-50"}`}>
+                      <span className="text-base">{l.flag}</span>
+                      <span>{l.label}</span>
+                      {lang === l.code && <svg className="w-3.5 h-3.5 text-brand-navy ml-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/></svg>}
                     </button>
                   ))}
                 </div>
@@ -263,7 +297,7 @@ export default function Navbar() {
                         : "bg-[linear-gradient(90deg,var(--color-brand-red),var(--color-brand-orange))] text-white hover:-translate-y-0.5"
                     }`}
                   >
-                    Sign In
+                    {t("nav.signin")}
                     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                     </svg>
@@ -313,7 +347,7 @@ export default function Navbar() {
           >
             <div className="border-t border-white/50 bg-white/92 px-4 py-3 shadow-xl backdrop-blur-xl">
               <div className="space-y-0.5">
-            {navLinks.map((link) => {
+            {NAV_KEYS.map((link) => {
               const isActive = pathname === link.href;
               return (
                 <Link
@@ -326,27 +360,29 @@ export default function Navbar() {
                       : "text-gray-700 hover:bg-gray-50 hover:text-brand-navy"
                   }`}
                 >
-                  {link.label}
+                  {t(link.key)}
                   {isActive && <span className="w-1.5 h-1.5 rounded-full bg-brand-red" />}
                 </Link>
               );
             })}
           </div>
 
-          {/* Mobile Currency Selector */}
+          {/* Mobile Language + Currency Selectors */}
           <div className="border-t border-gray-100 mt-3 pt-3">
+            <p className="px-4 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-gray-400">Language</p>
+            <div className="flex flex-wrap gap-2 px-4 pb-3">
+              {LANGUAGES.map((l) => (
+                <button key={l.code} onClick={() => { setLang(l.code); closeMenus(); }}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors ${lang === l.code ? "bg-brand-navy text-white border-brand-navy" : "border-gray-200 text-gray-600 hover:border-brand-navy hover:text-brand-navy"}`}>
+                  {l.flag} {l.code}
+                </button>
+              ))}
+            </div>
             <p className="px-4 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-gray-400">Currency</p>
             <div className="flex flex-wrap gap-2 px-4 pb-2">
               {CURRENCIES.map((c) => (
-                <button
-                  key={c.code}
-                  onClick={() => { setCurrency(c.code); closeMenus(); }}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors ${
-                    currency === c.code
-                      ? "bg-brand-navy text-white border-brand-navy"
-                      : "border-gray-200 text-gray-600 hover:border-brand-navy hover:text-brand-navy"
-                  }`}
-                >
+                <button key={c.code} onClick={() => { setCurrency(c.code); closeMenus(); }}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors ${currency === c.code ? "bg-brand-navy text-white border-brand-navy" : "border-gray-200 text-gray-600 hover:border-brand-navy hover:text-brand-navy"}`}>
                   {c.label}
                 </button>
               ))}

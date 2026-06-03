@@ -1,3 +1,10 @@
+export interface TourFAQ {
+  id: number;
+  question: string;
+  answer: string;
+  order: number;
+}
+
 export interface TourGuideLanguage {
   id: number;
   language: string;
@@ -34,6 +41,7 @@ export interface Tour {
   gallery?: string[];
   maxGroup?: number;
   guide?: TourGuide | null;
+  faqs?: TourFAQ[];
 }
 
 export interface Event {
