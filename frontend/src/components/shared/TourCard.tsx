@@ -6,6 +6,7 @@ import type { Tour } from "@/types";
 import { shouldUseUnoptimizedImage } from "@/lib/images";
 import TourImagePlaceholder from "@/components/shared/TourImagePlaceholder";
 import { useCurrency } from "@/context/CurrencyContext";
+import { useTranslation } from "@/context/TranslationContext";
 
 function getTourDurationParts(durationLabel?: string) {
   if (!durationLabel) {
@@ -26,6 +27,7 @@ function getTourDurationParts(durationLabel?: string) {
 export default function TourCard(tour: Tour & { compact?: boolean }) {
   const durationParts = getTourDurationParts(tour.duration);
   const { formatPrice } = useCurrency();
+  const { t } = useTranslation();
   const displayPrice = tour.basePrice ? formatPrice(tour.basePrice) : tour.price;
 
   return (
@@ -78,7 +80,7 @@ export default function TourCard(tour: Tour & { compact?: boolean }) {
               <p className="mt-1 text-sm text-white/75">{tour.difficulty || "Moderate"}</p>
             </div>
             <span className="inline-flex shrink-0 items-center gap-2 font-mono text-[10px] uppercase tracking-[0.22em] text-white/90 sm:text-[11px]">
-              Explore tour
+              {t("common.explore_tour")}
               <svg className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13 5l7 7-7 7M4 12h16" />
               </svg>

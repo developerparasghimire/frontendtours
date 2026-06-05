@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
+import { useTranslation } from "./TranslationContext";
 
 export type CurrencyCode = "USD" | "INR" | "EUR" | "NPR" | "GBP" | "AUD";
 
@@ -51,6 +52,7 @@ const CurrencyContext = createContext<CurrencyContextValue>({
 export function CurrencyProvider({ children }: { children: React.ReactNode }) {
   const [currency, setCurrencyState] = useState<CurrencyCode>("USD");
   const [rates, setRates] = useState<Record<CurrencyCode, number>>(FALLBACK_RATES);
+  const { geoCurrency } = useTranslation();
 
   // Restore saved currency preference
   useEffect(() => {
@@ -59,6 +61,16 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
       if (saved && CURRENCIES.some((c) => c.code === saved)) setCurrencyState(saved);
     } catch {}
   }, []);
+
+  // Apply geo-detected currency when IP lookup completes (only if no saved preference)
+  useEffect(() => {
+    if (!geoCurrency) return;
+    try {
+      if (!localStorage.getItem("gt_currency")) {
+        setCurrencyState(geoCurrency);
+      }
+    } catch {}
+  }, [geoCurrency]);
 
   // Fetch live rates via internal Next.js API route (server-side fetch, no CORS)
   useEffect(() => {

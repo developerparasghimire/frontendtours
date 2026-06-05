@@ -7,6 +7,7 @@ import type { Event } from "@/types";
 import type { APICategory } from "@/lib/api";
 import PageHero from "@/components/sections/PageHero";
 import { sectionImages } from "@/lib/sectionImages";
+import { useTranslation } from "@/context/TranslationContext";
 
 const eventCardOffsets = ["xl:translate-y-2", "xl:-translate-y-2", "xl:translate-y-3", "xl:-translate-y-1"] as const;
 const ALL = "All";
@@ -48,6 +49,7 @@ export default function EventsClient({
   }, [events, adminCategoryNames]);
 
   const [selectedCategory, setSelectedCategory] = useState<string>(ALL);
+  const { t } = useTranslation();
 
   const filteredEvents = useMemo(() => {
     if (selectedCategory === ALL) return visibleEvents;
@@ -60,9 +62,9 @@ export default function EventsClient({
     <div className="flex flex-col overflow-x-hidden">
       {/* ═══════════ HERO ═══════════ */}
       <PageHero
-        title="Upcoming Events & Experiences"
-        subtitle="Don't Miss Out"
-        description="Discover concerts, cultural walks, festivals, cooking classes, and more happening across Nepal."
+        title={t("events.hero_title")}
+        subtitle={t("events.hero_subtitle")}
+        description={t("events.hero_desc")}
         accentColor="brand-blue"
         backgroundImage={sectionImages.eventsHost}
         compact
@@ -106,7 +108,7 @@ export default function EventsClient({
               >
                 {categories.map((cat) => (
                   <option key={cat} value={cat}>
-                    {cat === ALL ? "All categories" : cat}
+                    {cat === ALL ? t("common.all_categories") : cat}
                   </option>
                 ))}
               </select>
@@ -116,10 +118,10 @@ export default function EventsClient({
 
         <div className="mb-6 sm:mb-8">
           <p className="text-gray-500 text-sm">
-            Showing <span className="font-bold text-brand-navy">{filteredEvents.length}</span> event{filteredEvents.length !== 1 ? "s" : ""}
+            {t("common.showing")} <span className="font-bold text-brand-navy">{filteredEvents.length}</span> {filteredEvents.length !== 1 ? t("events.plural") : t("events.singular")}
             {selectedCategory !== ALL && (
               <>
-                {" "}in <span className="font-bold text-brand-navy">{selectedCategory}</span>
+                {" "}{t("common.in")} <span className="font-bold text-brand-navy">{selectedCategory}</span>
               </>
             )}
           </p>
@@ -147,19 +149,19 @@ export default function EventsClient({
             {selectedCategory !== ALL && events.length > 0 ? (
               <>
                 <p className="text-gray-500 text-lg mb-4">
-                  No events found in <span className="font-semibold text-brand-navy">{selectedCategory}</span>.
+                  {t("events.no_events_cat")} <span className="font-semibold text-brand-navy">{selectedCategory}</span>.
                 </p>
                 <button
                   type="button"
                   onClick={() => setSelectedCategory(ALL)}
                   className="inline-flex items-center gap-2 bg-brand-blue text-white font-semibold px-5 py-2.5 rounded-lg hover:bg-blue-700 transition-colors duration-200"
                 >
-                  Show all events
+                  {t("events.show_all")}
                 </button>
               </>
             ) : (
               <p className="text-gray-500 text-lg">
-                No events available right now. Check back soon!
+                {t("events.empty")}
               </p>
             )}
           </div>
@@ -177,16 +179,16 @@ export default function EventsClient({
         <div className="absolute inset-0 bg-gradient-to-r from-brand-navy/70 via-brand-navy/60 to-brand-navy/70" />
         <MotionWrapper variant="scale-up" className="relative z-10 max-w-4xl mx-auto text-center px-4 sm:px-6">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-3 sm:mb-4">
-            Want to Host an Event With Us?
+            {t("events.host_heading")}
           </h2>
           <p className="text-gray-300 text-base sm:text-lg mb-6 sm:mb-8 max-w-xl mx-auto">
-            Partner with Get Tours to promote your event to thousands of travelers and locals.
+            {t("events.host_desc")}
           </p>
           <a
             href="/contact"
             className="group inline-flex items-center gap-2 bg-brand-red text-white font-semibold px-8 py-3.5 rounded-lg hover:bg-red-700 transition-colors duration-200"
           >
-            Contact Us
+            {t("common.contact")}
             <svg className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
             </svg>

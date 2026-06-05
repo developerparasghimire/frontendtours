@@ -7,6 +7,7 @@ import type { Tour } from "@/types";
 import type { APICategory } from "@/lib/api";
 import PageHero from "@/components/sections/PageHero";
 import { sectionImages } from "@/lib/sectionImages";
+import { useTranslation } from "@/context/TranslationContext";
 
 const tourCardOffsets = ["xl:translate-y-2", "xl:-translate-y-2", "xl:translate-y-3", "xl:-translate-y-1"] as const;
 const ALL = "All";
@@ -50,6 +51,7 @@ export default function ToursClient({
 
   const [selectedCategory, setSelectedCategory] = useState<string>(ALL);
   const [selectedSubcategory, setSelectedSubcategory] = useState<string>(ALL);
+  const { t } = useTranslation();
 
   // Sub-categories defined by admin under the currently selected parent.
   const subcategories = useMemo(() => {
@@ -93,9 +95,9 @@ export default function ToursClient({
     <div className="flex flex-col overflow-x-hidden">
       {/* ═══════════ HERO ═══════════ */}
       <PageHero
-        title="All Tour Packages"
-        subtitle="Explore Nepal"
-        description="From day trips to multi-week treks — find the perfect adventure for every traveler."
+        title={t("tours.hero_title")}
+        subtitle={t("tours.hero_subtitle")}
+        description={t("tours.hero_desc")}
         accentColor="brand-orange"
         backgroundImage={sectionImages.toursHelp}
         compact
@@ -139,7 +141,7 @@ export default function ToursClient({
               >
                 {categories.map((cat) => (
                   <option key={cat} value={cat}>
-                    {cat === ALL ? "All categories" : cat}
+                    {cat === ALL ? t("common.all_categories") : cat}
                   </option>
                 ))}
               </select>
@@ -151,7 +153,7 @@ export default function ToursClient({
         {subcategories.length > 1 && (
           <div className="mb-5">
             <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">
-              {selectedCategory} regions
+              {selectedCategory} {t("tours.regions")}
             </p>
             <div className="hidden sm:flex flex-wrap gap-2">
               {subcategories.map((sub) => {
@@ -185,7 +187,7 @@ export default function ToursClient({
               >
                 {subcategories.map((sub) => (
                   <option key={sub} value={sub}>
-                    {sub === ALL ? `All ${selectedCategory.toLowerCase()} regions` : sub}
+                    {sub === ALL ? `${t("common.all_categories")} ${selectedCategory.toLowerCase()} ${t("tours.regions")}` : sub}
                   </option>
                 ))}
               </select>
@@ -198,10 +200,10 @@ export default function ToursClient({
       {/* ═══════════ TOURS GRID ═══════════ */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 sm:pb-24 pt-4 sm:pt-6 w-full">
         <p className="text-gray-500 text-sm mb-5">
-          Showing <span className="font-bold text-brand-navy">{filteredTours.length}</span> tour{filteredTours.length !== 1 ? "s" : ""}
+          {t("common.showing")} <span className="font-bold text-brand-navy">{filteredTours.length}</span> {filteredTours.length !== 1 ? t("tours.plural") : t("tours.singular")}
           {selectedCategory !== ALL && (
             <>
-              {" "}in <span className="font-bold text-brand-navy">{selectedCategory}</span>
+              {" "}{t("common.in")} <span className="font-bold text-brand-navy">{selectedCategory}</span>
             </>
           )}
           {selectedSubcategory !== ALL && (
@@ -232,7 +234,7 @@ export default function ToursClient({
             {selectedCategory !== ALL && tours.length > 0 ? (
               <>
                 <p className="text-gray-500 text-lg mb-4">
-                  No tours found in{" "}
+                  {t("tours.no_tours_cat")}{" "}
                   <span className="font-semibold text-brand-navy">{selectedCategory}</span>
                   {selectedSubcategory !== ALL && (
                     <>
@@ -250,11 +252,11 @@ export default function ToursClient({
                   }}
                   className="inline-flex items-center gap-2 bg-brand-orange text-white font-semibold px-5 py-2.5 rounded-lg hover:bg-orange-600 transition-colors duration-200"
                 >
-                  Show all tours
+                  {t("tours.show_all")}
                 </button>
               </>
             ) : (
-              <p className="text-gray-500 text-lg">No tours available right now. Check back soon!</p>
+              <p className="text-gray-500 text-lg">{t("tours.empty")}</p>
             )}
           </div>
         )}
@@ -271,16 +273,16 @@ export default function ToursClient({
         <div className="absolute inset-0 bg-gradient-to-r from-brand-navy/70 via-brand-navy/60 to-brand-navy/70" />
         <MotionWrapper variant="scale-up" className="relative z-10 max-w-4xl mx-auto text-center px-4 sm:px-6">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-3 sm:mb-4">
-            Can&apos;t Decide? Let Us Help!
+            {t("tours.cta_heading")}
           </h2>
           <p className="text-gray-300 text-base sm:text-lg mb-6 sm:mb-8 max-w-xl mx-auto">
-            Our travel experts will craft a personalized itinerary just for you.
+            {t("tours.cta_desc")}
           </p>
           <a
             href="/contact"
             className="group inline-flex items-center gap-2 bg-brand-red text-white font-semibold px-8 py-3.5 rounded-lg hover:bg-red-700 transition-colors duration-200"
           >
-            Get Custom Trip
+            {t("tours.custom_trip")}
             <svg className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
             </svg>

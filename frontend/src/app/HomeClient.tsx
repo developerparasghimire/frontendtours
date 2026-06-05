@@ -14,6 +14,7 @@ import type { SiteConfig, APIPartner, APICategory, APIAboutStat } from "@/lib/ap
 import { shouldUseUnoptimizedImage } from "@/lib/images";
 import { sectionImages } from "@/lib/sectionImages";
 import { useCurrency } from "@/context/CurrencyContext";
+import { useTranslation } from "@/context/TranslationContext";
 
 const categories = [
   { icon: "🏔️", label: "Trekking", count: 12 },
@@ -42,6 +43,7 @@ function getEventDateParts(dateLabel: string) {
 function LatestEventFeatureCard({ event, index, noStagger }: { event: Event; index: number; noStagger?: boolean }) {
   const dateParts = getEventDateParts(event.date);
   const { formatPrice } = useCurrency();
+  const { t } = useTranslation();
   const displayPrice = event.basePrice ? formatPrice(event.basePrice) : event.price;
   const staggerClasses = [
     "xl:translate-y-4",
@@ -97,7 +99,7 @@ function LatestEventFeatureCard({ event, index, noStagger }: { event: Event; ind
                 <p className="mt-1 text-sm text-white/75">{event.time}</p>
               </div>
               <span className="inline-flex shrink-0 items-center gap-2 font-mono text-[10px] uppercase tracking-[0.22em] text-white/90 sm:text-[11px]">
-                View event
+                {t("common.view_event")}
                 <svg className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M13 5l7 7-7 7M4 12h16" />
                 </svg>
@@ -115,6 +117,7 @@ function LatestEventsSlider({ events }: { events: Event[] }) {
   const featuredEvents = events.slice(0, 3);
   const [mobileEventIdx, setMobileEventIdx] = useState(0);
   const evTouchX = useRef(0);
+  const { t } = useTranslation();
 
   // Infinite auto-advance on mobile
   useEffect(() => {
@@ -146,12 +149,12 @@ function LatestEventsSlider({ events }: { events: Event[] }) {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <MotionWrapper className="text-center mb-10 sm:mb-14">
-          <p className="font-mono text-[11px] tracking-[0.34em] text-brand-orange uppercase">What&apos;s Happening</p>
+          <p className="font-mono text-[11px] tracking-[0.34em] text-brand-orange uppercase">{t("home.events_eyebrow")}</p>
           <h2 className="mt-3 text-3xl sm:text-4xl md:text-5xl font-semibold tracking-[-0.05em] text-white">
-            Latest Events
+            {t("home.events_heading")}
           </h2>
           <p className="mt-4 text-sm sm:text-base max-w-2xl mx-auto text-white/60">
-            Upcoming festivals, cultural experiences, and local happenings across Nepal.
+            {t("home.events_desc")}
           </p>
         </MotionWrapper>
 
@@ -207,7 +210,7 @@ function LatestEventsSlider({ events }: { events: Event[] }) {
             href="/events"
             className="inline-flex items-center gap-2 rounded-full bg-brand-red px-8 py-3.5 text-sm font-semibold text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#c11000] shadow-[0_8px_24px_-8px_rgba(226,19,1,0.4)]"
           >
-            View all events
+            {t("home.events_cta")}
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.4}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
             </svg>
@@ -245,6 +248,7 @@ function FeaturedTourCard({
 }) {
   const durationParts = getTourDurationParts(tour.duration);
   const { formatPrice } = useCurrency();
+  const { t } = useTranslation();
   const displayPrice = tour.basePrice ? formatPrice(tour.basePrice) : tour.price;
   const staggerClasses = [
     "xl:translate-y-4",
@@ -304,7 +308,7 @@ function FeaturedTourCard({
                 <p className="mt-1 text-sm text-white/75">{tour.difficulty || "Moderate"}</p>
               </div>
               <span className="inline-flex shrink-0 items-center gap-2 font-mono text-[10px] uppercase tracking-[0.22em] text-white/90 sm:text-[11px]">
-                Explore tour
+                {t("common.explore_tour")}
                 <svg className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M13 5l7 7-7 7M4 12h16" />
                 </svg>
@@ -326,6 +330,7 @@ function ToursSlider({
   const featuredTours = tours.slice(0, 3);
   const [mobileTourIdx, setMobileTourIdx] = useState(0);
   const tourTouchX = useRef(0);
+  const { t } = useTranslation();
 
   // Infinite auto-advance on mobile
   useEffect(() => {
@@ -357,12 +362,12 @@ function ToursSlider({
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <MotionWrapper className="text-center mb-10 sm:mb-14">
-          <p className="font-mono text-[11px] tracking-[0.34em] text-brand-orange uppercase">Top Picks</p>
+          <p className="font-mono text-[11px] tracking-[0.34em] text-brand-orange uppercase">{t("home.tours_eyebrow")}</p>
           <h2 className="mt-3 text-3xl sm:text-4xl md:text-5xl font-semibold tracking-[-0.05em] text-white">
-            Popular Tour Packages
+            {t("home.tours_heading")}
           </h2>
           <p className="mt-4 text-sm sm:text-base max-w-2xl mx-auto text-white/60">
-            Our most booked adventures across Nepal — handpicked for every type of traveller.
+            {t("home.tours_desc")}
           </p>
         </MotionWrapper>
 
@@ -425,7 +430,7 @@ function ToursSlider({
             href="/tours"
             className="inline-flex items-center gap-2 rounded-full bg-brand-red px-8 py-3.5 text-sm font-semibold text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#c11000] shadow-[0_8px_24px_-8px_rgba(226,19,1,0.4)]"
           >
-            See all tours
+            {t("home.tours_cta")}
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.4}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
             </svg>
@@ -536,6 +541,7 @@ function GalleryLightbox({
 }
 
 function HomeGallerySlider({ siteConfig }: { siteConfig?: SiteConfig | null }) {
+  const { t } = useTranslation();
   const images = [
     siteConfig?.home_gallery_image_1,
     siteConfig?.home_gallery_image_2,
@@ -579,9 +585,9 @@ function HomeGallerySlider({ siteConfig }: { siteConfig?: SiteConfig | null }) {
     <section className="py-14 sm:py-20 bg-white overflow-hidden">
       {/* Heading */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-10 text-center">
-        <p className="font-mono text-[11px] tracking-[0.34em] text-brand-orange uppercase">Our Adventures</p>
+        <p className="font-mono text-[11px] tracking-[0.34em] text-brand-orange uppercase">{t("home.gallery_eyebrow")}</p>
         <h2 className="mt-3 text-3xl sm:text-4xl font-semibold tracking-[-0.04em] text-brand-navy">
-          Life in the Mountains
+          {t("home.gallery_heading")}
         </h2>
       </div>
 
@@ -793,6 +799,7 @@ function TestimonialsSlider({ testimonials }: { testimonials: Testimonial[] }) {
   const [idx, setIdx] = useState(0);
   const total = testimonials.length;
   const testTouchX = useRef(0);
+  const { t } = useTranslation();
 
   const prev = useCallback(() => setIdx((i) => (i === 0 ? total - 1 : i - 1)), [total]);
   const next = useCallback(() => setIdx((i) => (i + 1) % total), [total]);
@@ -804,7 +811,7 @@ function TestimonialsSlider({ testimonials }: { testimonials: Testimonial[] }) {
 
   if (total === 0) return null;
 
-  const t = testimonials[idx];
+  const current = testimonials[idx];
 
   return (
     <section className="dark-section relative overflow-hidden py-20 sm:py-28">
@@ -812,9 +819,9 @@ function TestimonialsSlider({ testimonials }: { testimonials: Testimonial[] }) {
 
         {/* Header */}
         <MotionWrapper className="text-center mb-12">
-          <p className="font-mono text-[11px] tracking-[0.34em] text-brand-orange uppercase">Testimonials</p>
+          <p className="font-mono text-[11px] tracking-[0.34em] text-brand-orange uppercase">{t("home.testimonials_eyebrow")}</p>
           <h2 className="mt-3 text-3xl sm:text-4xl md:text-5xl font-semibold tracking-[-0.05em] text-white">
-            Real stories from Nepal travelers
+            {t("home.testimonials_heading")}
           </h2>
         </MotionWrapper>
 
@@ -844,31 +851,31 @@ function TestimonialsSlider({ testimonials }: { testimonials: Testimonial[] }) {
                   </svg>
                 </div>
                 <div className="flex items-center gap-1.5 mb-6">
-                  {[...Array(t.rating || 5)].map((_, si) => (
+                  {[...Array(current.rating || 5)].map((_, si) => (
                     <svg key={si} className="w-5 h-5 text-[#f59e0b]" fill="currentColor" viewBox="0 0 20 20">
                       <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                     </svg>
                   ))}
                 </div>
                 <p className="text-white/85 text-lg sm:text-2xl font-medium leading-relaxed mb-8 flex-grow">
-                  &ldquo;{t.text}&rdquo;
+                  &ldquo;{current.text}&rdquo;
                 </p>
                 <div className="flex flex-col items-center gap-3">
                   <div className="relative w-16 h-16 rounded-full overflow-hidden ring-4 ring-white/10">
                     <Image
-                      src={t.image || "/img/landscape_background_small.jpg"}
-                      alt={t.name}
+                      src={current.image || "/img/landscape_background_small.jpg"}
+                      alt={current.name}
                       fill
                       className="object-cover"
                       sizes="64px"
                       loading="lazy"
                       quality={70}
-                      unoptimized={shouldUseUnoptimizedImage(t.image)}
+                      unoptimized={shouldUseUnoptimizedImage(current.image)}
                     />
                   </div>
                   <div>
-                    <p className="font-bold text-white text-base">{t.name}</p>
-                    <p className="text-xs text-white/45 uppercase tracking-widest mt-1">{t.location}</p>
+                    <p className="font-bold text-white text-base">{current.name}</p>
+                    <p className="text-xs text-white/45 uppercase tracking-widest mt-1">{current.location}</p>
                   </div>
                 </div>
               </div>
@@ -905,15 +912,16 @@ interface HomeClientProps {
 
 /* ─── Certificates & Partners Section ─── */
 function CertificatesPartnersSection({ partners }: { partners: APIPartner[] }) {
+  const { t } = useTranslation();
   if (partners.length === 0) return null;
 
   return (
     <section className="bg-white py-14 sm:py-20 border-t border-slate-100">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <MotionWrapper className="text-center mb-10 sm:mb-14">
-          <p className="font-mono text-[11px] tracking-[0.34em] text-brand-red uppercase">Trusted By</p>
+          <p className="font-mono text-[11px] tracking-[0.34em] text-brand-red uppercase">{t("home.partners_eyebrow")}</p>
           <h2 className="mt-3 text-3xl sm:text-4xl font-bold tracking-[-0.03em] text-brand-navy">
-            Certificates &amp; Partners
+            {t("home.partners_heading")}
           </h2>
           <div className="mt-4 flex items-center justify-center gap-3">
             <span className="h-px w-16 bg-slate-200" />
@@ -971,12 +979,13 @@ function CertificatesPartnersSection({ partners }: { partners: APIPartner[] }) {
 
 export default function HomeClient({ tours, events, testimonials, siteConfig, partners = [], featuredCategories = [], aboutStats = [] }: HomeClientProps) {
   const { formatPrice } = useCurrency();
+  const { t } = useTranslation();
   const trustReasons = [
     {
       icon: "M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z",
-      title: "Verified & Safe",
-      description: "Every tour is vetted for safety. Licensed guides, insured vehicles, and 24/7 support throughout your journey.",
-      stat: "200+ licensed guides",
+      title: t("home.trust1_title"),
+      description: t("home.trust1_desc"),
+      stat: t("home.trust1_stat"),
       iconBgClass: "bg-brand-green/16",
       iconTextClass: "text-brand-green",
       accentClass: "bg-brand-green",
@@ -984,9 +993,9 @@ export default function HomeClient({ tours, events, testimonials, siteConfig, pa
     },
     {
       icon: "M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z",
-      title: "Best Price Guarantee",
-      description: "We match any comparable offer. Get the best value for your Nepal adventure with no hidden fees.",
-      stat: "500+ trips matched",
+      title: t("home.trust2_title"),
+      description: t("home.trust2_desc"),
+      stat: t("home.trust2_stat"),
       iconBgClass: "bg-brand-orange/16",
       iconTextClass: "text-brand-orange",
       accentClass: "bg-brand-orange",
@@ -994,9 +1003,9 @@ export default function HomeClient({ tours, events, testimonials, siteConfig, pa
     },
     {
       icon: "M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z",
-      title: "Local Expertise",
-      description: "Our team of local experts crafts authentic experiences. We know Nepal like the back of our hand.",
-      stat: "15 yrs local roots",
+      title: t("home.trust3_title"),
+      description: t("home.trust3_desc"),
+      stat: t("home.trust3_stat"),
       iconBgClass: "bg-brand-red/16",
       iconTextClass: "text-brand-red",
       accentClass: "bg-brand-red",
@@ -1141,7 +1150,7 @@ export default function HomeClient({ tours, events, testimonials, siteConfig, pa
                   href="/about"
                   className="inline-flex items-center justify-center gap-2 rounded-full bg-brand-red px-8 py-3.5 text-sm font-semibold text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#c11000] shadow-[0_8px_24px_-8px_rgba(226,19,1,0.4)]"
                 >
-                  Our Story
+                  {t("home.our_story")}
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                   </svg>
@@ -1150,7 +1159,7 @@ export default function HomeClient({ tours, events, testimonials, siteConfig, pa
                   href="/contact"
                   className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-brand-navy/20 text-brand-navy px-8 py-3.5 text-sm font-semibold hover:border-brand-navy hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
                 >
-                  Get in Touch
+                  {t("home.get_in_touch")}
                 </Link>
               </div>
             </MotionWrapper>
@@ -1168,9 +1177,9 @@ export default function HomeClient({ tours, events, testimonials, siteConfig, pa
       <section className="bg-white py-16 sm:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <MotionWrapper className="text-center mb-10">
-            <p className="font-mono text-[11px] tracking-[0.34em] text-brand-orange uppercase">Travel Styles</p>
+            <p className="font-mono text-[11px] tracking-[0.34em] text-brand-orange uppercase">{t("home.adventure_eyebrow")}</p>
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-brand-navy mt-2">
-              Find Your Adventure
+              {t("home.adventure_heading")}
             </h2>
           </MotionWrapper>
 
@@ -1226,12 +1235,12 @@ export default function HomeClient({ tours, events, testimonials, siteConfig, pa
       <section className="bg-white py-[4.5rem] sm:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <MotionWrapper className="mx-auto mb-10 max-w-3xl text-center sm:mb-14">
-            <p className="font-mono text-[11px] tracking-[0.34em] text-brand-orange uppercase">Why Get Tours</p>
+            <p className="font-mono text-[11px] tracking-[0.34em] text-brand-orange uppercase">{t("home.why_eyebrow")}</p>
             <h2 className="mt-3 text-3xl font-bold tracking-[-0.04em] text-brand-navy sm:text-4xl md:text-5xl">
-              Travel With Confidence
+              {t("home.why_heading")}
             </h2>
             <p className="mt-4 text-sm leading-relaxed text-slate-500 sm:text-base">
-              We combine local knowledge, transparent planning, and thoughtful service so your Nepal trip feels exciting from the first click to the final day.
+              {t("home.why_desc")}
             </p>
           </MotionWrapper>
 
@@ -1269,12 +1278,12 @@ export default function HomeClient({ tours, events, testimonials, siteConfig, pa
       <section className="bg-white py-[4.5rem] sm:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <MotionWrapper className="text-center mb-12">
-            <p className="font-mono text-[11px] tracking-[0.34em] text-brand-orange uppercase">Get In Touch</p>
+            <p className="font-mono text-[11px] tracking-[0.34em] text-brand-orange uppercase">{t("home.contact_eyebrow")}</p>
             <h2 className="mt-3 text-3xl sm:text-4xl md:text-5xl font-bold tracking-[-0.03em] text-brand-navy">
-              Plan Your Nepal Journey
+              {t("home.contact_heading")}
             </h2>
             <p className="mt-4 text-slate-500 text-sm sm:text-base max-w-xl mx-auto">
-              Share your dates, travel style, or group size and our local team will shape the perfect itinerary for you.
+              {t("home.contact_desc")}
             </p>
           </MotionWrapper>
 
@@ -1289,9 +1298,9 @@ export default function HomeClient({ tours, events, testimonials, siteConfig, pa
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                   </svg>
                 </div>
-                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400 mb-2">Call Us</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400 mb-2">{t("home.call_us")}</p>
                 <p className="text-lg font-bold text-brand-navy">{siteConfig?.phone || "+977-9812*****"}</p>
-                <p className="mt-1 text-sm text-slate-500">Mon–Sat, 9 AM – 6 PM</p>
+                <p className="mt-1 text-sm text-slate-500">{t("home.hours")}</p>
               </a>
             </MotionWrapper>
 
@@ -1305,9 +1314,9 @@ export default function HomeClient({ tours, events, testimonials, siteConfig, pa
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                   </svg>
                 </div>
-                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400 mb-2">Email Us</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400 mb-2">{t("home.email_us")}</p>
                 <p className="text-lg font-bold text-brand-navy">{siteConfig?.email || "info@gettours.com.np"}</p>
-                <p className="mt-1 text-sm text-slate-500">Reply within 24 hours</p>
+                <p className="mt-1 text-sm text-slate-500">{t("home.reply_time")}</p>
               </a>
             </MotionWrapper>
 
@@ -1324,9 +1333,9 @@ export default function HomeClient({ tours, events, testimonials, siteConfig, pa
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
                 </div>
-                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400 mb-2">Find Us</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400 mb-2">{t("home.find_us")}</p>
                 <p className="text-lg font-bold text-brand-navy">{siteConfig?.address || "Thamel, Kathmandu"}</p>
-                <p className="mt-1 text-sm text-slate-500">Open in Google Maps</p>
+                <p className="mt-1 text-sm text-slate-500">{t("home.maps_link")}</p>
               </a>
             </MotionWrapper>
           </div>
@@ -1336,7 +1345,7 @@ export default function HomeClient({ tours, events, testimonials, siteConfig, pa
               href="/contact"
               className="inline-flex items-center gap-2 rounded-full bg-brand-red px-8 py-3.5 text-sm font-semibold text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#c11000] shadow-[0_8px_24px_-8px_rgba(226,19,1,0.4)]"
             >
-              Send Us a Message
+              {t("home.contact_cta")}
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.4}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
               </svg>
@@ -1366,12 +1375,12 @@ export default function HomeClient({ tours, events, testimonials, siteConfig, pa
               <div className="absolute inset-0 bg-gradient-to-t from-brand-navy/56 via-transparent to-brand-navy/22" />
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(226,19,1,0.22),transparent_34%),radial-gradient(circle_at_82%_18%,rgba(238,135,33,0.18),transparent_28%)]" />
               <div className="relative z-10">
-                <p className="text-sm font-bold uppercase tracking-[0.28em] text-brand-orange">Newsletter</p>
+                <p className="text-sm font-bold uppercase tracking-[0.28em] text-brand-orange">{t("home.newsletter_eyebrow")}</p>
                 <h2 className="mx-auto mt-4 max-w-2xl text-3xl font-extrabold tracking-[-0.04em] text-white sm:text-4xl">
-                  Get Nepal Travel Inspiration
+                  {t("home.newsletter_heading")}
                 </h2>
                 <p className="mx-auto mt-5 max-w-xl text-sm text-white/82 sm:text-base leading-relaxed">
-                  Subscribe for the latest tour packages, upcoming events, travel tips, and exclusive deals delivered to your inbox.
+                  {t("home.newsletter_desc")}
                 </p>
                 <div className="mt-10">
                   <SubscribeForm className="mx-auto max-w-md" />

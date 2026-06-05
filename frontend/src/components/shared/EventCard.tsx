@@ -5,6 +5,7 @@ import Image from "next/image";
 import type { Event } from "@/types";
 import { shouldUseUnoptimizedImage } from "@/lib/images";
 import { useCurrency } from "@/context/CurrencyContext";
+import { useTranslation } from "@/context/TranslationContext";
 
 function getEventDateParts(dateLabel: string) {
   const parsed = new Date(dateLabel);
@@ -25,6 +26,7 @@ function getEventDateParts(dateLabel: string) {
 export default function EventCard(event: Event & { compact?: boolean }) {
   const dateParts = getEventDateParts(event.date);
   const { formatPrice } = useCurrency();
+  const { t } = useTranslation();
   const displayPrice = event.basePrice ? formatPrice(event.basePrice) : event.price;
 
   return (
@@ -73,7 +75,7 @@ export default function EventCard(event: Event & { compact?: boolean }) {
               <p className="mt-1 text-sm text-white/75">{event.time}</p>
             </div>
             <span className="inline-flex shrink-0 items-center gap-2 font-mono text-[10px] uppercase tracking-[0.22em] text-white/90 sm:text-[11px]">
-              View event
+              {t("common.view_event")}
               <svg className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13 5l7 7-7 7M4 12h16" />
               </svg>
