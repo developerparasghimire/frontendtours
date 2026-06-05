@@ -31,6 +31,9 @@ from .views import (
     categories_list_view,
     category_create_view,
     category_detail_view,
+    event_popup_view,
+    event_popup_admin_view,
+    event_popup_clear_image_view,
 )
 
 urlpatterns = [
@@ -65,4 +68,7 @@ urlpatterns = [
     path('categories/', categories_list_view, name='categories-list'),
     path('categories/create/', category_create_view, name='category-create'),
     path('categories/<int:pk>/', category_detail_view, name='category-detail'),
+    path('popup/', event_popup_view, name='event-popup-active'),
+    path('popup/admin/', event_popup_admin_view, name='event-popup-admin'),
+    path('popup/clear-image/', event_popup_clear_image_view, name='event-popup-clear-image'),
 ]

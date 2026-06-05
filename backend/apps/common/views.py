@@ -12,7 +12,7 @@ from rest_framework.response import Response
 from rest_framework import status
 
 logger = logging.getLogger(__name__)
-from .models import SiteConfig, ContactSubmission, NewsletterSubscription, AboutStat, Value, Leader, Milestone, PageBanner, Partner, Category
+from .models import SiteConfig, ContactSubmission, NewsletterSubscription, AboutStat, Value, Leader, Milestone, EventPopup, PageBanner, Partner, Category
 from .serializers import (
     SiteConfigSerializer,
     ContactSubmissionSerializer,
@@ -21,6 +21,7 @@ from .serializers import (
     ValueSerializer,
     LeaderSerializer,
     MilestoneSerializer,
+    EventPopupSerializer,
     PageBannerSerializer,
     PartnerSerializer,
     CategorySerializer,
@@ -563,3 +564,53 @@ def category_detail_view(request, pk):
         serializer.save()
         return Response(serializer.data)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def event_popup_view(request):
+    """Return the active event popup (public endpoint)."""
+    popup = EventPopup.objects.filter(is_active=True).first()
+    if not popup:
+        return Response(None)
+    return Response(EventPopupSerializer(popup, context={'request': request}).data)
+
+
+@api_view(['GET', 'PUT', 'PATCH'])
+@permission_classes([AllowAny])
+def event_popup_admin_view(request):
+    """Get or update the event popup — admin write, public read."""
+    if request.method == 'GET':
+        popup = EventPopup.objects.first()
+        if not popup:
+            return Response({})
+        return Response(EventPopupSerializer(popup, context={'request': request}).data)
+
+    if not request.user or not request.user.is_authenticated:
+        return Response({'error': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)
+    if not hasattr(request.user, 'role') or request.user.role not in ('SUPER_ADMIN', 'ADMIN'):
+        return Response({'error': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)
+
+    popup, _ = EventPopup.objects.get_or_create(pk=1)
+    serializer = EventPopupSerializer(
+        popup,
+        data=request.data,
+        partial=(request.method == 'PATCH'),
+        context={'request': request},
+    )
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def event_popup_clear_image_view(request):
+    """Clear the event popup image."""
+    if not hasattr(request.user, 'role') or request.user.role not in ('SUPER_ADMIN', 'ADMIN'):
+        return Response({'error': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)
+    popup, _ = EventPopup.objects.get_or_create(pk=1)
+    popup.image = None
+    popup.save(update_fields=['image'])
+    return Response({'success': True})

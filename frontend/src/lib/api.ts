@@ -980,6 +980,40 @@ export async function updatePageBanner(
   });
 }
 
+/* ──────────────── Event Popup API ──────────────── */
+
+export interface EventPopup {
+  id?: number;
+  title: string;
+  image: string | null;
+  button_text: string;
+  button_url: string;
+  is_active: boolean;
+  updated_at?: string;
+}
+
+export async function getActiveEventPopup(): Promise<EventPopup | null> {
+  const data = await fetchAPI<EventPopup | null>("/common/popup/");
+  return data ?? null;
+}
+
+export async function getEventPopupAdmin(token: string): Promise<EventPopup> {
+  return fetchAPI<EventPopup>("/common/popup/admin/", {
+    headers: authHeaders(token),
+  });
+}
+
+export async function updateEventPopup(data: FormData, token: string): Promise<EventPopup> {
+  return fetchFormData<EventPopup>("/common/popup/admin/", "PATCH", data, token);
+}
+
+export async function clearEventPopupImage(token: string): Promise<void> {
+  await fetchAPI("/common/popup/clear-image/", {
+    method: "POST",
+    headers: authHeaders(token),
+  });
+}
+
 /* ──────────────── Contact Submissions API ──────────────── */
 
 export interface ContactSubmission {

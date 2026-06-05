@@ -280,6 +280,23 @@ class Category(models.Model):
             raise ValidationError("Parent category must have the same kind (tour/event).")
 
 
+class EventPopup(models.Model):
+    """Singleton promotional popup shown to visitors on first page load per session."""
+    title = models.CharField(max_length=255, blank=True, help_text="Optional heading shown above the poster image.")
+    image = models.ImageField(upload_to='popups/', blank=True, null=True, help_text="Event poster image.")
+    button_text = models.CharField(max_length=100, default="View Details", help_text="CTA button label.")
+    button_url = models.CharField(max_length=500, blank=True, help_text="URL the button links to (internal path or full URL).")
+    is_active = models.BooleanField(default=False, help_text="Show this popup to visitors.")
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Event Popup"
+        verbose_name_plural = "Event Popup"
+
+    def __str__(self):
+        return f"Event Popup — {'Active' if self.is_active else 'Inactive'}"
+
+
 class PageBanner(models.Model):
     """Hero / banner content for each page — editable from the admin panel."""
     PAGE_CHOICES = [

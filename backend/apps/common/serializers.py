@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import SiteConfig, ContactSubmission, NewsletterSubscription, AboutStat, Value, Leader, Milestone, PageBanner, Partner, Category
+from .models import SiteConfig, ContactSubmission, NewsletterSubscription, AboutStat, Value, Leader, Milestone, EventPopup, PageBanner, Partner, Category
 
 class SiteConfigSerializer(serializers.ModelSerializer):
     logo = serializers.SerializerMethodField()
@@ -183,6 +183,24 @@ class PartnerSerializer(serializers.ModelSerializer):
             if request:
                 return request.build_absolute_uri(obj.logo.url)
             return obj.logo.url
+        return None
+
+
+class EventPopupSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+    image_file = serializers.ImageField(source='image', write_only=True, required=False)
+
+    class Meta:
+        model = EventPopup
+        fields = ['id', 'title', 'image', 'image_file', 'button_text', 'button_url', 'is_active', 'updated_at']
+        read_only_fields = ['id', 'updated_at']
+
+    def get_image(self, obj):
+        if obj.image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.image.url)
+            return obj.image.url
         return None
 
 
