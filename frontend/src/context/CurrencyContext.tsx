@@ -2,8 +2,9 @@
 
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { useTranslation } from "./TranslationContext";
+import type { CurrencyCode } from "@/context/CurrencyTypes";
 
-export type CurrencyCode = "USD" | "INR" | "EUR" | "NPR" | "GBP" | "AUD";
+export type { CurrencyCode };
 
 export interface CurrencyInfo {
   code: CurrencyCode;

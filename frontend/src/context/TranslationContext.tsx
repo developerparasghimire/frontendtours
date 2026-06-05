@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
-import type { CurrencyCode } from "./CurrencyContext";
+import type { CurrencyCode } from "@/context/CurrencyTypes";
 
 export type LangCode = "EN" | "DE" | "FR" | "ES" | "IT";
 
