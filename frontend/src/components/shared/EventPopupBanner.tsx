@@ -6,29 +6,28 @@ import Link from "next/link";
 import { getActiveEventPopup, type EventPopup } from "@/lib/api";
 import { isSafeExternalUrl, isSafeRedirect } from "@/lib/sanitize";
 
-const SESSION_KEY = "event_popup_dismissed";
+const SESSION_KEY = "gt_popup_dismissed_at";
 
 export default function EventPopupBanner() {
   const [popup, setPopup] = useState<EventPopup | null>(null);
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    if (typeof sessionStorage !== "undefined" && sessionStorage.getItem(SESSION_KEY)) {
-      return;
-    }
     getActiveEventPopup()
       .then((data) => {
-        if (data) {
-          setPopup(data);
-          setVisible(true);
-        }
+        if (!data) return;
+        // If the popup was updated after the user dismissed it, show it again
+        const dismissedAt = sessionStorage.getItem(SESSION_KEY);
+        if (dismissedAt && data.updated_at && dismissedAt >= data.updated_at) return;
+        setPopup(data);
+        setVisible(true);
       })
       .catch(() => {});
   }, []);
 
   function dismiss() {
     setVisible(false);
-    sessionStorage.setItem(SESSION_KEY, "1");
+    sessionStorage.setItem(SESSION_KEY, popup?.updated_at || new Date().toISOString());
   }
 
   if (!visible || !popup) return null;
