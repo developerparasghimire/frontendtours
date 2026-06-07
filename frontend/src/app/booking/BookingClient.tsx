@@ -12,6 +12,7 @@ import { useAuth } from "@/lib/auth";
 import { createEventBooking, createTourBooking, guestCreateTourBooking, guestCreateEventBooking } from "@/lib/api";
 import { shouldUseUnoptimizedImage } from "@/lib/images";
 import { useCurrency } from "@/context/CurrencyContext";
+import { isSafeExternalUrl } from "@/lib/sanitize";
 
 type SavedBooking = {
   id: number;
@@ -172,7 +173,7 @@ function BookingContent({ tours, events }: { tours: Tour[]; events: Event[] }) {
       });
 
       // Hosted Checkout requires a top-level redirect to the gateway.
-      if (paymentUrl) {
+      if (paymentUrl && isSafeExternalUrl(paymentUrl)) {
         window.location.assign(paymentUrl);
         return;
       }

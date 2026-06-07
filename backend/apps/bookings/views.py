@@ -344,7 +344,7 @@ class AdminRecentBookingsAPI(views.APIView):
     def get(self, request):
         now = timezone.now()
         new_threshold = now - timedelta(hours=24)
-        limit = int(request.query_params.get('limit', 20))
+        limit = min(int(request.query_params.get('limit', 20)), 200)
 
         tour_qs = TourBooking.objects.select_related('user', 'tour').order_by('-created_at')[:limit]
         event_qs = EventBooking.objects.select_related('user', 'event').order_by('-created_at')[:limit]

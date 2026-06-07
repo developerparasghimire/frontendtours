@@ -186,9 +186,18 @@ class PartnerSerializer(serializers.ModelSerializer):
         return None
 
 
+def _validate_upload_size(value, max_mb=5):
+    if hasattr(value, 'size') and value.size > max_mb * 1024 * 1024:
+        raise serializers.ValidationError(f"Image too large (max {max_mb} MB).")
+    return value
+
+
 class EventPopupSerializer(serializers.ModelSerializer):
     image = serializers.SerializerMethodField()
     image_file = serializers.ImageField(source='image', write_only=True, required=False)
+
+    def validate_image_file(self, value):
+        return _validate_upload_size(value)
 
     class Meta:
         model = EventPopup

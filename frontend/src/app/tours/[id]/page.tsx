@@ -3,6 +3,7 @@ import TourDetailClient from "./TourDetailClient";
 import { getTourBySlug, getTourReviews } from "@/lib/api";
 import { mapAPITour } from "@/lib/mappers";
 import { notFound } from "next/navigation";
+import { safeJsonLd } from "@/lib/sanitize";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://gettours.com.np";
 
@@ -107,7 +108,7 @@ export default async function TourDetailPage({ params }: { params: Promise<{ id:
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }}
       />
       <TourDetailClient tour={tour} />
     </>

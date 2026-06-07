@@ -29,7 +29,7 @@ class TourBookingSerializer(serializers.ModelSerializer):
         model = TourBooking
         fields = '__all__'
         read_only_fields = [
-            'id', 'booking_reference', 'user', 'total_amount', 'currency',
+            'id', 'booking_reference', 'user', 'tour', 'total_amount', 'currency',
             'status', 'payment_reference', 'is_refunded', 'created_at', 'updated_at',
         ]
 
@@ -68,7 +68,7 @@ class EventBookingSerializer(serializers.ModelSerializer):
         model = EventBooking
         fields = '__all__'
         read_only_fields = [
-            'id', 'booking_reference', 'user', 'total_amount', 'currency',
+            'id', 'booking_reference', 'user', 'event', 'total_amount', 'currency',
             'status', 'payment_reference', 'is_refunded', 'created_at', 'updated_at',
         ]
 

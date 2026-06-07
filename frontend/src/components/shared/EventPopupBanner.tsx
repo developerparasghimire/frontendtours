@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { getActiveEventPopup, type EventPopup } from "@/lib/api";
+import { isSafeExternalUrl, isSafeRedirect } from "@/lib/sanitize";
 
 const SESSION_KEY = "event_popup_dismissed";
 
@@ -32,7 +33,10 @@ export default function EventPopupBanner() {
 
   if (!visible || !popup) return null;
 
-  const isExternal = popup.button_url.startsWith("http");
+  const url = popup.button_url ?? "";
+  const isExternal = isSafeExternalUrl(url);
+  const isInternal = !isExternal && isSafeRedirect(url);
+  if (!isExternal && !isInternal) return null;
 
   return (
     <div
@@ -75,10 +79,10 @@ export default function EventPopupBanner() {
             </h2>
           )}
 
-          {popup.button_url && (
+          {(isExternal || isInternal) && (
             isExternal ? (
               <a
-                href={popup.button_url}
+                href={url}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={dismiss}
@@ -88,7 +92,7 @@ export default function EventPopupBanner() {
               </a>
             ) : (
               <Link
-                href={popup.button_url}
+                href={url}
                 onClick={dismiss}
                 className="block w-full text-center bg-brand-navy text-white font-semibold py-3 px-6 rounded-xl hover:bg-brand-navy/90 transition-colors"
               >

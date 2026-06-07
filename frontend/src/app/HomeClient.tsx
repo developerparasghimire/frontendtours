@@ -15,6 +15,7 @@ import { shouldUseUnoptimizedImage } from "@/lib/images";
 import { sectionImages } from "@/lib/sectionImages";
 import { useCurrency } from "@/context/CurrencyContext";
 import { useTranslation } from "@/context/TranslationContext";
+import { isSafeExternalUrl } from "@/lib/sanitize";
 
 const categories = [
   { icon: "🏔️", label: "Trekking", count: 12 },
@@ -958,7 +959,7 @@ function CertificatesPartnersSection({ partners }: { partners: APIPartner[] }) {
               </div>
             );
 
-            return partner.website_url ? (
+            return isSafeExternalUrl(partner.website_url) ? (
               <a
                 key={partner.id}
                 href={partner.website_url}

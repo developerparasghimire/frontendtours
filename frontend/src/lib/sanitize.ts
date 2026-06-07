@@ -57,3 +57,26 @@ export function isSafeRedirect(value: string | null | undefined): boolean {
 export function safeRedirectOr(value: string | null | undefined, fallback = "/"): string {
   return isSafeRedirect(value) ? (value as string) : fallback;
 }
+
+/**
+ * Returns true only for http: or https: URLs. Blocks javascript:, data:,
+ * vbscript:, and other dangerous schemes that could execute code in an href.
+ */
+export function isSafeExternalUrl(url: string | null | undefined): boolean {
+  if (!url || typeof url !== "string") return false;
+  try {
+    const { protocol } = new URL(url);
+    return protocol === "https:" || protocol === "http:";
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Serializes data to a JSON-LD string safe for injection into a <script> tag.
+ * JSON.stringify does not escape </script>, which would let an attacker-
+ * controlled string break out of the script block.
+ */
+export function safeJsonLd(data: unknown): string {
+  return JSON.stringify(data).replace(/<\/script>/gi, "<\\/script>");
+}

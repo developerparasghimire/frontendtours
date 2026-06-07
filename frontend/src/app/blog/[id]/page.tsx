@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getBlogPostBySlug, getBlogPosts } from "@/lib/api";
 import BlogDetailClient from "./BlogDetailClient";
+import { safeJsonLd } from "@/lib/sanitize";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://gettours.com.np";
 
@@ -108,7 +109,7 @@ export default async function BlogDetailPage({
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(blogJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(blogJsonLd) }}
       />
       <BlogDetailClient post={legacyPost} related={legacyRelated} />
     </>

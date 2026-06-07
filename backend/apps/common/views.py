@@ -1,5 +1,7 @@
 import logging
 import json as _json
+import os
+from uuid import uuid4
 
 from django.conf import settings
 from django.core.mail import EmailMessage
@@ -94,13 +96,16 @@ def upload_image_view(request):
         return Response({'error': 'No image provided'}, status=status.HTTP_400_BAD_REQUEST)
 
     allowed_types = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
-    if image.content_type not in allowed_types:
+    allowed_exts = {'jpg', 'jpeg', 'png', 'gif', 'webp'}
+    raw_ext = os.path.splitext(image.name)[-1].lstrip('.').lower()
+    if image.content_type not in allowed_types or raw_ext not in allowed_exts:
         return Response({'error': 'Invalid file type. Allowed: JPEG, PNG, GIF, WebP'}, status=status.HTTP_400_BAD_REQUEST)
 
     if image.size > 10 * 1024 * 1024:  # 10 MB limit
         return Response({'error': 'Image too large (max 10 MB)'}, status=status.HTTP_400_BAD_REQUEST)
 
-    path = default_storage.save(f'editor/{image.name}', image)
+    safe_name = f'{uuid4().hex}.{raw_ext}'
+    path = default_storage.save(f'editor/{safe_name}', image)
     url = request.build_absolute_uri(default_storage.url(path))
     return Response({'url': url})
 
@@ -128,7 +133,7 @@ def health_check_view(request):
     }
 
     if database_error:
-        payload['database_error'] = database_error
+        logger.error("Health check database error: %s", database_error)
 
     return Response(
         payload,
@@ -577,19 +582,17 @@ def event_popup_view(request):
 
 
 @api_view(['GET', 'PUT', 'PATCH'])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 def event_popup_admin_view(request):
-    """Get or update the event popup — admin write, public read."""
+    """Get or update the event popup — admin only."""
+    if not hasattr(request.user, 'role') or request.user.role not in ('SUPER_ADMIN', 'ADMIN'):
+        return Response({'error': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)
+
     if request.method == 'GET':
         popup = EventPopup.objects.first()
         if not popup:
             return Response({})
         return Response(EventPopupSerializer(popup, context={'request': request}).data)
-
-    if not request.user or not request.user.is_authenticated:
-        return Response({'error': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)
-    if not hasattr(request.user, 'role') or request.user.role not in ('SUPER_ADMIN', 'ADMIN'):
-        return Response({'error': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)
 
     popup, _ = EventPopup.objects.get_or_create(pk=1)
     serializer = EventPopupSerializer(
