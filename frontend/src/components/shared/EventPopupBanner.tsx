@@ -36,7 +36,8 @@ export default function EventPopupBanner() {
   const url = popup.button_url ?? "";
   const isExternal = isSafeExternalUrl(url);
   const isInternal = !isExternal && isSafeRedirect(url);
-  if (!isExternal && !isInternal) return null;
+  // Block popups with a non-empty but unsafe URL (e.g. javascript:)
+  if (url && !isExternal && !isInternal) return null;
 
   return (
     <div
