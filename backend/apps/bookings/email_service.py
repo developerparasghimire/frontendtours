@@ -42,17 +42,9 @@ def _safe_send(subject: str, plain_body: str, recipients: list[str], html_body: 
 
 
 def queue_booking_emails(booking_type: str, booking) -> None:
-    """Schedule customer + admin emails on Celery (or run them eagerly)."""
-    from .tasks import send_booking_emails_task
-
-    try:
-        send_booking_emails_task.delay(booking_type, booking.id)
-    except Exception:
-        # If the broker is down at this exact moment we still want to deliver
-        # the email — fall back to inline send.
-        logger.exception("Could not enqueue booking-email task; sending inline as fallback.")
-        send_booking_confirmation_email(booking_type, booking)
-        send_admin_booking_notification(booking_type, booking)
+    """Send customer confirmation + admin notification emails synchronously."""
+    send_booking_confirmation_email(booking_type, booking)
+    send_admin_booking_notification(booking_type, booking)
 
 
 def send_booking_confirmation_email(booking_type: str, booking) -> None:

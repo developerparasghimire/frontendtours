@@ -301,28 +301,6 @@ LOGGING = {
     },
 }
 
-# ──────────── Celery (async tasks: emails, refund retries) ────────────
-# CELERY_BROKER_URL is auto-set by Heroku Redis as REDIS_URL. If neither is
-# configured we fall back to eager mode so the project still works without Redis
-# (tasks run synchronously in-process). Email service uses this transparently.
-CELERY_BROKER_URL = config('CELERY_BROKER_URL', default=config('REDIS_URL', default=''))
-CELERY_RESULT_BACKEND = config('CELERY_RESULT_BACKEND', default=CELERY_BROKER_URL)
-CELERY_TASK_ALWAYS_EAGER = not bool(CELERY_BROKER_URL)
-CELERY_TASK_EAGER_PROPAGATES = True
-CELERY_TASK_ACKS_LATE = True
-CELERY_TASK_TIME_LIMIT = 60
-CELERY_TASK_SOFT_TIME_LIMIT = 50
-CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
-CELERY_ACCEPT_CONTENT = ['json']
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_RESULT_SERIALIZER = 'json'
-CELERY_TIMEZONE = TIME_ZONE
-
-# Heroku Redis with self-signed cert requires this for rediss:// URLs.
-if CELERY_BROKER_URL.startswith('rediss://'):
-    import ssl
-    CELERY_BROKER_USE_SSL = {'ssl_cert_reqs': ssl.CERT_NONE}
-    CELERY_REDIS_BACKEND_USE_SSL = {'ssl_cert_reqs': ssl.CERT_NONE}
 
 # Obfuscated admin URL (env-driven so it differs per deploy).
 ADMIN_URL = config('ADMIN_URL', default='gettoursadmin/')
