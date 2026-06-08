@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getBlogPostBySlug, getBlogPosts } from "@/lib/api";
 import BlogDetailClient from "./BlogDetailClient";
-import { safeJsonLd } from "@/lib/sanitize";
+import { safeJsonLd } from "@/lib/jsonld";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://gettours.com.np";
 

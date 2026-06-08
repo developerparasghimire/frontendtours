@@ -3,7 +3,7 @@ import TourDetailClient from "./TourDetailClient";
 import { getTourBySlug, getTourReviews } from "@/lib/api";
 import { mapAPITour } from "@/lib/mappers";
 import { notFound } from "next/navigation";
-import { safeJsonLd } from "@/lib/sanitize";
+import { safeJsonLd } from "@/lib/jsonld";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://gettours.com.np";
 

@@ -72,11 +72,3 @@ export function isSafeExternalUrl(url: string | null | undefined): boolean {
   }
 }
 
-/**
- * Serializes data to a JSON-LD string safe for injection into a <script> tag.
- * JSON.stringify does not escape </script>, which would let an attacker-
- * controlled string break out of the script block.
- */
-export function safeJsonLd(data: unknown): string {
-  return JSON.stringify(data).replace(/<\/script>/gi, "<\\/script>");
-}
