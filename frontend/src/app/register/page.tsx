@@ -9,7 +9,7 @@ import { resendVerification } from "@/lib/api";
 import { Suspense } from "react";
 import { sectionImages } from "@/lib/sectionImages";
 import GoogleAuthButton from "@/components/auth/GoogleAuthButton";
-import { safeRedirectOr } from "@/lib/sanitize";
+import { safeRedirectOr } from "@/lib/urlutils";
 
 function RegisterForm() {
   const { register, isAuthenticated } = useAuth();

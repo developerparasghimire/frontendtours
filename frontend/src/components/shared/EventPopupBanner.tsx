@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { getActiveEventPopup, type EventPopup } from "@/lib/api";
-import { isSafeExternalUrl, isSafeRedirect } from "@/lib/sanitize";
+import { isSafeExternalUrl, isSafeRedirect } from "@/lib/urlutils";
 
 const SESSION_KEY = "gt_popup_dismissed_at";
 

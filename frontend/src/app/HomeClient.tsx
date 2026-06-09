@@ -15,7 +15,7 @@ import { shouldUseUnoptimizedImage } from "@/lib/images";
 import { sectionImages } from "@/lib/sectionImages";
 import { useCurrency } from "@/context/CurrencyContext";
 import { useTranslation } from "@/context/TranslationContext";
-import { isSafeExternalUrl } from "@/lib/sanitize";
+import { isSafeExternalUrl } from "@/lib/urlutils";
 
 const categories = [
   { icon: "🏔️", label: "Trekking", count: 12 },

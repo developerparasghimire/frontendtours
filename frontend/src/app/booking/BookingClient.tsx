@@ -12,7 +12,7 @@ import { useAuth } from "@/lib/auth";
 import { createEventBooking, createTourBooking, guestCreateTourBooking, guestCreateEventBooking } from "@/lib/api";
 import { shouldUseUnoptimizedImage } from "@/lib/images";
 import { useCurrency } from "@/context/CurrencyContext";
-import { isSafeExternalUrl } from "@/lib/sanitize";
+import { isSafeExternalUrl } from "@/lib/urlutils";
 
 type SavedBooking = {
   id: number;
