@@ -1,4 +1,5 @@
 import json
+import os
 from django.core.files.storage import default_storage
 from django.core.validators import FileExtensionValidator
 from rest_framework import serializers
@@ -47,7 +48,7 @@ def _save_gallery_files(files, upload_to='events/gallery/'):
     urls = []
     for f in files:
         _validate_image_file(f)
-        path = default_storage.save(f'{upload_to}{f.name}', f)
+        path = default_storage.save(f'{upload_to}{os.path.basename(f.name)}', f)
         urls.append(default_storage.url(path))
     return urls
 
