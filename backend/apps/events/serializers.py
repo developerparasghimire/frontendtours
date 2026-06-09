@@ -76,7 +76,7 @@ class EventSerializer(serializers.ModelSerializer):
             'booking_count',
             'created_at', 'updated_at',
         ]
-        read_only_fields = ['id', 'booking_count', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'available_tickets', 'booking_count', 'created_at', 'updated_at']
 
     def get_image(self, obj):
         if obj.image:
