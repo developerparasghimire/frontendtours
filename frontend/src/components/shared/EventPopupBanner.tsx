@@ -6,7 +6,7 @@ import Link from "next/link";
 import { getActiveEventPopup, type EventPopup } from "@/lib/api";
 import { isSafeExternalUrl, isSafeRedirect } from "@/lib/urlutils";
 
-const SESSION_KEY = "gt_popup_dismissed_at";
+const STORAGE_KEY = "gt_popup_dismissed_at";
 
 export default function EventPopupBanner() {
   const [popup, setPopup] = useState<EventPopup | null>(null);
@@ -16,8 +16,8 @@ export default function EventPopupBanner() {
     getActiveEventPopup()
       .then((data) => {
         if (!data) return;
-        // If the popup was updated after the user dismissed it, show it again
-        const dismissedAt = sessionStorage.getItem(SESSION_KEY);
+        // Show again only if the popup has been updated since last dismissal
+        const dismissedAt = localStorage.getItem(STORAGE_KEY);
         if (dismissedAt && data.updated_at && dismissedAt >= data.updated_at) return;
         setPopup(data);
         setVisible(true);
@@ -27,7 +27,7 @@ export default function EventPopupBanner() {
 
   function dismiss() {
     setVisible(false);
-    sessionStorage.setItem(SESSION_KEY, popup?.updated_at || new Date().toISOString());
+    localStorage.setItem(STORAGE_KEY, popup?.updated_at || new Date().toISOString());
   }
 
   if (!visible || !popup) return null;

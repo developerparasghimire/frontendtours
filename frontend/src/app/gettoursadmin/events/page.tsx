@@ -139,7 +139,7 @@ export default function AdminEventsPage() {
       fd.append("long_description", form.long_description);
       fd.append("category", form.category);
       fd.append("venue", form.venue);
-      fd.append("event_date", new Date(form.event_date).toISOString());
+      fd.append("event_date", form.event_date);
       fd.append("base_price", form.base_price);
       fd.append("currency", form.currency);
       fd.append("total_tickets", String(form.total_tickets));
