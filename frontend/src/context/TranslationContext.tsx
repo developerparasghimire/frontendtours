@@ -3,7 +3,7 @@
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
 import type { CurrencyCode } from "@/context/CurrencyTypes";
 
-export type LangCode = "EN" | "DE" | "FR" | "ES" | "IT" | "JA" | "RU";
+export type LangCode = "EN" | "DE" | "FR" | "ES" | "IT" | "JA" | "RU" | "ZH" | "HI";
 
 export const LANGUAGES = [
   { code: "EN" as LangCode, label: "English",  flag: "🇬🇧" },
@@ -13,9 +13,11 @@ export const LANGUAGES = [
   { code: "IT" as LangCode, label: "Italiano", flag: "🇮🇹" },
   { code: "JA" as LangCode, label: "日本語",    flag: "🇯🇵" },
   { code: "RU" as LangCode, label: "Русский",  flag: "🇷🇺" },
+  { code: "ZH" as LangCode, label: "中文",      flag: "🇨🇳" },
+  { code: "HI" as LangCode, label: "हिन्दी",    flag: "🇮🇳" },
 ];
 
-const SUPPORTED_LANGS = new Set<LangCode>(["EN", "DE", "FR", "ES", "IT", "JA", "RU"]);
+const SUPPORTED_LANGS = new Set<LangCode>(["EN", "DE", "FR", "ES", "IT", "JA", "RU", "ZH", "HI"]);
 
 // Browser navigator.language → LangCode
 function getBrowserLang(): LangCode {
@@ -35,6 +37,8 @@ const LANG_MAP: Record<string, LangCode> = {
   IT: "IT", SM: "IT", VA: "IT",
   JP: "JA",
   RU: "RU", BY: "RU", KZ: "RU",
+  CN: "ZH", TW: "ZH", HK: "ZH", SG: "ZH",
+  IN: "HI",
 };
 
 // Countries whose default currency is EUR
@@ -881,6 +885,236 @@ const T: Record<LangCode, Dict> = {
     "events.empty": "Событий пока нет. Загляните позже!",
     "events.host_heading": "Хотите провести мероприятие с нами?",
     "events.host_desc": "Сотрудничайте с Get Tours, чтобы продвигать ваше мероприятие среди тысяч путешественников и местных жителей.",
+  },
+
+  // ─── CHINESE (Simplified) ──────────────────
+  ZH: {
+    "nav.home": "首页", "nav.about": "关于我们", "nav.events": "活动",
+    "nav.tours": "旅游", "nav.blogs": "博客", "nav.contact": "联系我们",
+    "nav.signin": "登录",
+
+    "tour.book": "预订此行程", "tour.book_now": "立即预订",
+    "tour.download": "下载行程详情",
+    "tour.price_from": "起价", "tour.per_person": "每人",
+    "tour.about": "关于此行程", "tour.highlights": "行程亮点",
+    "tour.gallery": "图库", "tour.included": "包含内容",
+    "tour.guide": "您的导游", "tour.faq": "常见问题",
+    "tour.back": "返回所有行程",
+    "tour.destination": "目的地", "tour.duration": "行程时长",
+    "tour.difficulty": "难度", "tour.activity": "活动类型",
+    "tour.best_season": "最佳季节", "tour.rating": "评分",
+    "tour.reviews": "条评价",
+
+    "event.book": "购买门票", "event.back": "返回所有活动",
+    "event.about": "关于此活动", "event.highlights": "活动亮点",
+    "event.download": "下载活动详情",
+    "event.date": "日期", "event.time": "时间", "event.venue": "地点",
+    "event.price": "门票价格", "event.tickets": "可用票数",
+
+    "common.free": "免费", "common.sold_out": "已售罄",
+    "common.contact": "联系我们", "common.need_help": "需要旅行规划帮助？",
+    "common.select_date": "选择日期", "common.travelers": "旅行者",
+    "common.tickets": "票",
+    "common.all_categories": "所有分类",
+    "common.explore_tour": "浏览行程",
+    "common.view_event": "查看活动",
+    "common.showing": "显示",
+    "common.in": "在",
+
+    "trust.certified": "认证旅行社",
+    "trust.safe": "安全可靠",
+    "trust.support": "24/7全天支持",
+    "trust.guarantee": "最低价格保证",
+
+    "home.events_eyebrow": "正在进行",
+    "home.events_heading": "最新活动",
+    "home.events_desc": "尼泊尔各地即将举办的节日、文化体验和本地活动。",
+    "home.events_cta": "查看所有活动",
+
+    "home.tours_eyebrow": "热门推荐",
+    "home.tours_heading": "热门旅游套餐",
+    "home.tours_desc": "我们在尼泊尔最受欢迎的冒险旅程——专为各类旅行者精心挑选。",
+    "home.tours_cta": "查看所有行程",
+
+    "home.gallery_eyebrow": "我们的冒险",
+    "home.gallery_heading": "山间生活",
+
+    "home.adventure_eyebrow": "旅行风格",
+    "home.adventure_heading": "寻找您的冒险",
+
+    "home.why_eyebrow": "为什么选择Get Tours",
+    "home.why_heading": "放心出行",
+    "home.why_desc": "我们融合本地知识、透明规划和贴心服务，让您的尼泊尔之旅从第一次点击到最后一天都充满期待。",
+    "home.trust1_title": "认证 & 安全",
+    "home.trust1_desc": "每条路线均经过安全审核。持证导游、保险车辆及全程24/7支持。",
+    "home.trust1_stat": "200+名持证导游",
+    "home.trust2_title": "最低价格保证",
+    "home.trust2_desc": "我们匹配任何同类报价。最优价值，无任何隐藏费用。",
+    "home.trust2_stat": "500+次行程比价",
+    "home.trust3_title": "本地专业知识",
+    "home.trust3_desc": "我们的本地专家团队打造真实体验，对尼泊尔了如指掌。",
+    "home.trust3_stat": "15年本地根基",
+
+    "home.testimonials_eyebrow": "旅客评价",
+    "home.testimonials_heading": "尼泊尔旅行者的真实故事",
+
+    "home.contact_eyebrow": "联系我们",
+    "home.contact_heading": "规划您的尼泊尔之旅",
+    "home.contact_desc": "告诉我们您的日期、旅行风格或团队规模，我们的本地团队将为您量身定制完美行程。",
+    "home.contact_cta": "发送消息",
+    "home.call_us": "致电我们",
+    "home.email_us": "发送邮件",
+    "home.find_us": "找到我们",
+    "home.hours": "周一至周六，上午9点–下午6点",
+    "home.reply_time": "24小时内回复",
+    "home.maps_link": "在Google地图中打开",
+    "home.our_story": "我们的故事",
+    "home.get_in_touch": "联系我们",
+
+    "home.partners_eyebrow": "信任我们",
+    "home.partners_heading": "证书与合作伙伴",
+    "home.newsletter_eyebrow": "新闻订阅",
+    "home.newsletter_heading": "获取尼泊尔旅行灵感",
+    "home.newsletter_desc": "订阅获取最新旅游套餐、即将举办的活动、旅行贴士及专属优惠，直达您的邮箱。",
+
+    "tours.hero_title": "全部旅游套餐",
+    "tours.hero_subtitle": "探索尼泊尔",
+    "tours.hero_desc": "从一日游到多周徒步——为每位旅行者找到完美的冒险体验。",
+    "tours.singular": "条行程",
+    "tours.plural": "条行程",
+    "tours.no_tours_cat": "未找到行程：",
+    "tours.empty": "暂无可用行程，请稍后查看！",
+    "tours.show_all": "显示所有行程",
+    "tours.cta_heading": "无法决定？让我们帮您！",
+    "tours.cta_desc": "我们的旅行专家将为您量身打造个性化行程。",
+    "tours.custom_trip": "获取定制行程",
+    "tours.regions": "个地区",
+
+    "events.hero_title": "即将举办的活动与体验",
+    "events.hero_subtitle": "不要错过",
+    "events.hero_desc": "发现尼泊尔各地举办的音乐会、文化漫步、节日、烹饪课等活动。",
+    "events.singular": "项活动",
+    "events.plural": "项活动",
+    "events.show_all": "显示所有活动",
+    "events.no_events_cat": "未找到活动：",
+    "events.empty": "暂无可用活动，请稍后查看！",
+    "events.host_heading": "想与我们合办活动？",
+    "events.host_desc": "与Get Tours合作，向数千名旅行者和当地人推广您的活动。",
+  },
+
+  // ─── HINDI ─────────────────────────────────
+  HI: {
+    "nav.home": "होम", "nav.about": "हमारे बारे में", "nav.events": "कार्यक्रम",
+    "nav.tours": "टूर", "nav.blogs": "ब्लॉग", "nav.contact": "संपर्क करें",
+    "nav.signin": "साइन इन",
+
+    "tour.book": "यह टूर बुक करें", "tour.book_now": "अभी बुक करें",
+    "tour.download": "टूर विवरण डाउनलोड करें",
+    "tour.price_from": "शुरुआती कीमत", "tour.per_person": "प्रति व्यक्ति",
+    "tour.about": "इस टूर के बारे में", "tour.highlights": "टूर की खासियतें",
+    "tour.gallery": "गैलरी", "tour.included": "क्या शामिल है",
+    "tour.guide": "आपका गाइड", "tour.faq": "अक्सर पूछे जाने वाले प्रश्न",
+    "tour.back": "सभी टूर पर वापस जाएं",
+    "tour.destination": "गंतव्य", "tour.duration": "अवधि",
+    "tour.difficulty": "कठिनाई", "tour.activity": "गतिविधि",
+    "tour.best_season": "सर्वश्रेष्ठ मौसम", "tour.rating": "रेटिंग",
+    "tour.reviews": "समीक्षाएं",
+
+    "event.book": "टिकट बुक करें", "event.back": "सभी कार्यक्रमों पर वापस जाएं",
+    "event.about": "इस कार्यक्रम के बारे में", "event.highlights": "कार्यक्रम की खासियतें",
+    "event.download": "कार्यक्रम विवरण डाउनलोड करें",
+    "event.date": "तारीख", "event.time": "समय", "event.venue": "स्थान",
+    "event.price": "प्रवेश मूल्य", "event.tickets": "उपलब्ध टिकट",
+
+    "common.free": "मुफ़्त", "common.sold_out": "बिक चुका है",
+    "common.contact": "हमसे संपर्क करें", "common.need_help": "यात्रा योजना में मदद चाहिए?",
+    "common.select_date": "तारीख चुनें", "common.travelers": "यात्री",
+    "common.tickets": "टिकट",
+    "common.all_categories": "सभी श्रेणियां",
+    "common.explore_tour": "टूर देखें",
+    "common.view_event": "कार्यक्रम देखें",
+    "common.showing": "दिखा रहे हैं",
+    "common.in": "में",
+
+    "trust.certified": "प्रमाणित ट्रैवल एजेंसी",
+    "trust.safe": "सुरक्षित और भरोसेमंद",
+    "trust.support": "24/7 सहायता",
+    "trust.guarantee": "सर्वश्रेष्ठ मूल्य गारंटी",
+
+    "home.events_eyebrow": "क्या हो रहा है",
+    "home.events_heading": "नवीनतम कार्यक्रम",
+    "home.events_desc": "नेपाल भर में आने वाले त्योहार, सांस्कृतिक अनुभव और स्थानीय आयोजन।",
+    "home.events_cta": "सभी कार्यक्रम देखें",
+
+    "home.tours_eyebrow": "सर्वश्रेष्ठ चुनाव",
+    "home.tours_heading": "लोकप्रिय टूर पैकेज",
+    "home.tours_desc": "नेपाल में हमारे सबसे बुक किए गए साहसिक टूर — हर यात्री के लिए सावधानीपूर्वक चुने गए।",
+    "home.tours_cta": "सभी टूर देखें",
+
+    "home.gallery_eyebrow": "हमारे साहसिक कार्य",
+    "home.gallery_heading": "पहाड़ों में जीवन",
+
+    "home.adventure_eyebrow": "यात्रा शैली",
+    "home.adventure_heading": "अपना साहसिक कार्य खोजें",
+
+    "home.why_eyebrow": "Get Tours क्यों चुनें",
+    "home.why_heading": "विश्वास के साथ यात्रा करें",
+    "home.why_desc": "हम स्थानीय ज्ञान, पारदर्शी योजना और विचारशील सेवा को मिलाकर आपकी नेपाल यात्रा को पहले क्लिक से अंतिम दिन तक रोमांचक बनाते हैं।",
+    "home.trust1_title": "सत्यापित और सुरक्षित",
+    "home.trust1_desc": "हर टूर की सुरक्षा जांच की जाती है। लाइसेंसधारी गाइड, बीमाकृत वाहन और पूरी यात्रा में 24/7 सहायता।",
+    "home.trust1_stat": "200+ लाइसेंसधारी गाइड",
+    "home.trust2_title": "सर्वश्रेष्ठ मूल्य गारंटी",
+    "home.trust2_desc": "हम किसी भी तुलनीय प्रस्ताव से मेल खाते हैं। बिना किसी छुपे शुल्क के नेपाल यात्रा का सर्वोत्तम मूल्य।",
+    "home.trust2_stat": "500+ यात्राएं मिलान की गईं",
+    "home.trust3_title": "स्थानीय विशेषज्ञता",
+    "home.trust3_desc": "हमारी स्थानीय विशेषज्ञों की टीम प्रामाणिक अनुभव तैयार करती है। हम नेपाल को अपनी हथेली की तरह जानते हैं।",
+    "home.trust3_stat": "15 साल की स्थानीय जड़ें",
+
+    "home.testimonials_eyebrow": "प्रशंसापत्र",
+    "home.testimonials_heading": "नेपाल यात्रियों की वास्तविक कहानियां",
+
+    "home.contact_eyebrow": "संपर्क करें",
+    "home.contact_heading": "अपनी नेपाल यात्रा की योजना बनाएं",
+    "home.contact_desc": "अपनी तारीखें, यात्रा शैली या समूह का आकार साझा करें और हमारी स्थानीय टीम आपके लिए सही यात्रा कार्यक्रम तैयार करेगी।",
+    "home.contact_cta": "हमें संदेश भेजें",
+    "home.call_us": "हमें कॉल करें",
+    "home.email_us": "हमें ईमेल करें",
+    "home.find_us": "हमें खोजें",
+    "home.hours": "सोम–शनि, सुबह 9 बजे – शाम 6 बजे",
+    "home.reply_time": "24 घंटे में जवाब",
+    "home.maps_link": "Google Maps में खोलें",
+    "home.our_story": "हमारी कहानी",
+    "home.get_in_touch": "संपर्क करें",
+
+    "home.partners_eyebrow": "हम पर भरोसा",
+    "home.partners_heading": "प्रमाण पत्र और साझेदार",
+    "home.newsletter_eyebrow": "न्यूज़लेटर",
+    "home.newsletter_heading": "नेपाल यात्रा की प्रेरणा पाएं",
+    "home.newsletter_desc": "नवीनतम टूर पैकेज, आगामी कार्यक्रम, यात्रा टिप्स और विशेष ऑफर सीधे अपने इनबॉक्स में पाने के लिए सदस्यता लें।",
+
+    "tours.hero_title": "सभी टूर पैकेज",
+    "tours.hero_subtitle": "नेपाल को एक्सप्लोर करें",
+    "tours.hero_desc": "एक दिन की यात्राओं से लेकर बहु-सप्ताह के ट्रेक तक — हर यात्री के लिए सही साहसिक कार्य खोजें।",
+    "tours.singular": "टूर",
+    "tours.plural": "टूर",
+    "tours.no_tours_cat": "इसमें कोई टूर नहीं मिला",
+    "tours.empty": "अभी कोई टूर उपलब्ध नहीं है। जल्द वापस जांचें!",
+    "tours.show_all": "सभी टूर दिखाएं",
+    "tours.cta_heading": "निर्णय नहीं कर पा रहे? हम मदद करेंगे!",
+    "tours.cta_desc": "हमारे यात्रा विशेषज्ञ आपके लिए एक व्यक्तिगत यात्रा कार्यक्रम तैयार करेंगे।",
+    "tours.custom_trip": "कस्टम यात्रा पाएं",
+    "tours.regions": "क्षेत्र",
+
+    "events.hero_title": "आगामी कार्यक्रम और अनुभव",
+    "events.hero_subtitle": "कुछ न छोड़ें",
+    "events.hero_desc": "नेपाल भर में होने वाले संगीत समारोह, सांस्कृतिक सैर, त्योहार, कुकिंग क्लास और बहुत कुछ खोजें।",
+    "events.singular": "कार्यक्रम",
+    "events.plural": "कार्यक्रम",
+    "events.show_all": "सभी कार्यक्रम दिखाएं",
+    "events.no_events_cat": "इसमें कोई कार्यक्रम नहीं मिला",
+    "events.empty": "अभी कोई कार्यक्रम उपलब्ध नहीं है। जल्द वापस जांचें!",
+    "events.host_heading": "हमारे साथ कार्यक्रम आयोजित करना चाहते हैं?",
+    "events.host_desc": "हजारों यात्रियों और स्थानीय लोगों को अपने कार्यक्रम से परिचित कराने के लिए Get Tours के साथ साझेदारी करें।",
   },
 };
 
