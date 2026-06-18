@@ -73,7 +73,7 @@ class EventSerializer(serializers.ModelSerializer):
             'image', 'image_file', 'event_date', 'base_price', 'currency',
             'category', 'highlights', 'gallery',
             'total_tickets', 'available_tickets', 'is_active', 'is_latest',
-            'booking_count',
+            'booking_count', 'translations',
             'created_at', 'updated_at',
         ]
         read_only_fields = ['id', 'available_tickets', 'booking_count', 'created_at', 'updated_at']

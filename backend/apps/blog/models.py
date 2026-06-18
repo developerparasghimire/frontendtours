@@ -1,5 +1,6 @@
 from django.db import models
 from apps.common.models import TimeStampedModel
+from apps.common.translation_utils import auto_translate
 
 
 class BlogPost(TimeStampedModel):
@@ -15,8 +16,25 @@ class BlogPost(TimeStampedModel):
     is_published = models.BooleanField(default=True)
     publish_date = models.DateField(auto_now_add=True)
 
+    translations = models.JSONField(default=dict, blank=True, help_text="Auto-filled: translations of text fields into all supported languages.")
+
     class Meta:
         ordering = ['-created_at']
 
     def __str__(self):
         return self.title
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        fields = {}
+        if self.title: fields["title"] = self.title
+        if self.excerpt: fields["excerpt"] = self.excerpt
+        if self.content: fields["content"] = self.content
+        if self.category: fields["category"] = self.category
+        if self.read_time: fields["read_time"] = self.read_time
+        if fields:
+            try:
+                self.translations = auto_translate(fields)
+                BlogPost.objects.filter(pk=self.pk).update(translations=self.translations)
+            except Exception:
+                pass

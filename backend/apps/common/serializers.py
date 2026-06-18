@@ -201,7 +201,7 @@ class EventPopupSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = EventPopup
-        fields = ['id', 'title', 'image', 'image_file', 'button_text', 'button_url', 'is_active', 'updated_at']
+        fields = ['id', 'title', 'image', 'image_file', 'button_text', 'button_url', 'is_active', 'translations', 'updated_at']
         read_only_fields = ['id', 'updated_at']
 
     def get_image(self, obj):
@@ -216,7 +216,7 @@ class EventPopupSerializer(serializers.ModelSerializer):
 class PageBannerSerializer(serializers.ModelSerializer):
     class Meta:
         model = PageBanner
-        fields = ['id', 'page', 'title', 'subtitle', 'description', 'updated_at']
+        fields = ['id', 'page', 'title', 'subtitle', 'description', 'translations', 'updated_at']
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -229,7 +229,7 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = [
             'id', 'kind', 'name', 'parent', 'parent_name',
             'icon', 'image', 'image_file', 'description',
-            'is_featured', 'order', 'is_active',
+            'is_featured', 'order', 'is_active', 'translations',
             'created_at', 'updated_at',
         ]
         read_only_fields = ['id', 'parent_name', 'created_at', 'updated_at']

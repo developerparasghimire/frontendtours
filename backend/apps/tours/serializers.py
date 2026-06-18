@@ -60,7 +60,7 @@ def _save_gallery_files(files, upload_to='tours/gallery/'):
 class TourFAQSerializer(serializers.ModelSerializer):
     class Meta:
         model = TourFAQ
-        fields = ['id', 'question', 'answer', 'order']
+        fields = ['id', 'question', 'answer', 'order', 'translations']
 
 
 class TourSerializer(serializers.ModelSerializer):
@@ -83,7 +83,7 @@ class TourSerializer(serializers.ModelSerializer):
             'image', 'image_file', 'gallery', 'base_price', 'currency',
             'duration_days', 'category', 'subcategory', 'difficulty', 'rating', 'badge', 'best_season',
             'highlights', 'includes', 'max_capacity', 'is_active', 'is_latest',
-            'booking_count',
+            'booking_count', 'translations',
             'created_at', 'updated_at',
         ]
         read_only_fields = ['id', 'booking_count', 'created_at', 'updated_at']
@@ -183,7 +183,7 @@ class TourGuideSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TourGuide
-        fields = ['id', 'tour_slug', 'name', 'bio', 'photo', 'photo_file', 'languages']
+        fields = ['id', 'tour_slug', 'name', 'bio', 'photo', 'photo_file', 'languages', 'translations']
 
     def get_photo(self, obj):
         if obj.photo:

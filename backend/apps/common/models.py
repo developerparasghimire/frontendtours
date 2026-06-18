@@ -374,6 +374,8 @@ class Category(models.Model):
             return f"{self.get_kind_display()} • {self.parent.name} › {self.name}"
         return f"{self.get_kind_display()} • {self.name}"
 
+    translations = models.JSONField(default=dict, blank=True, help_text="Auto-filled: translations of name & description.")
+
     def clean(self):
         from django.core.exceptions import ValidationError
         # Only one nesting level allowed.
@@ -382,6 +384,18 @@ class Category(models.Model):
         # Parent must be the same kind.
         if self.parent and self.parent.kind != self.kind:
             raise ValidationError("Parent category must have the same kind (tour/event).")
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        fields = {}
+        if self.name: fields["name"] = self.name
+        if self.description: fields["description"] = self.description
+        if fields:
+            try:
+                self.translations = auto_translate(fields)
+                Category.objects.filter(pk=self.pk).update(translations=self.translations)
+            except Exception:
+                pass
 
 
 class EventPopup(models.Model):
@@ -392,6 +406,7 @@ class EventPopup(models.Model):
     button_url = models.CharField(max_length=500, blank=True, help_text="URL the button links to (internal path or full URL).")
     is_active = models.BooleanField(default=False, help_text="Show this popup to visitors.")
     updated_at = models.DateTimeField(auto_now=True)
+    translations = models.JSONField(default=dict, blank=True, help_text="Auto-filled: translations of title & button_text.")
 
     class Meta:
         verbose_name = "Event Popup"
@@ -399,6 +414,18 @@ class EventPopup(models.Model):
 
     def __str__(self):
         return f"Event Popup — {'Active' if self.is_active else 'Inactive'}"
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        fields = {}
+        if self.title: fields["title"] = self.title
+        if self.button_text: fields["button_text"] = self.button_text
+        if fields:
+            try:
+                self.translations = auto_translate(fields)
+                EventPopup.objects.filter(pk=self.pk).update(translations=self.translations)
+            except Exception:
+                pass
 
 
 class PageBanner(models.Model):
@@ -423,11 +450,25 @@ class PageBanner(models.Model):
     subtitle = models.CharField(max_length=255, blank=True, help_text="Short label shown above the title")
     description = models.TextField(blank=True, help_text="Longer text shown below the title")
     updated_at = models.DateTimeField(auto_now=True)
+    translations = models.JSONField(default=dict, blank=True, help_text="Auto-filled: translations of title, subtitle & description.")
 
     class Meta:
         ordering = ["page"]
         verbose_name = "Page Banner"
         verbose_name_plural = "Page Banners"
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        fields = {}
+        if self.title: fields["title"] = self.title
+        if self.subtitle: fields["subtitle"] = self.subtitle
+        if self.description: fields["description"] = self.description
+        if fields:
+            try:
+                self.translations = auto_translate(fields)
+                PageBanner.objects.filter(pk=self.pk).update(translations=self.translations)
+            except Exception:
+                pass
 
     def __str__(self):
         return f"Banner — {self.get_page_display()}"

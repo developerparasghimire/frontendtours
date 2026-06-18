@@ -20,7 +20,7 @@ class BlogPostSerializer(serializers.ModelSerializer):
             'id', 'title', 'slug', 'excerpt', 'content',
             'image', 'image_file', 'author', 'category',
             'read_time', 'tags', 'is_published', 'publish_date',
-            'created_at', 'updated_at',
+            'translations', 'created_at', 'updated_at',
         ]
         read_only_fields = ['id', 'publish_date', 'created_at', 'updated_at']
 

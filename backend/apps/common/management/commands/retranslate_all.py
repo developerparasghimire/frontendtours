@@ -8,7 +8,10 @@ Usage:
     python manage.py retranslate_all
 """
 from django.core.management.base import BaseCommand
-from apps.common.models import SiteConfig, AboutStat, Value, Leader, Milestone
+from apps.common.models import SiteConfig, AboutStat, Value, Leader, Milestone, Category, EventPopup, PageBanner
+from apps.tours.models import Tour, TourFAQ, TourGuide
+from apps.events.models import Event
+from apps.blog.models import BlogPost
 from apps.common.translation_utils import auto_translate
 
 
@@ -21,6 +24,14 @@ class Command(BaseCommand):
         self._retranslate_values()
         self._retranslate_leaders()
         self._retranslate_milestones()
+        self._retranslate_categories()
+        self._retranslate_eventpopups()
+        self._retranslate_pagebanners()
+        self._retranslate_tours()
+        self._retranslate_tourfaqs()
+        self._retranslate_tourguides()
+        self._retranslate_events()
+        self._retranslate_blogposts()
         self.stdout.write(self.style.SUCCESS("✅ All translations regenerated."))
 
     def _retranslate_siteconfig(self):
@@ -88,3 +99,116 @@ class Command(BaseCommand):
             translations = auto_translate({"text": obj.text})
             Milestone.objects.filter(pk=obj.pk).update(translations=translations)
         self.stdout.write(self.style.SUCCESS("  Milestone: done."))
+
+    def _retranslate_categories(self):
+        qs = Category.objects.all()
+        self.stdout.write(f"  Category: {qs.count()} records…")
+        for obj in qs:
+            fields = {k: v for k, v in {"name": obj.name, "description": obj.description or ""}.items() if v}
+            if not fields:
+                continue
+            translations = auto_translate(fields)
+            Category.objects.filter(pk=obj.pk).update(translations=translations)
+        self.stdout.write(self.style.SUCCESS("  Category: done."))
+
+    def _retranslate_eventpopups(self):
+        qs = EventPopup.objects.all()
+        self.stdout.write(f"  EventPopup: {qs.count()} records…")
+        for obj in qs:
+            fields = {k: v for k, v in {"title": obj.title or "", "button_text": obj.button_text or ""}.items() if v}
+            if not fields:
+                continue
+            translations = auto_translate(fields)
+            EventPopup.objects.filter(pk=obj.pk).update(translations=translations)
+        self.stdout.write(self.style.SUCCESS("  EventPopup: done."))
+
+    def _retranslate_pagebanners(self):
+        qs = PageBanner.objects.all()
+        self.stdout.write(f"  PageBanner: {qs.count()} records…")
+        for obj in qs:
+            fields = {k: v for k, v in {
+                "title": obj.title or "", "subtitle": obj.subtitle or "", "description": obj.description or ""
+            }.items() if v}
+            if not fields:
+                continue
+            translations = auto_translate(fields)
+            PageBanner.objects.filter(pk=obj.pk).update(translations=translations)
+        self.stdout.write(self.style.SUCCESS("  PageBanner: done."))
+
+    def _retranslate_tours(self):
+        qs = Tour.objects.all()
+        self.stdout.write(f"  Tour: {qs.count()} records…")
+        for obj in qs:
+            highlights_str = "\n".join(obj.highlights) if obj.highlights else ""
+            includes_str = "\n".join(obj.includes) if obj.includes else ""
+            fields = {k: v for k, v in {
+                "title": obj.title or "",
+                "description": obj.description or "",
+                "long_description": obj.long_description or "",
+                "badge": obj.badge or "",
+                "best_season": obj.best_season or "",
+                "destination": obj.destination or "",
+                "highlights": highlights_str,
+                "includes": includes_str,
+            }.items() if v}
+            if not fields:
+                continue
+            translations = auto_translate(fields)
+            Tour.objects.filter(pk=obj.pk).update(translations=translations)
+        self.stdout.write(self.style.SUCCESS("  Tour: done."))
+
+    def _retranslate_tourfaqs(self):
+        qs = TourFAQ.objects.all()
+        self.stdout.write(f"  TourFAQ: {qs.count()} records…")
+        for obj in qs:
+            fields = {k: v for k, v in {"question": obj.question or "", "answer": obj.answer or ""}.items() if v}
+            if not fields:
+                continue
+            translations = auto_translate(fields)
+            TourFAQ.objects.filter(pk=obj.pk).update(translations=translations)
+        self.stdout.write(self.style.SUCCESS("  TourFAQ: done."))
+
+    def _retranslate_tourguides(self):
+        qs = TourGuide.objects.all()
+        self.stdout.write(f"  TourGuide: {qs.count()} records…")
+        for obj in qs:
+            if not obj.bio:
+                continue
+            translations = auto_translate({"bio": obj.bio})
+            TourGuide.objects.filter(pk=obj.pk).update(translations=translations)
+        self.stdout.write(self.style.SUCCESS("  TourGuide: done."))
+
+    def _retranslate_events(self):
+        qs = Event.objects.all()
+        self.stdout.write(f"  Event: {qs.count()} records…")
+        for obj in qs:
+            highlights_str = "\n".join(obj.highlights) if obj.highlights else ""
+            fields = {k: v for k, v in {
+                "title": obj.title or "",
+                "description": obj.description or "",
+                "long_description": obj.long_description or "",
+                "venue": obj.venue or "",
+                "highlights": highlights_str,
+            }.items() if v}
+            if not fields:
+                continue
+            translations = auto_translate(fields)
+            Event.objects.filter(pk=obj.pk).update(translations=translations)
+        self.stdout.write(self.style.SUCCESS("  Event: done."))
+
+    def _retranslate_blogposts(self):
+        qs = BlogPost.objects.all()
+        self.stdout.write(f"  BlogPost: {qs.count()} records…")
+        for obj in qs:
+            fields = {k: v for k, v in {
+                "title": obj.title or "",
+                "excerpt": obj.excerpt or "",
+                "content": obj.content or "",
+                "category": obj.category or "",
+                "read_time": obj.read_time or "",
+            }.items() if v}
+            if not fields:
+                continue
+            translations = auto_translate(fields)
+            BlogPost.objects.filter(pk=obj.pk).update(translations=translations)
+        self.stdout.write(self.style.SUCCESS("  BlogPost: done."))

@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from apps.common.models import TimeStampedModel
+from apps.common.translation_utils import auto_translate
 
 class Tour(TimeStampedModel):
     DIFFICULTY_CHOICES = [
@@ -48,8 +49,28 @@ class Tour(TimeStampedModel):
     is_active = models.BooleanField(default=True)
     is_latest = models.BooleanField(default=False, help_text="Show on the home page as a featured latest tour.")
 
+    translations = models.JSONField(default=dict, blank=True, help_text="Auto-filled: translations of text fields into all supported languages.")
+
     def __str__(self):
         return self.title
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        fields = {}
+        if self.title: fields["title"] = self.title
+        if self.description: fields["description"] = self.description
+        if self.long_description: fields["long_description"] = self.long_description
+        if self.badge: fields["badge"] = self.badge
+        if self.best_season: fields["best_season"] = self.best_season
+        if self.destination: fields["destination"] = self.destination
+        if self.highlights: fields["highlights"] = "\n".join(self.highlights)
+        if self.includes: fields["includes"] = "\n".join(self.includes)
+        if fields:
+            try:
+                self.translations = auto_translate(fields)
+                Tour.objects.filter(pk=self.pk).update(translations=self.translations)
+            except Exception:
+                pass
 
 
 class TourPDFLead(models.Model):
@@ -70,6 +91,7 @@ class TourFAQ(models.Model):
     question = models.CharField(max_length=500)
     answer = models.TextField()
     order = models.PositiveIntegerField(default=0, help_text="Display order (lower = first)")
+    translations = models.JSONField(default=dict, blank=True)
 
     class Meta:
         ordering = ['order']
@@ -77,15 +99,37 @@ class TourFAQ(models.Model):
     def __str__(self):
         return f"{self.question[:60]} ({self.tour.title})"
 
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        fields = {}
+        if self.question: fields["question"] = self.question
+        if self.answer: fields["answer"] = self.answer
+        if fields:
+            try:
+                self.translations = auto_translate(fields)
+                TourFAQ.objects.filter(pk=self.pk).update(translations=self.translations)
+            except Exception:
+                pass
+
 
 class TourGuide(models.Model):
     tour = models.OneToOneField(Tour, on_delete=models.CASCADE, related_name='guide')
     name = models.CharField(max_length=200)
     bio = models.TextField(blank=True)
     photo = models.ImageField(upload_to='tours/guides/', blank=True, null=True)
+    translations = models.JSONField(default=dict, blank=True)
 
     def __str__(self):
         return f"Guide: {self.name} ({self.tour.title})"
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if self.bio:
+            try:
+                self.translations = auto_translate({"bio": self.bio})
+                TourGuide.objects.filter(pk=self.pk).update(translations=self.translations)
+            except Exception:
+                pass
 
 
 class TourGuideLanguage(models.Model):

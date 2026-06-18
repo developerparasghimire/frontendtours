@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from apps.common.models import TimeStampedModel
+from apps.common.translation_utils import auto_translate
 
 class Event(TimeStampedModel):
     title = models.CharField(max_length=255)
@@ -24,6 +25,8 @@ class Event(TimeStampedModel):
     is_active = models.BooleanField(default=True)
     is_latest = models.BooleanField(default=False, help_text="Show on the home page as a featured latest event.")
 
+    translations = models.JSONField(default=dict, blank=True, help_text="Auto-filled: translations of text fields into all supported languages.")
+
     def __str__(self):
         return self.title
 
@@ -31,6 +34,18 @@ class Event(TimeStampedModel):
         if not self.pk:
             self.available_tickets = self.total_tickets
         super().save(*args, **kwargs)
+        fields = {}
+        if self.title: fields["title"] = self.title
+        if self.description: fields["description"] = self.description
+        if self.long_description: fields["long_description"] = self.long_description
+        if self.venue: fields["venue"] = self.venue
+        if self.highlights: fields["highlights"] = "\n".join(self.highlights)
+        if fields:
+            try:
+                self.translations = auto_translate(fields)
+                Event.objects.filter(pk=self.pk).update(translations=self.translations)
+            except Exception:
+                pass
 
 
 class EventPDFLead(models.Model):
