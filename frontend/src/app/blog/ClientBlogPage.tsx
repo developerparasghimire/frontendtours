@@ -11,11 +11,14 @@ import ZoomSection from "@/components/ui/ZoomSection";
 import { shouldUseUnoptimizedImage } from "@/lib/images";
 import BlogImagePlaceholder from "@/components/shared/BlogImagePlaceholder";
 import { sectionImages } from "@/lib/sectionImages";
+import { useTranslation } from "@/context/TranslationContext";
+import { tr } from "@/lib/langContent";
 
 type Post = { id: string; slug: string; title: string; excerpt: string; image: string; date: string; author: string; category: string; readTime: string; translations?: Record<string, Record<string, string>> };
 
 export default function ClientBlogPage() {
   const [apiPosts, setApiPosts] = useState<APIBlogPost[] | null>(null);
+  const { lang } = useTranslation();
 
   useEffect(() => {
     getBlogPosts().then(setApiPosts).catch(() => setApiPosts([]));
@@ -89,16 +92,16 @@ export default function ClientBlogPage() {
                 </div>
                 <div className="flex flex-col justify-center p-8 sm:p-12">
                   <div className="flex items-center gap-3 mb-4 text-xs text-slate-500 font-medium">
-                    <span className="bg-slate-100 text-brand-navy px-3 py-1 rounded-full font-semibold">{featured.category}</span>
+                    <span className="bg-slate-100 text-brand-navy px-3 py-1 rounded-full font-semibold">{tr(featured, lang, "category") || featured.category}</span>
                     <span>·</span>
                     <time>{featured.date}</time>
                     <span>·</span>
-                    <span>{featured.readTime}</span>
+                    <span>{tr(featured, lang, "read_time") || featured.readTime}</span>
                   </div>
                   <h2 className="text-2xl sm:text-3xl font-extrabold text-brand-navy mb-4 leading-tight group-hover:text-brand-red transition-colors duration-300">
-                    {featured.title}
+                    {tr(featured, lang, "title") || featured.title}
                   </h2>
-                  <p className="text-slate-600 text-base leading-relaxed mb-8 line-clamp-3">{featured.excerpt}</p>
+                  <p className="text-slate-600 text-base leading-relaxed mb-8 line-clamp-3">{tr(featured, lang, "excerpt") || featured.excerpt}</p>
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-semibold text-slate-700">By {featured.author}</span>
                     <span className="inline-flex items-center gap-2 text-sm font-bold text-brand-red">

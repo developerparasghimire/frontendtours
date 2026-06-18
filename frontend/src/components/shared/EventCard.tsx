@@ -6,6 +6,7 @@ import type { Event } from "@/types";
 import { shouldUseUnoptimizedImage } from "@/lib/images";
 import { useCurrency } from "@/context/CurrencyContext";
 import { useTranslation } from "@/context/TranslationContext";
+import { tr } from "@/lib/langContent";
 
 function getEventDateParts(dateLabel: string) {
   const parsed = new Date(dateLabel);
@@ -26,8 +27,11 @@ function getEventDateParts(dateLabel: string) {
 export default function EventCard(event: Event & { compact?: boolean }) {
   const dateParts = getEventDateParts(event.date);
   const { formatPrice } = useCurrency();
-  const { t } = useTranslation();
+  const { t, lang } = useTranslation();
   const displayPrice = event.basePrice ? formatPrice(event.basePrice) : event.price;
+  const tTitle = tr(event, lang, "title") || event.title;
+  const tCategory = tr(event, lang, "category") || event.category;
+  const tVenue = tr(event, lang, "venue") || event.location || "Nepal";
 
   return (
     <Link href={`/events/${event.id}`} className="group block">
@@ -48,7 +52,7 @@ export default function EventCard(event: Event & { compact?: boolean }) {
 
           <div className="absolute left-5 top-5 right-5 flex items-start justify-between gap-3">
             <span className="rounded-full border border-white/15 bg-black/25 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.28em] text-white/70 backdrop-blur-sm">
-              {event.category}
+              {tCategory}
             </span>
             <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-white/80 backdrop-blur-sm">
               {displayPrice}
@@ -63,14 +67,14 @@ export default function EventCard(event: Event & { compact?: boolean }) {
               {dateParts.day}
             </div>
             <h3 className="mx-auto mt-3 max-w-[12rem] text-base font-semibold leading-tight text-white sm:text-lg">
-              {event.title}
+              {tTitle}
             </h3>
           </div>
 
           <div className="absolute inset-x-6 bottom-5 flex items-end justify-between gap-4 transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:bottom-8">
             <div className="min-w-0">
               <p className="font-mono text-[10px] uppercase tracking-[0.26em] text-white/45">
-                {event.location || "Nepal"}
+                {tVenue}
               </p>
               <p className="mt-1 text-sm text-white/75">{event.time}</p>
             </div>
