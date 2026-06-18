@@ -93,6 +93,8 @@ export default function TourDetailClient({ tour }: { tour: Tour }) {
   const tHighlights = tHighlightsRaw ? tHighlightsRaw.split("\n").filter(Boolean) : (tour.highlights || []);
   const tIncludesRaw = tr(tour, lang, "includes");
   const tIncludes = tIncludesRaw ? tIncludesRaw.split("\n").filter(Boolean) : (tour.includes || []);
+  const tDifficulty = tr(tour, lang, "difficulty") || tour.difficulty;
+  const tCategory = tr(tour, lang, "category") || (tour.subcategory ? `${tour.category} / ${tour.subcategory}` : tour.category);
 
   useEffect(() => {
     const el = bookingCardRef.current;
@@ -192,12 +194,12 @@ export default function TourDetailClient({ tour }: { tour: Tour }) {
                 <svg className="w-5 h-5 text-brand-red" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                 </svg>
-                {tour.rating} Rating
+                {tour.rating} {t("tour.rating")}
               </span>
             )}
-            {tour.difficulty && (
+            {tDifficulty && (
               <span className="px-3 py-1 rounded-full bg-white/20 text-white text-xs font-semibold">
-                {tour.difficulty}
+                {tDifficulty}
               </span>
             )}
             {tBestSeason && (
@@ -241,7 +243,7 @@ export default function TourDetailClient({ tour }: { tour: Tour }) {
                         </svg>
                       </span>
                       <div>
-                        <p className="text-[11px] text-gray-400 font-medium uppercase tracking-wide">Destination</p>
+                        <p className="text-[11px] text-gray-400 font-medium uppercase tracking-wide">{t("tour.destination")}</p>
                         <p className="text-brand-navy font-semibold text-sm mt-0.5">{tDestination}</p>
                       </div>
                     </div>
@@ -254,7 +256,7 @@ export default function TourDetailClient({ tour }: { tour: Tour }) {
                         </svg>
                       </span>
                       <div>
-                        <p className="text-[11px] text-gray-400 font-medium uppercase tracking-wide">Duration</p>
+                        <p className="text-[11px] text-gray-400 font-medium uppercase tracking-wide">{t("tour.duration")}</p>
                         <p className="text-brand-navy font-semibold text-sm mt-0.5">{tour.duration}</p>
                       </div>
                     </div>
@@ -268,8 +270,8 @@ export default function TourDetailClient({ tour }: { tour: Tour }) {
                         </svg>
                       </span>
                       <div>
-                        <p className="text-[11px] text-gray-400 font-medium uppercase tracking-wide">Difficulty</p>
-                        <p className="text-brand-navy font-semibold text-sm mt-0.5">{tour.difficulty}</p>
+                        <p className="text-[11px] text-gray-400 font-medium uppercase tracking-wide">{t("tour.difficulty")}</p>
+                        <p className="text-brand-navy font-semibold text-sm mt-0.5">{tDifficulty}</p>
                       </div>
                     </div>
                   )}
@@ -281,8 +283,8 @@ export default function TourDetailClient({ tour }: { tour: Tour }) {
                         </svg>
                       </span>
                       <div>
-                        <p className="text-[11px] text-gray-400 font-medium uppercase tracking-wide">Activity</p>
-                        <p className="text-brand-navy font-semibold text-sm mt-0.5">{tour.subcategory ? `${tour.category} / ${tour.subcategory}` : tour.category}</p>
+                        <p className="text-[11px] text-gray-400 font-medium uppercase tracking-wide">{t("tour.activity")}</p>
+                        <p className="text-brand-navy font-semibold text-sm mt-0.5">{tCategory}</p>
                       </div>
                     </div>
                   )}
@@ -294,7 +296,7 @@ export default function TourDetailClient({ tour }: { tour: Tour }) {
                         </svg>
                       </span>
                       <div>
-                        <p className="text-[11px] text-gray-400 font-medium uppercase tracking-wide">Best Season</p>
+                        <p className="text-[11px] text-gray-400 font-medium uppercase tracking-wide">{t("tour.best_season")}</p>
                         <p className="text-brand-navy font-semibold text-sm mt-0.5">{tBestSeason}</p>
                       </div>
                     </div>
@@ -307,7 +309,7 @@ export default function TourDetailClient({ tour }: { tour: Tour }) {
                         </svg>
                       </span>
                       <div>
-                        <p className="text-[11px] text-gray-400 font-medium uppercase tracking-wide">Rating</p>
+                        <p className="text-[11px] text-gray-400 font-medium uppercase tracking-wide">{t("tour.rating")}</p>
                         <p className="text-brand-navy font-semibold text-sm mt-0.5">{tour.rating} / 5</p>
                       </div>
                     </div>
@@ -325,7 +327,7 @@ export default function TourDetailClient({ tour }: { tour: Tour }) {
                     <svg className="w-4 h-4 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                     </svg>
-                    <h2 className="text-sm font-bold text-white uppercase tracking-widest">Your Guide</h2>
+                    <h2 className="text-sm font-bold text-white uppercase tracking-widest">{t("tour.guide")}</h2>
                   </div>
 
                   <div className="bg-white p-5 sm:p-6">
@@ -362,7 +364,7 @@ export default function TourDetailClient({ tour }: { tour: Tour }) {
                     {/* Languages */}
                     {tour.guide.languages && tour.guide.languages.length > 0 && (
                       <div className="mt-5 pt-5 border-t border-gray-100">
-                        <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Languages</p>
+                        <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">{t("tour.languages")}</p>
                         <div className="flex flex-col gap-2.5">
                           {tour.guide.languages.map((lang) => (
                             <div key={lang.id} className="flex items-center justify-between gap-4">
@@ -498,26 +500,26 @@ export default function TourDetailClient({ tour }: { tour: Tour }) {
 
               <div className="space-y-4">
                 <div>
-                  <label className="text-sm font-bold text-brand-navy mb-1 block">Select Date</label>
+                  <label className="text-sm font-bold text-brand-navy mb-1 block">{t("common.select_date")}</label>
                   <input
                     type="date"
                     className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-blue/50 text-brand-navy"
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-bold text-brand-navy mb-1 block">Travelers</label>
+                  <label className="text-sm font-bold text-brand-navy mb-1 block">{t("common.travelers")}</label>
                   <select className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-blue/50 text-brand-navy bg-white">
-                    <option>1 Person</option>
-                    <option>2 People</option>
-                    <option>3-5 People</option>
-                    <option>6+ People</option>
+                    <option>{t("tour.person_1")}</option>
+                    <option>{t("tour.people_2")}</option>
+                    <option>{t("tour.people_3_5")}</option>
+                    <option>{t("tour.people_6plus")}</option>
                   </select>
                 </div>
               </div>
 
               {/* Payment method icons */}
               <div>
-                <p className="text-[10px] text-gray-400 uppercase tracking-wider mb-2">We accept</p>
+                <p className="text-[10px] text-gray-400 uppercase tracking-wider mb-2">{t("tour.we_accept")}</p>
                 <div className="flex flex-wrap items-center gap-2">
                   {/* Visa */}
                   <svg viewBox="0 0 38 24" className="h-6 w-auto" aria-label="Visa"><rect width="38" height="24" rx="4" fill="#1A1F71"/><text x="5" y="17" fontFamily="Arial" fontWeight="bold" fontSize="13" fill="white" letterSpacing="-1">VISA</text></svg>
@@ -567,7 +569,7 @@ export default function TourDetailClient({ tour }: { tour: Tour }) {
 
               {/* Includes */}
               <div className="border-t-2 border-gray-100 pt-4">
-                <p className="font-bold text-brand-navy text-sm mb-3 uppercase tracking-wider">What&apos;s Included</p>
+                <p className="font-bold text-brand-navy text-sm mb-3 uppercase tracking-wider">{t("tour.included")}</p>
                 <ul className="space-y-2">
                   {tIncludes.map((item, i) => (
                     <li key={i} className="flex items-center gap-2 text-gray-700 text-sm">
@@ -609,7 +611,7 @@ export default function TourDetailClient({ tour }: { tour: Tour }) {
             <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
             </svg>
-            Back to All Tours
+            {t("tour.back")}
           </Link>
         </div>
       </section>
@@ -617,14 +619,14 @@ export default function TourDetailClient({ tour }: { tour: Tour }) {
       {/* ═══════════ STICKY BOOK BAR (appears when booking card scrolls out of view) ═══════════ */}
       <div className={`fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 px-4 py-3 flex items-center gap-3 shadow-2xl transition-transform duration-300 ${showStickyBar ? "translate-y-0" : "translate-y-full"}`}>
         <div className="flex-1 min-w-0">
-          <p className="text-xs text-gray-400 leading-none">Starting from</p>
+          <p className="text-xs text-gray-400 leading-none">{t("tour.price_from")}</p>
           <p className="text-lg font-extrabold text-brand-green leading-tight">{displayPrice}</p>
         </div>
         <Link
           href={`/booking?type=tour&id=${tour.id}`}
           className="flex-shrink-0 bg-brand-red text-white font-bold px-5 py-3 rounded-xl hover:bg-red-700 transition-colors active:scale-95 text-sm mr-16"
         >
-          Book This Tour
+          {t("tour.book")}
         </Link>
       </div>
 
