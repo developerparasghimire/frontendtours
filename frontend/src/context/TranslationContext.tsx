@@ -3,7 +3,7 @@
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
 import type { CurrencyCode } from "@/context/CurrencyTypes";
 
-export type LangCode = "EN" | "DE" | "FR" | "ES" | "IT";
+export type LangCode = "EN" | "DE" | "FR" | "ES" | "IT" | "JA" | "RU";
 
 export const LANGUAGES = [
   { code: "EN" as LangCode, label: "English",  flag: "🇬🇧" },
@@ -11,9 +11,11 @@ export const LANGUAGES = [
   { code: "FR" as LangCode, label: "Français", flag: "🇫🇷" },
   { code: "ES" as LangCode, label: "Español",  flag: "🇪🇸" },
   { code: "IT" as LangCode, label: "Italiano", flag: "🇮🇹" },
+  { code: "JA" as LangCode, label: "日本語",    flag: "🇯🇵" },
+  { code: "RU" as LangCode, label: "Русский",  flag: "🇷🇺" },
 ];
 
-const SUPPORTED_LANGS = new Set<LangCode>(["EN", "DE", "FR", "ES", "IT"]);
+const SUPPORTED_LANGS = new Set<LangCode>(["EN", "DE", "FR", "ES", "IT", "JA", "RU"]);
 
 // Browser navigator.language → LangCode
 function getBrowserLang(): LangCode {
@@ -31,6 +33,8 @@ const LANG_MAP: Record<string, LangCode> = {
   UY: "ES", CR: "ES", PA: "ES", GT: "ES", HN: "ES",
   SV: "ES", NI: "ES", DO: "ES", CU: "ES",
   IT: "IT", SM: "IT", VA: "IT",
+  JP: "JA",
+  RU: "RU", BY: "RU", KZ: "RU",
 };
 
 // Countries whose default currency is EUR
@@ -647,6 +651,236 @@ const T: Record<LangCode, Dict> = {
     "events.empty": "Nessun evento disponibile al momento. Torna presto!",
     "events.host_heading": "Vuoi organizzare un evento con noi?",
     "events.host_desc": "Collabora con Get Tours per promuovere il tuo evento a migliaia di viaggiatori e locali.",
+  },
+
+  // ─── JAPANESE ──────────────────────────────
+  JA: {
+    "nav.home": "ホーム", "nav.about": "私たちについて", "nav.events": "イベント",
+    "nav.tours": "ツアー", "nav.blogs": "ブログ", "nav.contact": "お問い合わせ",
+    "nav.signin": "サインイン",
+
+    "tour.book": "このツアーを予約", "tour.book_now": "今すぐ予約",
+    "tour.download": "ツアー詳細をダウンロード",
+    "tour.price_from": "料金", "tour.per_person": "お一人様あたり",
+    "tour.about": "このツアーについて", "tour.highlights": "ツアーのハイライト",
+    "tour.gallery": "ギャラリー", "tour.included": "含まれるもの",
+    "tour.guide": "あなたのガイド", "tour.faq": "よくある質問",
+    "tour.back": "全ツアーに戻る",
+    "tour.destination": "目的地", "tour.duration": "期間",
+    "tour.difficulty": "難易度", "tour.activity": "アクティビティ",
+    "tour.best_season": "ベストシーズン", "tour.rating": "評価",
+    "tour.reviews": "レビュー",
+
+    "event.book": "チケットを購入", "event.back": "全イベントに戻る",
+    "event.about": "このイベントについて", "event.highlights": "ハイライト",
+    "event.download": "イベント詳細をダウンロード",
+    "event.date": "日付", "event.time": "時間", "event.venue": "会場",
+    "event.price": "入場料", "event.tickets": "残席",
+
+    "common.free": "無料", "common.sold_out": "売り切れ",
+    "common.contact": "お問い合わせ", "common.need_help": "旅のご相談はこちら",
+    "common.select_date": "日付を選択", "common.travelers": "旅行者",
+    "common.tickets": "チケット",
+    "common.all_categories": "全カテゴリ",
+    "common.explore_tour": "ツアーを見る",
+    "common.view_event": "イベントを見る",
+    "common.showing": "表示中",
+    "common.in": "の",
+
+    "trust.certified": "認定旅行代理店",
+    "trust.safe": "安全・安心",
+    "trust.support": "24時間サポート",
+    "trust.guarantee": "最低価格保証",
+
+    "home.events_eyebrow": "開催中",
+    "home.events_heading": "最新イベント",
+    "home.events_desc": "ネパール各地で開催される祭り、文化体験、地域イベントをご紹介。",
+    "home.events_cta": "全イベントを見る",
+
+    "home.tours_eyebrow": "人気のツアー",
+    "home.tours_heading": "人気のツアーパッケージ",
+    "home.tours_desc": "あらゆる旅行者に向けて厳選した、ネパールで最も予約の多い冒険コース。",
+    "home.tours_cta": "全ツアーを見る",
+
+    "home.gallery_eyebrow": "私たちの冒険",
+    "home.gallery_heading": "山での生活",
+
+    "home.adventure_eyebrow": "旅のスタイル",
+    "home.adventure_heading": "あなたの冒険を見つけよう",
+
+    "home.why_eyebrow": "Get Toursを選ぶ理由",
+    "home.why_heading": "安心して旅しよう",
+    "home.why_desc": "現地の知識、透明な計画、心のこもったサービスで、最初のクリックから最終日まで、ネパール旅行をワクワクするものにします。",
+    "home.trust1_title": "認定・安全",
+    "home.trust1_desc": "すべてのツアーは安全性を確認済み。ライセンス取得ガイド、保険付き車両、旅行中の24時間サポート。",
+    "home.trust1_stat": "200人以上のライセンスガイド",
+    "home.trust2_title": "最低価格保証",
+    "home.trust2_desc": "同等のオファーに対応します。隠れた費用なしでネパールの冒険を最高の価格でお届け。",
+    "home.trust2_stat": "500件以上の旅行を比較",
+    "home.trust3_title": "現地の専門知識",
+    "home.trust3_desc": "現地専門家チームが本物の体験を提供。ネパールを知り尽くしています。",
+    "home.trust3_stat": "15年の現地実績",
+
+    "home.testimonials_eyebrow": "お客様の声",
+    "home.testimonials_heading": "ネパール旅行者のリアルな声",
+
+    "home.contact_eyebrow": "お問い合わせ",
+    "home.contact_heading": "ネパール旅行を計画しよう",
+    "home.contact_desc": "旅行日程・スタイル・グループ人数をお知らせください。現地チームが最適な旅程をご提案します。",
+    "home.contact_cta": "メッセージを送る",
+    "home.call_us": "電話する",
+    "home.email_us": "メールする",
+    "home.find_us": "場所を確認",
+    "home.hours": "月〜土 9:00〜18:00",
+    "home.reply_time": "24時間以内に返信",
+    "home.maps_link": "Google マップで開く",
+    "home.our_story": "私たちのストーリー",
+    "home.get_in_touch": "お問い合わせ",
+
+    "home.partners_eyebrow": "信頼のパートナー",
+    "home.partners_heading": "認定証・パートナー",
+    "home.newsletter_eyebrow": "ニュースレター",
+    "home.newsletter_heading": "ネパール旅行のインスピレーション",
+    "home.newsletter_desc": "最新のツアーパッケージ、イベント、旅行情報、お得な情報をメールでお届けします。",
+
+    "tours.hero_title": "全ツアーパッケージ",
+    "tours.hero_subtitle": "ネパールを探索",
+    "tours.hero_desc": "日帰りから数週間のトレッキングまで — あらゆる旅行者に最適な冒険を見つけよう。",
+    "tours.singular": "ツアー",
+    "tours.plural": "ツアー",
+    "tours.no_tours_cat": "ツアーが見つかりません：",
+    "tours.empty": "現在利用可能なツアーはありません。また後でご確認ください！",
+    "tours.show_all": "全ツアーを表示",
+    "tours.cta_heading": "迷っていますか？お手伝いします！",
+    "tours.cta_desc": "旅行の専門家があなただけのオリジナル旅程を作成します。",
+    "tours.custom_trip": "カスタム旅行を相談",
+    "tours.regions": "地域",
+
+    "events.hero_title": "今後のイベント＆体験",
+    "events.hero_subtitle": "お見逃しなく",
+    "events.hero_desc": "ネパール各地で開催されるコンサート、文化散策、フェスティバル、料理教室などをご紹介。",
+    "events.singular": "イベント",
+    "events.plural": "イベント",
+    "events.show_all": "全イベントを表示",
+    "events.no_events_cat": "イベントが見つかりません：",
+    "events.empty": "現在利用可能なイベントはありません。また後でご確認ください！",
+    "events.host_heading": "私たちとイベントを開催しませんか？",
+    "events.host_desc": "Get Toursと提携して、あなたのイベントを何千人もの旅行者や地元の人々にアピールしましょう。",
+  },
+
+  // ─── RUSSIAN ───────────────────────────────
+  RU: {
+    "nav.home": "Главная", "nav.about": "О нас", "nav.events": "События",
+    "nav.tours": "Туры", "nav.blogs": "Блог", "nav.contact": "Контакты",
+    "nav.signin": "Войти",
+
+    "tour.book": "Забронировать тур", "tour.book_now": "Забронировать",
+    "tour.download": "Скачать детали тура",
+    "tour.price_from": "От", "tour.per_person": "на человека",
+    "tour.about": "О туре", "tour.highlights": "Основные моменты",
+    "tour.gallery": "Галерея", "tour.included": "Что включено",
+    "tour.guide": "Ваш гид", "tour.faq": "Часто задаваемые вопросы",
+    "tour.back": "Ко всем турам",
+    "tour.destination": "Направление", "tour.duration": "Продолжительность",
+    "tour.difficulty": "Сложность", "tour.activity": "Активность",
+    "tour.best_season": "Лучший сезон", "tour.rating": "Рейтинг",
+    "tour.reviews": "отзывов",
+
+    "event.book": "Купить билеты", "event.back": "Ко всем событиям",
+    "event.about": "О мероприятии", "event.highlights": "Основные моменты",
+    "event.download": "Скачать детали",
+    "event.date": "Дата", "event.time": "Время", "event.venue": "Место",
+    "event.price": "Цена входа", "event.tickets": "Доступно билетов",
+
+    "common.free": "Бесплатно", "common.sold_out": "Распродано",
+    "common.contact": "Связаться с нами", "common.need_help": "Нужна помощь в планировании?",
+    "common.select_date": "Выбрать дату", "common.travelers": "Путешественники",
+    "common.tickets": "Билеты",
+    "common.all_categories": "Все категории",
+    "common.explore_tour": "Изучить тур",
+    "common.view_event": "Посмотреть событие",
+    "common.showing": "Показано",
+    "common.in": "в",
+
+    "trust.certified": "Сертифицированное турагентство",
+    "trust.safe": "Безопасно и надёжно",
+    "trust.support": "Поддержка 24/7",
+    "trust.guarantee": "Гарантия лучшей цены",
+
+    "home.events_eyebrow": "Что происходит",
+    "home.events_heading": "Последние события",
+    "home.events_desc": "Предстоящие фестивали, культурные мероприятия и местные события по всему Непалу.",
+    "home.events_cta": "Все события",
+
+    "home.tours_eyebrow": "Популярные",
+    "home.tours_heading": "Популярные туры",
+    "home.tours_desc": "Наши самые популярные приключения в Непале — тщательно подобранные для любого путешественника.",
+    "home.tours_cta": "Все туры",
+
+    "home.gallery_eyebrow": "Наши приключения",
+    "home.gallery_heading": "Жизнь в горах",
+
+    "home.adventure_eyebrow": "Стили путешествий",
+    "home.adventure_heading": "Найдите своё приключение",
+
+    "home.why_eyebrow": "Почему Get Tours",
+    "home.why_heading": "Путешествуй с уверенностью",
+    "home.why_desc": "Мы сочетаем местные знания, прозрачное планирование и внимательный сервис, чтобы ваша поездка в Непал была захватывающей с первого клика до последнего дня.",
+    "home.trust1_title": "Проверено и безопасно",
+    "home.trust1_desc": "Каждый тур проверен на безопасность. Лицензированные гиды, застрахованные автомобили и поддержка 24/7 на протяжении всей поездки.",
+    "home.trust1_stat": "200+ лицензированных гидов",
+    "home.trust2_title": "Гарантия лучшей цены",
+    "home.trust2_desc": "Мы соответствуем любому сопоставимому предложению. Лучшая стоимость вашего непальского приключения без скрытых платежей.",
+    "home.trust2_stat": "500+ поездок сравнено",
+    "home.trust3_title": "Местная экспертиза",
+    "home.trust3_desc": "Наша команда местных экспертов создаёт аутентичные впечатления. Мы знаем Непал как свои пять пальцев.",
+    "home.trust3_stat": "15 лет местных корней",
+
+    "home.testimonials_eyebrow": "Отзывы",
+    "home.testimonials_heading": "Реальные истории путешественников по Непалу",
+
+    "home.contact_eyebrow": "Связаться с нами",
+    "home.contact_heading": "Спланируйте путешествие в Непал",
+    "home.contact_desc": "Поделитесь датами, стилем путешествия или размером группы, и наша местная команда составит идеальный маршрут.",
+    "home.contact_cta": "Написать нам",
+    "home.call_us": "Позвонить",
+    "home.email_us": "Написать письмо",
+    "home.find_us": "Найти нас",
+    "home.hours": "Пн–Сб, 9:00–18:00",
+    "home.reply_time": "Ответ в течение 24 часов",
+    "home.maps_link": "Открыть в Google Maps",
+    "home.our_story": "Наша история",
+    "home.get_in_touch": "Связаться",
+
+    "home.partners_eyebrow": "Нам доверяют",
+    "home.partners_heading": "Сертификаты и партнёры",
+    "home.newsletter_eyebrow": "Рассылка",
+    "home.newsletter_heading": "Вдохновение для путешествий в Непал",
+    "home.newsletter_desc": "Подпишитесь, чтобы получать последние туры, предстоящие события, советы путешественника и эксклюзивные предложения прямо на почту.",
+
+    "tours.hero_title": "Все туры",
+    "tours.hero_subtitle": "Исследуй Непал",
+    "tours.hero_desc": "От однодневных поездок до многонедельных треккингов — найдите идеальное приключение для каждого путешественника.",
+    "tours.singular": "тур",
+    "tours.plural": "туров",
+    "tours.no_tours_cat": "Туры не найдены в",
+    "tours.empty": "Туров пока нет. Загляните позже!",
+    "tours.show_all": "Показать все туры",
+    "tours.cta_heading": "Не можете определиться? Мы поможем!",
+    "tours.cta_desc": "Наши эксперты составят персональный маршрут специально для вас.",
+    "tours.custom_trip": "Запросить индивидуальный тур",
+    "tours.regions": "регионов",
+
+    "events.hero_title": "Предстоящие события и впечатления",
+    "events.hero_subtitle": "Не пропустите",
+    "events.hero_desc": "Концерты, культурные прогулки, фестивали, кулинарные классы и многое другое по всему Непалу.",
+    "events.singular": "событие",
+    "events.plural": "событий",
+    "events.show_all": "Показать все события",
+    "events.no_events_cat": "События не найдены в",
+    "events.empty": "Событий пока нет. Загляните позже!",
+    "events.host_heading": "Хотите провести мероприятие с нами?",
+    "events.host_desc": "Сотрудничайте с Get Tours, чтобы продвигать ваше мероприятие среди тысяч путешественников и местных жителей.",
   },
 };
 
