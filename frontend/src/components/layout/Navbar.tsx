@@ -262,13 +262,13 @@ export default function Navbar() {
                           <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                           </svg>
-                          My Dashboard
+                          {t("nav.dashboard")}
                         </Link>
                         <Link href="/dashboard#bookings" onClick={closeMenus} className="flex items-center gap-3 px-5 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
                           <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                           </svg>
-                          My Bookings
+                          {t("nav.my_bookings")}
                         </Link>
                       </div>
                       <div className="border-t border-gray-100 py-2">
@@ -279,7 +279,7 @@ export default function Navbar() {
                           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                           </svg>
-                          Sign Out
+                          {t("nav.sign_out")}
                         </button>
                       </div>
                     </div>
@@ -297,7 +297,7 @@ export default function Navbar() {
                         : "bg-[linear-gradient(90deg,var(--color-brand-red),var(--color-brand-orange))] text-white hover:-translate-y-0.5"
                     }`}
                   >
-                    {t("nav.signin")}
+                    {t("nav.sign_in")}
                     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                     </svg>
@@ -369,7 +369,7 @@ export default function Navbar() {
 
           {/* Mobile Language + Currency Selectors */}
           <div className="border-t border-gray-100 mt-3 pt-3">
-            <p className="px-4 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-gray-400">Language</p>
+            <p className="px-4 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-gray-400">{t("nav.language")}</p>
             <div className="flex flex-wrap gap-2 px-4 pb-3">
               {LANGUAGES.map((l) => (
                 <button key={l.code} onClick={() => { setLang(l.code); closeMenus(); }}
@@ -378,7 +378,7 @@ export default function Navbar() {
                 </button>
               ))}
             </div>
-            <p className="px-4 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-gray-400">Currency</p>
+            <p className="px-4 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-gray-400">{t("nav.currency")}</p>
             <div className="flex flex-wrap gap-2 px-4 pb-2">
               {CURRENCIES.map((c) => (
                 <button key={c.code} onClick={() => { setCurrency(c.code); closeMenus(); }}
@@ -401,13 +401,13 @@ export default function Navbar() {
                   <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                   </svg>
-                  My Dashboard
+                  {t("nav.dashboard")}
                 </Link>
                 <Link href="/dashboard#bookings" onClick={closeMenus} className="flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50">
                   <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                   </svg>
-                  My Bookings
+                  {t("nav.my_bookings")}
                 </Link>
                 <button
                   onClick={logout}
@@ -416,7 +416,7 @@ export default function Navbar() {
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                   </svg>
-                  Sign Out
+                  {t("nav.sign_out")}
                 </button>
               </>
             ) : (
@@ -425,7 +425,7 @@ export default function Navbar() {
                 onClick={closeMenus}
                 className="flex items-center justify-center gap-1.5 w-full py-3 rounded-xl text-sm font-semibold bg-brand-red text-white hover:bg-red-700 transition-colors"
               >
-                Sign In
+                {t("nav.sign_in")}
                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                 </svg>

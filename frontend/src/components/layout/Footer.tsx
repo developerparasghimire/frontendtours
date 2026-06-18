@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { getSiteConfig, getBlogPosts, getTours, type SiteConfig, type APITour } from "@/lib/api";
 import { shouldUseUnoptimizedImage } from "@/lib/images";
 import BlogImagePlaceholder from "@/components/shared/BlogImagePlaceholder";
+import { useTranslation } from "@/context/TranslationContext";
 
 /* ── Social media SVG icons ── */
 function SocialIcon({ platform }: { platform: string }) {
@@ -52,23 +53,24 @@ function SocialIcon({ platform }: { platform: string }) {
   }
 }
 
-const footerLinks = {
+const FOOTER_LINK_KEYS = {
   company: [
-    { href: "/about", label: "About Us" },
-    { href: "/tours", label: "Our Tours" },
-    { href: "/events", label: "Events" },
-    { href: "/blog", label: "Blog" },
-    { href: "/contact", label: "Contact" },
+    { href: "/about", key: "footer.link_about" },
+    { href: "/tours", key: "footer.link_tours" },
+    { href: "/events", key: "footer.link_events" },
+    { href: "/blog", key: "footer.link_blog" },
+    { href: "/contact", key: "footer.link_contact" },
   ],
   support: [
-    { href: "/faqs", label: "FAQs" },
-    { href: "/booking-policy", label: "Booking Policy" },
-    { href: "/terms", label: "Terms of Service" },
-    { href: "/privacy", label: "Privacy Policy" },
+    { href: "/faqs", key: "footer.link_faqs" },
+    { href: "/booking-policy", key: "footer.link_policy" },
+    { href: "/terms", key: "footer.link_terms" },
+    { href: "/privacy", key: "footer.link_privacy" },
   ],
 };
 
 export default function Footer() {
+  const { t } = useTranslation();
   const [cfg, setCfg] = useState<SiteConfig | null>(null);
   const [tourPackages, setTourPackages] = useState<Array<{ href: string; label: string }>>([]);
   const [latestBlogs, setLatestBlogs] = useState<
@@ -158,7 +160,7 @@ export default function Footer() {
 
           {/* Tour Packages */}
           <div className="hidden sm:block">
-            <h4 className="text-[11px] font-bold uppercase tracking-[0.28em] text-white/40 mb-4">Tour Packages</h4>
+            <h4 className="text-[11px] font-bold uppercase tracking-[0.28em] text-white/40 mb-4">{t("footer.tour_packages")}</h4>
             <div className="h-px w-8 bg-gradient-to-r from-brand-red to-brand-orange mb-5" />
             <ul className="space-y-3">
               {tourPackages.length > 0
@@ -174,7 +176,7 @@ export default function Footer() {
                     <li key={href}>
                       <Link href={href} className="group flex items-center gap-2 text-sm text-white/55 transition-colors hover:text-white">
                         <span className="w-0 h-px bg-brand-red transition-all duration-300 group-hover:w-4 flex-shrink-0" />
-                        View all tours
+                        {t("footer.view_all_tours")}
                       </Link>
                     </li>
                   ))
@@ -184,14 +186,14 @@ export default function Footer() {
 
           {/* Company */}
           <div className="hidden sm:block">
-            <h4 className="text-[11px] font-bold uppercase tracking-[0.28em] text-white/40 mb-4">Company</h4>
+            <h4 className="text-[11px] font-bold uppercase tracking-[0.28em] text-white/40 mb-4">{t("footer.company")}</h4>
             <div className="h-px w-8 bg-gradient-to-r from-brand-blue to-brand-green mb-5" />
             <ul className="space-y-3">
-              {footerLinks.company.map((link) => (
-                <li key={link.label}>
+              {FOOTER_LINK_KEYS.company.map((link) => (
+                <li key={link.key}>
                   <Link href={link.href} className="group flex items-center gap-2 text-sm text-white/55 transition-colors hover:text-white">
                     <span className="w-0 h-px bg-brand-blue transition-all duration-300 group-hover:w-4 flex-shrink-0" />
-                    {link.label}
+                    {t(link.key)}
                   </Link>
                 </li>
               ))}
@@ -200,7 +202,7 @@ export default function Footer() {
 
           {/* Latest Blogs */}
           <div className="hidden sm:block">
-            <h4 className="text-[11px] font-bold uppercase tracking-[0.28em] text-white/40 mb-4">Latest From Blog</h4>
+            <h4 className="text-[11px] font-bold uppercase tracking-[0.28em] text-white/40 mb-4">{t("footer.blog_latest")}</h4>
             <div className="h-px w-8 bg-gradient-to-r from-brand-orange to-brand-red mb-5" />
             <div className="space-y-4">
               {latestBlogs.map((post) => (
@@ -238,16 +240,16 @@ export default function Footer() {
       <div className="border-t border-white/10 bg-black/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center">
           <p className="text-white/55 text-sm font-medium">
-            © All rights reserved by Golden Era Tours and Travel
+            {t("footer.copyright")}
           </p>
           <div className="mt-3 flex flex-wrap justify-center gap-4 sm:gap-6">
-            {footerLinks.support.map((link) => (
+            {FOOTER_LINK_KEYS.support.map((link) => (
               <Link
-                key={link.label}
+                key={link.key}
                 href={link.href}
                 className="text-xs text-white/40 transition-colors hover:text-white"
               >
-                {link.label}
+                {t(link.key)}
               </Link>
             ))}
           </div>

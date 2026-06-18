@@ -6,9 +6,11 @@ import MotionWrapper, { StaggerContainer, StaggerItem } from "@/components/share
 import PageHero from "@/components/sections/PageHero";
 import { submitContact, getSiteConfig, type SiteConfig } from "@/lib/api";
 import { sectionImages } from "@/lib/sectionImages";
+import { useTranslation } from "@/context/TranslationContext";
 
 
 export default function ContactClient() {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -36,7 +38,7 @@ export default function ContactClient() {
       setSubmitted(true);
       setFormData({ name: "", email: "", phone: "", subject: "", message: "" });
     } catch {
-      setError("Something went wrong. Please try again.");
+      setError(t("contact.error"));
     } finally {
       setSubmitting(false);
     }
@@ -57,20 +59,20 @@ export default function ContactClient() {
     {
       icon: "M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z",
       icon2: "M15 11a3 3 0 11-6 0 3 3 0 016 0z",
-      title: "Visit Us",
-      lines: addressLines.length > 0 ? addressLines : ["Address not set yet."],
+      titleKey: "contact.visit_us",
+      lines: addressLines.length > 0 ? addressLines : [t("contact.no_address")],
       href: mapOpenUrl,
     },
     {
       icon: "M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z",
-      title: "Email Us",
-      lines: emailLines.length > 0 ? emailLines : ["Email not set yet."],
+      titleKey: "contact.email_us",
+      lines: emailLines.length > 0 ? emailLines : [t("contact.no_email")],
       href: emailLines[0] ? `mailto:${emailLines[0]}` : null,
     },
     {
       icon: "M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z",
-      title: "Call Us",
-      lines: phoneLines.length > 0 ? phoneLines : ["Phone not set yet."],
+      titleKey: "contact.call_us",
+      lines: phoneLines.length > 0 ? phoneLines : [t("contact.no_phone")],
       href: phoneLines[0] ? `tel:${phoneLines[0].replace(/\s+/g, "")}` : null,
     },
   ];
@@ -79,9 +81,9 @@ export default function ContactClient() {
     <div className="flex flex-col overflow-x-hidden">
       {/* ═══════════ HERO ═══════════ */}
       <PageHero
-        title="Contact Us"
-        subtitle="Let's Talk"
-        description="Have a question, want a custom itinerary, or ready to book? We'd love to hear from you."
+        title={t("contact.hero_title")}
+        subtitle={t("contact.hero_subtitle")}
+        description={t("contact.hero_desc")}
         accentColor="brand-blue"
         backgroundImage={sectionImages.contactCta}
         compact
@@ -93,17 +95,16 @@ export default function ContactClient() {
           {/* Contact Info */}
           <div className="lg:col-span-2 space-y-8">
             <MotionWrapper variant="fade-left">
-              <h2 className="text-2xl font-bold text-brand-navy mb-6">Get In Touch</h2>
+              <h2 className="text-2xl font-bold text-brand-navy mb-6">{t("contact.get_in_touch")}</h2>
               <p className="text-gray-700 leading-relaxed">
-                Whether you need help choosing a tour, planning a custom trip, or have any
-                questions, our team is ready to assist you.
+                {t("contact.help_text")}
               </p>
               <div className="mt-4 rounded-xl border border-brand-blue/20 bg-brand-blue/5 px-4 py-4 flex items-start gap-3">
                 <svg className="w-5 h-5 text-brand-blue mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
                 <p className="text-sm text-brand-navy">
-                  <span className="font-bold">Want to book a tour or event?</span> Fill out the form below or reach out to us directly — we&apos;ll arrange everything for you.
+                  <span className="font-bold">{t("contact.book_tip")}</span>{" "}{t("contact.book_tip_detail")}
                 </p>
               </div>
             </MotionWrapper>
@@ -122,7 +123,7 @@ export default function ContactClient() {
                       </svg>
                     </div>
                     <div className="min-w-0">
-                      <h3 className="font-bold text-brand-navy mb-1">{info.title}</h3>
+                      <h3 className="font-bold text-brand-navy mb-1">{t(info.titleKey)}</h3>
                       {info.lines.map((line) => (
                         <p key={line} className="text-gray-700 text-sm break-words">{line}</p>
                       ))}
@@ -130,7 +131,7 @@ export default function ContactClient() {
                   </div>
                 );
                 return (
-                  <StaggerItem key={info.title}>
+                  <StaggerItem key={info.titleKey}>
                     {info.href ? (
                       <a href={info.href} target={info.href.startsWith("http") ? "_blank" : undefined} rel={info.href.startsWith("http") ? "noopener noreferrer" : undefined} className="block">
                         {cardInner}
@@ -147,15 +148,15 @@ export default function ContactClient() {
           <div className="lg:col-span-3">
             <MotionWrapper variant="fade-right">
               <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-[0_8px_30px_-6px_rgba(0,0,0,0.08)] border border-gray-100/50 p-5 sm:p-8 md:p-10">
-              <h2 className="text-xl sm:text-2xl font-bold text-brand-navy mb-2">Send Us a Message</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-brand-navy mb-2">{t("contact.form_title")}</h2>
               <p className="text-gray-500 text-sm mb-6 sm:mb-8">
-                Fill out the form below and we&apos;ll respond within 24 hours.
+                {t("contact.form_desc")}
               </p>
 
               <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6">
                 {submitted && (
                   <div className="bg-green-50 border border-green-200 text-green-700 rounded-xl px-4 py-3 text-sm font-medium">
-                    ✅ Thank you! We&apos;ll get back to you within 24 hours.
+                    {t("contact.success")}
                   </div>
                 )}
                 {error && (
@@ -165,24 +166,24 @@ export default function ContactClient() {
                 )}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                   <div>
-                    <label className="text-sm font-bold text-brand-navy mb-1.5 block">Full Name *</label>
+                    <label className="text-sm font-bold text-brand-navy mb-1.5 block">{t("contact.name_label")} *</label>
                     <input
                       type="text"
                       required
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      placeholder="John Doe"
+                      placeholder={t("contact.name_placeholder")}
                       className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-blue/50 focus:border-brand-blue transition text-brand-navy"
                     />
                   </div>
                   <div>
-                    <label className="text-sm font-bold text-brand-navy mb-1.5 block">Email *</label>
+                    <label className="text-sm font-bold text-brand-navy mb-1.5 block">{t("contact.email_label")} *</label>
                     <input
                       type="email"
                       required
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      placeholder="john@example.com"
+                      placeholder={t("contact.email_placeholder")}
                       className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-blue/50 focus:border-brand-blue transition text-brand-navy"
                     />
                   </div>
@@ -190,41 +191,41 @@ export default function ContactClient() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="text-sm font-bold text-brand-navy mb-1.5 block">Phone</label>
+                    <label className="text-sm font-bold text-brand-navy mb-1.5 block">{t("contact.phone_label")}</label>
                     <input
                       type="tel"
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      placeholder="+977 98XXXXXXXX"
+                      placeholder={t("contact.phone_placeholder")}
                       className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-blue/50 focus:border-brand-blue transition text-brand-navy"
                     />
                   </div>
                   <div>
-                    <label className="text-sm font-bold text-brand-navy mb-1.5 block">Subject *</label>
+                    <label className="text-sm font-bold text-brand-navy mb-1.5 block">{t("contact.subject_label")} *</label>
                     <select
                       required
                       value={formData.subject}
                       onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
                       className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-blue/50 focus:border-brand-blue transition bg-white text-brand-navy"
                     >
-                      <option value="">Select a topic</option>
-                      <option value="booking">Tour Booking</option>
-                      <option value="custom">Custom Itinerary</option>
-                      <option value="event">Event Inquiry</option>
-                      <option value="partnership">Partnership</option>
-                      <option value="other">Other</option>
+                      <option value="">{t("contact.subject_placeholder")}</option>
+                      <option value="booking">{t("contact.subject_booking")}</option>
+                      <option value="custom">{t("contact.subject_custom")}</option>
+                      <option value="event">{t("contact.subject_event")}</option>
+                      <option value="partnership">{t("contact.subject_partnership")}</option>
+                      <option value="other">{t("contact.subject_other")}</option>
                     </select>
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-sm font-bold text-brand-navy mb-1.5 block">Message *</label>
+                  <label className="text-sm font-bold text-brand-navy mb-1.5 block">{t("contact.message_label")} *</label>
                   <textarea
                     required
                     rows={5}
                     value={formData.message}
                     onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                    placeholder="Tell us about your dream trip, dates, group size, or any questions..."
+                    placeholder={t("contact.message_placeholder")}
                     className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-blue/50 focus:border-brand-blue transition resize-none text-brand-navy"
                   />
                 </div>
@@ -234,7 +235,7 @@ export default function ContactClient() {
                   disabled={submitting}
                   className="w-full bg-brand-red text-white font-bold py-4 rounded-xl text-base hover:bg-red-700 transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-brand-red/20 disabled:opacity-60"
                 >
-                  {submitting ? "Sending..." : "Send Message"}
+                  {submitting ? t("contact.sending_btn") : t("contact.send_btn")}
                 </button>
               </form>
               </div>
@@ -277,16 +278,16 @@ export default function ContactClient() {
         <div className="absolute inset-0 bg-gradient-to-r from-brand-navy/70 via-brand-navy/60 to-brand-navy/70" />
         <MotionWrapper variant="scale-up" className="relative z-10 max-w-4xl mx-auto text-center px-4 sm:px-6">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-3 sm:mb-4">
-            Ready to Plan Your Nepal Journey?
+            {t("contact.cta_heading")}
           </h2>
           <p className="text-gray-300 text-base sm:text-lg mb-6 sm:mb-8 max-w-xl mx-auto">
-            Share your dates, travel style, and ideas with us, and we&apos;ll help shape the right trip for you.
+            {t("contact.cta_desc")}
           </p>
           <Link
             href="/tours"
             className="group inline-flex items-center gap-2 bg-brand-red text-white font-semibold px-8 py-3.5 rounded-lg hover:bg-red-700 transition-colors duration-200"
           >
-            Explore Tours
+            {t("contact.cta_btn")}
             <svg className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
             </svg>
