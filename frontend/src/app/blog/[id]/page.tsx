@@ -74,6 +74,7 @@ export default async function BlogDetailPage({
     readTime: post.read_time,
     content: post.content ? post.content.split(/\n\n+/).filter(Boolean) : [],
     tags: post.tags ? post.tags.split(",").map((t) => t.trim()).filter(Boolean) : [],
+    translations: post.translations,
   };
   const legacyRelated = padded.map((p) => ({
     id: p.slug,
@@ -86,6 +87,7 @@ export default async function BlogDetailPage({
     readTime: p.read_time,
     content: [],
     tags: [],
+    translations: p.translations,
   }));
 
   const blogJsonLd = {

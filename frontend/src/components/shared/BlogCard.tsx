@@ -5,6 +5,8 @@ import Image from "next/image";
 import type { BlogPost } from "@/types";
 import { shouldUseUnoptimizedImage } from "@/lib/images";
 import BlogImagePlaceholder from "@/components/shared/BlogImagePlaceholder";
+import { useTranslation } from "@/context/TranslationContext";
+import { tr } from "@/lib/langContent";
 
 function getBlogDateParts(dateLabel: string) {
   const parsed = new Date(dateLabel);
@@ -26,6 +28,11 @@ function getBlogDateParts(dateLabel: string) {
 
 export default function BlogCard({ post }: { post: BlogPost & { slug: string } }) {
   const dateParts = getBlogDateParts(post.date);
+  const { lang } = useTranslation();
+  const tTitle = tr(post, lang, "title") || post.title;
+  const tExcerpt = tr(post, lang, "excerpt") || post.excerpt;
+  const tCategory = tr(post, lang, "category") || post.category;
+  const tReadTime = tr(post, lang, "read_time") || post.readTime;
 
   return (
     <Link href={`/blog/${post.slug}`} className="group block h-full">
@@ -47,7 +54,7 @@ export default function BlogCard({ post }: { post: BlogPost & { slug: string } }
           )}
           <div className="absolute left-4 top-4">
             <span className="rounded-full bg-white/90 backdrop-blur-sm px-3 py-1 text-xs font-semibold text-brand-navy shadow-sm">
-              {post.category}
+              {tCategory}
             </span>
           </div>
         </div>
@@ -64,16 +71,16 @@ export default function BlogCard({ post }: { post: BlogPost & { slug: string } }
               <svg className="w-4 h-4 text-brand-red" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              {post.readTime}
+              {tReadTime}
             </span>
           </div>
 
           <h3 className="mb-3 text-xl font-bold leading-tight text-brand-navy group-hover:text-brand-red transition-colors duration-300">
-            {post.title}
+            {tTitle}
           </h3>
-          
+
           <p className="mb-6 line-clamp-2 text-sm text-slate-600 flex-1">
-            {post.excerpt}
+            {tExcerpt}
           </p>
 
           <div className="mt-auto flex items-center justify-between border-t border-slate-100 pt-4">

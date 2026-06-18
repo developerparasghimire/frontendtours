@@ -8,6 +8,7 @@ import type { APICategory } from "@/lib/api";
 import PageHero from "@/components/sections/PageHero";
 import { sectionImages } from "@/lib/sectionImages";
 import { useTranslation } from "@/context/TranslationContext";
+import { tr } from "@/lib/langContent";
 
 const tourCardOffsets = ["xl:translate-y-2", "xl:-translate-y-2", "xl:translate-y-3", "xl:-translate-y-1"] as const;
 const ALL = "All";
@@ -51,7 +52,7 @@ export default function ToursClient({
 
   const [selectedCategory, setSelectedCategory] = useState<string>(ALL);
   const [selectedSubcategory, setSelectedSubcategory] = useState<string>(ALL);
-  const { t } = useTranslation();
+  const { t, lang } = useTranslation();
 
   // Sub-categories defined by admin under the currently selected parent.
   const subcategories = useMemo(() => {
@@ -111,6 +112,8 @@ export default function ToursClient({
             <div className="hidden sm:flex flex-wrap gap-2">
               {categories.map((cat) => {
                 const active = selectedCategory === cat;
+                const catObj = adminCategories.find((c) => c.name === cat);
+                const displayName = cat === ALL ? t("common.all_categories") : (catObj ? tr(catObj, lang, "name") || cat : cat);
                 return (
                   <button
                     key={cat}
@@ -123,7 +126,7 @@ export default function ToursClient({
                     }`}
                     aria-pressed={active}
                   >
-                    {cat}
+                    {displayName}
                   </button>
                 );
               })}
@@ -139,11 +142,13 @@ export default function ToursClient({
                 onChange={(e) => handleCategoryChange(e.target.value)}
                 className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-brand-navy focus:border-brand-orange focus:outline-none"
               >
-                {categories.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {cat === ALL ? t("common.all_categories") : cat}
-                  </option>
-                ))}
+                {categories.map((cat) => {
+                  const catObj = adminCategories.find((c) => c.name === cat);
+                  const displayName = cat === ALL ? t("common.all_categories") : (catObj ? tr(catObj, lang, "name") || cat : cat);
+                  return (
+                    <option key={cat} value={cat}>{displayName}</option>
+                  );
+                })}
               </select>
             </div>
           </div>
@@ -158,6 +163,8 @@ export default function ToursClient({
             <div className="hidden sm:flex flex-wrap gap-2">
               {subcategories.map((sub) => {
                 const active = selectedSubcategory === sub;
+                const subObj = adminCategories.find((c) => c.name === sub);
+                const displaySub = sub === ALL ? t("common.all_categories") : (subObj ? tr(subObj, lang, "name") || sub : sub);
                 return (
                   <button
                     key={sub}
@@ -170,7 +177,7 @@ export default function ToursClient({
                     }`}
                     aria-pressed={active}
                   >
-                    {sub}
+                    {displaySub}
                   </button>
                 );
               })}
@@ -185,11 +192,13 @@ export default function ToursClient({
                 onChange={(e) => setSelectedSubcategory(e.target.value)}
                 className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-brand-navy focus:border-brand-navy focus:outline-none"
               >
-                {subcategories.map((sub) => (
-                  <option key={sub} value={sub}>
-                    {sub === ALL ? `${t("common.all_categories")} ${selectedCategory.toLowerCase()} ${t("tours.regions")}` : sub}
-                  </option>
-                ))}
+                {subcategories.map((sub) => {
+                  const subObj = adminCategories.find((c) => c.name === sub);
+                  const displaySub = sub === ALL ? `${t("common.all_categories")} ${selectedCategory.toLowerCase()} ${t("tours.regions")}` : (subObj ? tr(subObj, lang, "name") || sub : sub);
+                  return (
+                    <option key={sub} value={sub}>{displaySub}</option>
+                  );
+                })}
               </select>
             </div>
           </div>

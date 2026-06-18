@@ -12,7 +12,7 @@ import { shouldUseUnoptimizedImage } from "@/lib/images";
 import BlogImagePlaceholder from "@/components/shared/BlogImagePlaceholder";
 import { sectionImages } from "@/lib/sectionImages";
 
-type Post = { id: string; slug: string; title: string; excerpt: string; image: string; date: string; author: string; category: string; readTime: string };
+type Post = { id: string; slug: string; title: string; excerpt: string; image: string; date: string; author: string; category: string; readTime: string; translations?: Record<string, Record<string, string>> };
 
 export default function ClientBlogPage() {
   const [apiPosts, setApiPosts] = useState<APIBlogPost[] | null>(null);
@@ -33,6 +33,7 @@ export default function ClientBlogPage() {
           author: p.author,
           category: p.category,
           readTime: p.read_time,
+          translations: p.translations,
         }))
       : [];
 

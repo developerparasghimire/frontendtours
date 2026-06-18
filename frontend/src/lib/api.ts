@@ -1220,6 +1220,7 @@ export interface APIBlogPost {
   publish_date: string;
   created_at: string;
   updated_at: string;
+  translations?: Record<string, Record<string, string>>;
 }
 
 export async function getBlogPosts(params?: { search?: string }): Promise<APIBlogPost[]> {
@@ -1317,6 +1318,7 @@ export interface APICategory {
   is_featured?: boolean;
   created_at?: string;
   updated_at?: string;
+  translations?: Record<string, Record<string, string>>;
 }
 
 export async function getCategories(params?: {

@@ -1,8 +1,11 @@
+export type Translations = Record<string, Record<string, string>>;
+
 export interface TourFAQ {
   id: number;
   question: string;
   answer: string;
   order: number;
+  translations?: Translations;
 }
 
 export interface TourGuideLanguage {
@@ -17,6 +20,7 @@ export interface TourGuide {
   bio: string;
   photo: string | null;
   languages: TourGuideLanguage[];
+  translations?: Translations;
 }
 
 export interface Tour {
@@ -42,6 +46,7 @@ export interface Tour {
   maxGroup?: number;
   guide?: TourGuide | null;
   faqs?: TourFAQ[];
+  translations?: Translations;
 }
 
 export interface Event {
@@ -60,6 +65,7 @@ export interface Event {
   highlights?: string[];
   availableTickets?: number;
   totalTickets?: number;
+  translations?: Translations;
 }
 
 export interface Destination {
@@ -83,6 +89,7 @@ export interface BlogPost {
   readTime: string;
   content?: string[];
   tags?: string[];
+  translations?: Translations;
 }
 
 export interface TeamMember {

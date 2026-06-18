@@ -7,6 +7,8 @@ import type { BlogPost } from "@/types";
 import { shouldUseUnoptimizedImage } from "@/lib/images";
 import BlogImagePlaceholder from "@/components/shared/BlogImagePlaceholder";
 import { sanitizeHTML } from "@/lib/sanitize";
+import { useTranslation } from "@/context/TranslationContext";
+import { tr } from "@/lib/langContent";
 
 export default function BlogDetailClient({
   post,
@@ -15,6 +17,14 @@ export default function BlogDetailClient({
   post: BlogPost;
   related: BlogPost[];
 }) {
+  const { lang } = useTranslation();
+  const tTitle = tr(post, lang, "title") || post.title;
+  const tExcerpt = tr(post, lang, "excerpt") || post.excerpt;
+  const tCategory = tr(post, lang, "category") || post.category;
+  const tReadTime = tr(post, lang, "read_time") || post.readTime;
+  const tContentRaw = tr(post, lang, "content");
+  const contentToRender = tContentRaw || (Array.isArray(post.content) ? post.content.join("\n\n") : (post.content ?? ""));
+
   return (
     <div className="flex flex-col overflow-x-hidden">
       {/* ═══════════ HERO ═══════════ */}
@@ -41,14 +51,14 @@ export default function BlogDetailClient({
         <div className="relative z-10 max-w-5xl mx-auto w-full px-4 sm:px-6 lg:px-8 pb-14 pt-20">
           <div className="flex flex-wrap items-center gap-3 mb-4">
             <span className="bg-brand-red text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-lg uppercase tracking-wide">
-              {post.category}
+              {tCategory}
             </span>
             <span className="text-white/70 text-sm">{post.date}</span>
             <span className="text-white/50 text-sm">·</span>
-            <span className="text-white/70 text-sm">{post.readTime}</span>
+            <span className="text-white/70 text-sm">{tReadTime}</span>
           </div>
           <h1 className="text-3xl sm:text-5xl md:text-6xl font-extrabold text-white leading-tight mb-5">
-            {post.title}
+            {tTitle}
           </h1>
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-sm font-bold text-white backdrop-blur-sm">
@@ -71,12 +81,12 @@ export default function BlogDetailClient({
             <MotionWrapper>
               {/* Excerpt lead */}
               <p className="text-lg sm:text-xl text-gray-700 font-medium leading-relaxed border-l-4 border-brand-red pl-5 mb-10">
-                {post.excerpt}
+                {tExcerpt}
               </p>
 
               {/* Article paragraphs */}
-              {post.content && post.content.length > 0 && (() => {
-                const raw = typeof post.content === "string" ? post.content : post.content.join("\n\n");
+              {contentToRender && contentToRender.length > 0 && (() => {
+                const raw = contentToRender;
                 const isHTML = /<[a-z][\s\S]*>/i.test(raw);
                 return isHTML ? (
                   <div
@@ -85,7 +95,7 @@ export default function BlogDetailClient({
                   />
                 ) : (
                   <div className="space-y-6 text-gray-700 text-base sm:text-lg leading-relaxed">
-                    {(Array.isArray(post.content) ? post.content : raw.split(/\n\n+/).filter(Boolean)).map((paragraph, i) => (
+                    {raw.split(/\n\n+/).filter(Boolean).map((paragraph, i) => (
                       <p key={i}>{paragraph}</p>
                     ))}
                   </div>

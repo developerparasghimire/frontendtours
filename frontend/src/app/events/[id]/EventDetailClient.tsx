@@ -9,6 +9,8 @@ import type { Event } from "@/types";
 import { shouldUseUnoptimizedImage } from "@/lib/images";
 import { sanitizeHTML } from "@/lib/sanitize";
 import { useCurrency } from "@/context/CurrencyContext";
+import { useTranslation } from "@/context/TranslationContext";
+import { tr } from "@/lib/langContent";
 import { eventPdfLead } from "@/lib/api";
 import { generateEventPDF } from "@/lib/generateDetailPDF";
 
@@ -74,7 +76,15 @@ function PDFDownloadModal({ onDownload, onClose }: { onDownload: (email: string)
 export default function EventDetailClient({ event }: { event: Event & { longDescription?: string; highlights?: string[]; availableTickets?: number; totalTickets?: number; numericId?: number } }) {
   const soldOut = event.availableTickets === 0;
   const { formatPrice } = useCurrency();
+  const { lang } = useTranslation();
   const displayPrice = event.basePrice ? formatPrice(event.basePrice) : event.price;
+
+  const tTitle = tr(event, lang, "title") || event.title;
+  const tCategory = tr(event, lang, "category") || event.category;
+  const tVenue = tr(event, lang, "venue") || event.location;
+  const tDescription = tr(event, lang, "long_description") || tr(event, lang, "description") || event.longDescription || event.description;
+  const tHighlightsRaw = tr(event, lang, "highlights");
+  const tHighlights = tHighlightsRaw ? tHighlightsRaw.split("\n").filter(Boolean) : (event.highlights || []);
   const [pdfModalOpen, setPdfModalOpen] = useState(false);
   const [showStickyBar, setShowStickyBar] = useState(false);
   const bookingCardRef = useRef<HTMLDivElement>(null);
@@ -116,19 +126,19 @@ export default function EventDetailClient({ event }: { event: Event & { longDesc
 
         <div className="relative z-10 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pb-16 pt-20">
           <span className="inline-block bg-brand-orange/90 backdrop-blur-sm text-white text-xs font-bold px-4 py-1.5 rounded-full mb-4 shadow-lg uppercase tracking-wide">
-            {event.category}
+            {tCategory}
           </span>
           <h1 className="text-2xl sm:text-4xl md:text-6xl font-extrabold text-white mb-4">
-            {event.title}
+            {tTitle}
           </h1>
           <div className="flex flex-wrap items-center gap-3 sm:gap-6 text-gray-200 text-sm sm:text-base">
-            {event.location && (
+            {tVenue && (
               <span className="flex items-center gap-2">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
-                {event.location}
+                {tVenue}
               </span>
             )}
             <span className="flex items-center gap-2">
@@ -155,24 +165,24 @@ export default function EventDetailClient({ event }: { event: Event & { longDesc
             {/* Description */}
             <MotionWrapper>
               <h2 className="text-xl sm:text-2xl font-bold text-brand-navy mb-4">About This Event</h2>
-              {(event.longDescription || event.description) && /<[a-z][\s\S]*>/i.test(event.longDescription || event.description || "") ? (
+              {tDescription && /<[a-z][\s\S]*>/i.test(tDescription) ? (
                 <div
                   className="text-gray-700 leading-relaxed text-base sm:text-lg [&>h1]:text-2xl [&>h1]:font-bold [&>h1]:text-brand-navy [&>h1]:mb-3 [&>h2]:text-xl [&>h2]:font-bold [&>h2]:text-brand-navy [&>h2]:mb-2 [&>h3]:text-lg [&>h3]:font-semibold [&>h3]:text-brand-navy [&>h3]:mb-2 [&>p]:mb-3 [&>ul]:list-disc [&>ul]:pl-5 [&>ul]:mb-3 [&>ol]:list-decimal [&>ol]:pl-5 [&>ol]:mb-3 [&>blockquote]:border-l-4 [&>blockquote]:border-brand-navy/30 [&>blockquote]:pl-4 [&>blockquote]:italic [&>blockquote]:text-gray-600 [&>blockquote]:mb-3 [&>img]:max-w-full [&>img]:rounded-xl [&>img]:my-4"
-                  dangerouslySetInnerHTML={{ __html: sanitizeHTML(event.longDescription || event.description || "") }}
+                  dangerouslySetInnerHTML={{ __html: sanitizeHTML(tDescription) }}
                 />
               ) : (
                 <p className="text-gray-700 leading-relaxed text-base sm:text-lg">
-                  {event.longDescription || event.description}
+                  {tDescription}
                 </p>
               )}
             </MotionWrapper>
 
             {/* Highlights */}
-            {event.highlights && event.highlights.length > 0 && (
+            {tHighlights.length > 0 && (
               <MotionWrapper delay={0.1}>
                 <h2 className="text-xl sm:text-2xl font-bold text-brand-navy mb-4">Event Highlights</h2>
                 <div className="space-y-3">
-                  {event.highlights.map((h, i) => (
+                  {tHighlights.map((h, i) => (
                     <div key={i} className="flex items-start gap-3">
                       <div className="w-6 h-6 bg-brand-blue/10 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                         <svg className="w-4 h-4 text-brand-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -211,7 +221,7 @@ export default function EventDetailClient({ event }: { event: Event & { longDesc
                     <p className="text-brand-navy font-semibold text-sm mt-0.5">{event.time}</p>
                   </div>
                 </div>
-                {event.location && (
+                {tVenue && (
                   <div className="flex items-start gap-3">
                     <span className="w-9 h-9 rounded-lg bg-white flex items-center justify-center flex-shrink-0 shadow-sm">
                       <svg className="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
@@ -221,7 +231,7 @@ export default function EventDetailClient({ event }: { event: Event & { longDesc
                     </span>
                     <div>
                       <p className="text-[11px] text-gray-400 font-medium uppercase tracking-wide">Venue</p>
-                      <p className="text-brand-navy font-semibold text-sm mt-0.5">{event.location}</p>
+                      <p className="text-brand-navy font-semibold text-sm mt-0.5">{tVenue}</p>
                     </div>
                   </div>
                 )}
@@ -233,7 +243,7 @@ export default function EventDetailClient({ event }: { event: Event & { longDesc
                   </span>
                   <div>
                     <p className="text-[11px] text-gray-400 font-medium uppercase tracking-wide">Category</p>
-                    <p className="text-brand-navy font-semibold text-sm mt-0.5">{event.category}</p>
+                    <p className="text-brand-navy font-semibold text-sm mt-0.5">{tCategory}</p>
                   </div>
                 </div>
               </div>

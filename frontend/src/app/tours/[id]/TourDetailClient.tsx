@@ -10,6 +10,7 @@ import { shouldUseUnoptimizedImage } from "@/lib/images";
 import { sanitizeHTML } from "@/lib/sanitize";
 import { useCurrency } from "@/context/CurrencyContext";
 import { useTranslation } from "@/context/TranslationContext";
+import { tr } from "@/lib/langContent";
 import { tourPdfLead } from "@/lib/api";
 import { generateTourPDF } from "@/lib/generateDetailPDF";
 
@@ -80,8 +81,18 @@ export default function TourDetailClient({ tour }: { tour: Tour }) {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const bookingCardRef = useRef<HTMLDivElement>(null);
   const { formatPrice } = useCurrency();
-  const { t } = useTranslation();
+  const { t, lang } = useTranslation();
   const displayPrice = tour.basePrice ? formatPrice(tour.basePrice) : tour.price;
+
+  const tTitle = tr(tour, lang, "title") || tour.title;
+  const tDescription = tr(tour, lang, "long_description") || tr(tour, lang, "description") || tour.longDescription || tour.description;
+  const tBadge = tr(tour, lang, "badge") || tour.badge;
+  const tBestSeason = tr(tour, lang, "best_season") || tour.bestSeason;
+  const tDestination = tr(tour, lang, "destination") || tour.location;
+  const tHighlightsRaw = tr(tour, lang, "highlights");
+  const tHighlights = tHighlightsRaw ? tHighlightsRaw.split("\n").filter(Boolean) : (tour.highlights || []);
+  const tIncludesRaw = tr(tour, lang, "includes");
+  const tIncludes = tIncludesRaw ? tIncludesRaw.split("\n").filter(Boolean) : (tour.includes || []);
 
   useEffect(() => {
     const el = bookingCardRef.current;
@@ -144,28 +155,28 @@ export default function TourDetailClient({ tour }: { tour: Tour }) {
         <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-gradient-to-r from-brand-orange via-brand-red to-brand-orange" />
 
         <div className="relative z-10 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pb-16 pt-20">
-          {tour.badge && (
+          {tBadge && (
             <span
               className="inline-block bg-brand-orange text-white text-xs font-bold px-4 py-1.5 rounded-full mb-4 shadow-lg"
             >
-              {tour.badge}
+              {tBadge}
             </span>
           )}
           <h1
             className="text-2xl sm:text-4xl md:text-6xl font-extrabold text-white mb-4"
           >
-            {tour.title}
+            {tTitle}
           </h1>
           <div
             className="flex flex-wrap items-center gap-3 sm:gap-6 text-gray-200 text-sm sm:text-base"
           >
-            {tour.location && (
+            {tDestination && (
               <span className="flex items-center gap-2">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
-                {tour.location}
+                {tDestination}
               </span>
             )}
             {tour.duration && (
@@ -189,9 +200,9 @@ export default function TourDetailClient({ tour }: { tour: Tour }) {
                 {tour.difficulty}
               </span>
             )}
-            {tour.bestSeason && (
+            {tBestSeason && (
               <span className="px-3 py-1 rounded-full bg-brand-green/30 text-white text-xs font-semibold">
-                {tour.bestSeason}
+                {tBestSeason}
               </span>
             )}
           </div>
@@ -206,14 +217,14 @@ export default function TourDetailClient({ tour }: { tour: Tour }) {
             {/* Description */}
             <MotionWrapper>
               <h2 className="text-xl sm:text-2xl font-bold text-brand-navy mb-4">{t("tour.about")}</h2>
-              {tour.longDescription && /<[a-z][\s\S]*>/i.test(tour.longDescription) ? (
+              {tDescription && /<[a-z][\s\S]*>/i.test(tDescription) ? (
                 <div
                   className="text-gray-700 leading-relaxed text-base sm:text-lg [&>h1]:text-2xl [&>h1]:font-bold [&>h1]:text-brand-navy [&>h1]:mb-3 [&>h2]:text-xl [&>h2]:font-bold [&>h2]:text-brand-navy [&>h2]:mb-2 [&>h3]:text-lg [&>h3]:font-semibold [&>h3]:text-brand-navy [&>h3]:mb-2 [&>p]:mb-3 [&>ul]:list-disc [&>ul]:pl-5 [&>ul]:mb-3 [&>ol]:list-decimal [&>ol]:pl-5 [&>ol]:mb-3 [&>blockquote]:border-l-4 [&>blockquote]:border-brand-navy/30 [&>blockquote]:pl-4 [&>blockquote]:italic [&>blockquote]:text-gray-600 [&>blockquote]:mb-3 [&>img]:max-w-full [&>img]:rounded-xl [&>img]:my-4"
-                  dangerouslySetInnerHTML={{ __html: sanitizeHTML(tour.longDescription) }}
+                  dangerouslySetInnerHTML={{ __html: sanitizeHTML(tDescription) }}
                 />
               ) : (
                 <p className="text-gray-700 leading-relaxed text-base sm:text-lg">
-                  {tour.longDescription || tour.description}
+                  {tDescription}
                 </p>
               )}
             </MotionWrapper>
@@ -222,7 +233,7 @@ export default function TourDetailClient({ tour }: { tour: Tour }) {
             {(tour.location || tour.duration || tour.difficulty || tour.category || tour.bestSeason || tour.rating) && (
               <MotionWrapper delay={0.05}>
                 <div className="bg-[#eef2f7] rounded-2xl p-5 sm:p-6 grid grid-cols-2 gap-x-6 gap-y-5">
-                  {tour.location && (
+                  {tDestination && (
                     <div className="flex items-start gap-3">
                       <span className="w-9 h-9 rounded-lg bg-white flex items-center justify-center flex-shrink-0 shadow-sm">
                         <svg className="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
@@ -231,7 +242,7 @@ export default function TourDetailClient({ tour }: { tour: Tour }) {
                       </span>
                       <div>
                         <p className="text-[11px] text-gray-400 font-medium uppercase tracking-wide">Destination</p>
-                        <p className="text-brand-navy font-semibold text-sm mt-0.5">{tour.location}</p>
+                        <p className="text-brand-navy font-semibold text-sm mt-0.5">{tDestination}</p>
                       </div>
                     </div>
                   )}
@@ -275,7 +286,7 @@ export default function TourDetailClient({ tour }: { tour: Tour }) {
                       </div>
                     </div>
                   )}
-                  {tour.bestSeason && (
+                  {tBestSeason && (
                     <div className="flex items-start gap-3">
                       <span className="w-9 h-9 rounded-lg bg-white flex items-center justify-center flex-shrink-0 shadow-sm">
                         <svg className="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
@@ -284,7 +295,7 @@ export default function TourDetailClient({ tour }: { tour: Tour }) {
                       </span>
                       <div>
                         <p className="text-[11px] text-gray-400 font-medium uppercase tracking-wide">Best Season</p>
-                        <p className="text-brand-navy font-semibold text-sm mt-0.5">{tour.bestSeason}</p>
+                        <p className="text-brand-navy font-semibold text-sm mt-0.5">{tBestSeason}</p>
                       </div>
                     </div>
                   )}
@@ -343,7 +354,7 @@ export default function TourDetailClient({ tour }: { tour: Tour }) {
                       <div className="flex-1 min-w-0">
                         <p className="text-base sm:text-lg font-bold text-brand-navy">{tour.guide.name}</p>
                         {tour.guide.bio && (
-                          <p className="text-gray-500 text-sm leading-relaxed mt-1">{tour.guide.bio}</p>
+                          <p className="text-gray-500 text-sm leading-relaxed mt-1">{tr(tour.guide, lang, "bio") || tour.guide.bio}</p>
                         )}
                       </div>
                     </div>
@@ -382,7 +393,7 @@ export default function TourDetailClient({ tour }: { tour: Tour }) {
             <MotionWrapper delay={0.1}>
               <h2 className="text-xl sm:text-2xl font-bold text-brand-navy mb-4">{t("tour.highlights")}</h2>
               <div className="space-y-3">
-                {tour.highlights?.map((h, i) => (
+                {tHighlights.map((h, i) => (
                   <div
                     key={i}
                     className="flex items-start gap-3"
@@ -437,7 +448,7 @@ export default function TourDetailClient({ tour }: { tour: Tour }) {
                         onClick={() => setOpenFaq(openFaq === i ? null : i)}
                         className="w-full flex items-center justify-between gap-4 px-5 py-4 text-left bg-white hover:bg-gray-50 transition-colors"
                       >
-                        <span className="font-semibold text-brand-navy text-sm sm:text-base">{faq.question}</span>
+                        <span className="font-semibold text-brand-navy text-sm sm:text-base">{tr(faq, lang, "question") || faq.question}</span>
                         <svg
                           className={`w-5 h-5 text-brand-navy flex-shrink-0 transition-transform duration-200 ${openFaq === i ? "rotate-180" : ""}`}
                           fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
@@ -447,7 +458,7 @@ export default function TourDetailClient({ tour }: { tour: Tour }) {
                       </button>
                       {openFaq === i && (
                         <div className="px-5 pb-4 text-gray-600 text-sm leading-relaxed border-t border-gray-100 pt-3 bg-gray-50">
-                          {faq.answer}
+                          {tr(faq, lang, "answer") || faq.answer}
                         </div>
                       )}
                     </div>
@@ -558,7 +569,7 @@ export default function TourDetailClient({ tour }: { tour: Tour }) {
               <div className="border-t-2 border-gray-100 pt-4">
                 <p className="font-bold text-brand-navy text-sm mb-3 uppercase tracking-wider">What&apos;s Included</p>
                 <ul className="space-y-2">
-                  {tour.includes?.map((item, i) => (
+                  {tIncludes.map((item, i) => (
                     <li key={i} className="flex items-center gap-2 text-gray-700 text-sm">
                       <svg className="w-4 h-4 text-brand-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />

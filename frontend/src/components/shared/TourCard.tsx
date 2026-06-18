@@ -7,6 +7,7 @@ import { shouldUseUnoptimizedImage } from "@/lib/images";
 import TourImagePlaceholder from "@/components/shared/TourImagePlaceholder";
 import { useCurrency } from "@/context/CurrencyContext";
 import { useTranslation } from "@/context/TranslationContext";
+import { tr } from "@/lib/langContent";
 
 function getTourDurationParts(durationLabel?: string) {
   if (!durationLabel) {
@@ -27,8 +28,10 @@ function getTourDurationParts(durationLabel?: string) {
 export default function TourCard(tour: Tour & { compact?: boolean }) {
   const durationParts = getTourDurationParts(tour.duration);
   const { formatPrice } = useCurrency();
-  const { t } = useTranslation();
+  const { t, lang } = useTranslation();
   const displayPrice = tour.basePrice ? formatPrice(tour.basePrice) : tour.price;
+  const tTitle = tr(tour, lang, "title") || tour.title;
+  const tBadge = tr(tour, lang, "badge") || tour.badge || tr(tour, lang, "destination") || tour.category || "Journey";
 
   return (
     <Link href={`/tours/${tour.id}`} className="group block">
@@ -53,7 +56,7 @@ export default function TourCard(tour: Tour & { compact?: boolean }) {
 
           <div className="absolute left-5 top-5 right-5 flex items-start justify-between gap-3">
             <span className="rounded-full border border-white/15 bg-black/25 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.28em] text-white/70 backdrop-blur-sm">
-              {tour.badge || tour.category || "Journey"}
+              {tBadge}
             </span>
             <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-white/80 backdrop-blur-sm">
               {displayPrice}
@@ -68,7 +71,7 @@ export default function TourCard(tour: Tour & { compact?: boolean }) {
               {durationParts.value}
             </div>
             <h3 className="mx-auto mt-3 max-w-[12rem] text-base font-semibold leading-tight text-white sm:text-lg">
-              {tour.title}
+              {tTitle}
             </h3>
           </div>
 
