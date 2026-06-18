@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import type { SiteConfig } from "@/lib/api";
+import { useTranslation } from "@/context/TranslationContext";
 
 interface HeroSliderProps {
   siteConfig?: SiteConfig | null;
@@ -24,6 +25,7 @@ export default function HeroSlider({ siteConfig }: HeroSliderProps) {
     return () => window.clearTimeout(timeout);
   }, []);
 
+  const { t } = useTranslation();
   const siteName = siteConfig?.site_name || "Get Tours Nepal";
   const backgroundY = useTransform(scrollY, [0, 720], [0, prefersReducedMotion ? 0 : 240]);
   const portraitY = useTransform(scrollY, [0, 720], [0, prefersReducedMotion ? 0 : 170]);
@@ -123,14 +125,14 @@ export default function HeroSlider({ siteConfig }: HeroSliderProps) {
                 type="search"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search tours, events, destinations..."
+                placeholder={t("hero.search_placeholder")}
                 className="flex-1 border-none bg-transparent text-sm font-medium text-brand-navy outline-none placeholder:text-slate-400"
               />
               <button
                 type="submit"
                 className="flex-shrink-0 rounded-full bg-brand-red px-5 py-2 text-sm font-semibold text-white transition-all duration-300 hover:bg-[#c11000]"
               >
-                Search
+                {t("hero.search_btn")}
               </button>
             </div>
           </form>

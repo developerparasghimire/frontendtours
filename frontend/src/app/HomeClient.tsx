@@ -45,8 +45,10 @@ function getEventDateParts(dateLabel: string) {
 function LatestEventFeatureCard({ event, index, noStagger }: { event: Event; index: number; noStagger?: boolean }) {
   const dateParts = getEventDateParts(event.date);
   const { formatPrice } = useCurrency();
-  const { t } = useTranslation();
+  const { t, lang } = useTranslation();
   const displayPrice = event.basePrice ? formatPrice(event.basePrice) : event.price;
+  const tTitle = tr(event, lang, "title") || event.title;
+  const tCategory = tr(event, lang, "category") || event.category;
   const staggerClasses = [
     "xl:translate-y-4",
     "xl:-translate-y-6",
@@ -74,7 +76,7 @@ function LatestEventFeatureCard({ event, index, noStagger }: { event: Event; ind
 
             <div className="absolute left-5 top-5 right-5 flex items-start justify-between gap-3">
               <span className="rounded-full border border-white/15 bg-black/25 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.28em] text-white/70 backdrop-blur-sm">
-                {event.category}
+                {tCategory}
               </span>
               <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-white/80 backdrop-blur-sm">
                 {displayPrice}
@@ -89,7 +91,7 @@ function LatestEventFeatureCard({ event, index, noStagger }: { event: Event; ind
                 {dateParts.day}
               </div>
               <h3 className="mx-auto mt-3 max-w-[12rem] text-base font-semibold leading-tight text-white sm:text-lg lg:text-xl">
-                {event.title}
+                {tTitle}
               </h3>
             </div>
 
@@ -250,8 +252,10 @@ function FeaturedTourCard({
 }) {
   const durationParts = getTourDurationParts(tour.duration);
   const { formatPrice } = useCurrency();
-  const { t } = useTranslation();
+  const { t, lang } = useTranslation();
   const displayPrice = tour.basePrice ? formatPrice(tour.basePrice) : tour.price;
+  const tTitle = tr(tour, lang, "title") || tour.title;
+  const tBadge = tr(tour, lang, "badge") || tr(tour, lang, "destination") || tour.badge || tour.category || "Journey";
   const staggerClasses = [
     "xl:translate-y-4",
     "xl:-translate-y-6",
@@ -283,7 +287,7 @@ function FeaturedTourCard({
 
             <div className="absolute left-5 top-5 right-5 flex items-start justify-between gap-3">
               <span className="rounded-full border border-white/15 bg-black/25 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.28em] text-white/70 backdrop-blur-sm">
-                {tour.badge || tour.category || "Journey"}
+                {tBadge}
               </span>
               <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-white/80 backdrop-blur-sm">
                 {displayPrice}
@@ -298,7 +302,7 @@ function FeaturedTourCard({
                 {durationParts.value}
               </div>
               <h3 className="mx-auto mt-3 max-w-[12rem] text-base font-semibold leading-tight text-white sm:text-lg lg:text-xl">
-                {tour.title}
+                {tTitle}
               </h3>
             </div>
 
@@ -1206,9 +1210,9 @@ export default function HomeClient({ tours, events, testimonials, siteConfig, pa
                   ) : (
                     <span className="text-4xl block mb-3 group-hover:scale-125 transition-transform duration-300">{cat.icon || "✨"}</span>
                   )}
-                  <h3 className="font-bold text-brand-navy text-sm mb-1 group-hover:text-brand-blue transition-colors duration-300">{cat.name}</h3>
+                  <h3 className="font-bold text-brand-navy text-sm mb-1 group-hover:text-brand-blue transition-colors duration-300">{tr(cat, lang, "name") || cat.name}</h3>
                   {cat.description ? (
-                    <p className="text-gray-400 text-xs line-clamp-2">{cat.description}</p>
+                    <p className="text-gray-400 text-xs line-clamp-2">{tr(cat, lang, "description") || cat.description}</p>
                   ) : null}
                 </Link>
               </StaggerItem>
