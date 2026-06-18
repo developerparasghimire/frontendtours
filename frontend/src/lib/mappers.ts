@@ -46,6 +46,7 @@ export function mapAPITour(t: APITour): Tour {
     maxGroup: t.max_capacity,
     guide: t.guide ?? null,
     faqs: (t.faqs ?? []) as TourFAQ[],
+    translations: t.translations,
   };
 }
 
@@ -68,5 +69,6 @@ export function mapAPIEvent(e: APIEvent): Event {
     highlights: e.highlights || [],
     availableTickets: e.available_tickets,
     totalTickets: e.total_tickets,
+    translations: e.translations,
   };
 }

@@ -399,6 +399,7 @@ export interface APITourFAQ {
   question: string;
   answer: string;
   order: number;
+  translations?: Record<string, Record<string, string>>;
 }
 
 export interface APITourGuide {
@@ -407,6 +408,7 @@ export interface APITourGuide {
   bio: string;
   photo: string | null;
   languages: APITourGuideLanguage[];
+  translations?: Record<string, Record<string, string>>;
 }
 
 export interface APITour {
@@ -435,6 +437,7 @@ export interface APITour {
   booking_count?: number;
   guide?: APITourGuide | null;
   faqs?: APITourFAQ[];
+  translations?: Record<string, Record<string, string>>;
   created_at: string;
   updated_at: string;
 }
@@ -491,6 +494,7 @@ export interface APIEvent {
   is_active: boolean;
   is_latest: boolean;
   booking_count?: number;
+  translations?: Record<string, Record<string, string>>;
   created_at: string;
   updated_at: string;
 }
