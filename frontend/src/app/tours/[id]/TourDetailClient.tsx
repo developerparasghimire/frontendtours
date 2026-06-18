@@ -89,9 +89,9 @@ export default function TourDetailClient({ tour }: { tour: Tour }) {
   const tBadge = tr(tour, lang, "badge") || tour.badge;
   const tBestSeason = tr(tour, lang, "best_season") || tour.bestSeason;
   const tDestination = tr(tour, lang, "destination") || tour.location;
-  const tHighlightsRaw = tr(tour, lang, "highlights");
+  const tHighlightsRaw = lang !== "EN" ? tr(tour, lang, "highlights") : "";
   const tHighlights = tHighlightsRaw ? tHighlightsRaw.split("\n").filter(Boolean) : (tour.highlights || []);
-  const tIncludesRaw = tr(tour, lang, "includes");
+  const tIncludesRaw = lang !== "EN" ? tr(tour, lang, "includes") : "";
   const tIncludes = tIncludesRaw ? tIncludesRaw.split("\n").filter(Boolean) : (tour.includes || []);
   const tDifficulty = tr(tour, lang, "difficulty") || tour.difficulty;
   const tCategory = tr(tour, lang, "category") || (tour.subcategory ? `${tour.category} / ${tour.subcategory}` : tour.category);
