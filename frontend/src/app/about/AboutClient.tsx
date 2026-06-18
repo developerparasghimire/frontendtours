@@ -7,6 +7,7 @@ import { shouldUseUnoptimizedImage } from "@/lib/images";
 import { sectionImages } from "@/lib/sectionImages";
 import PageHero from "@/components/sections/PageHero";
 import { useTranslation } from "@/context/TranslationContext";
+import { tr } from "@/lib/langContent";
 import type { APIAboutStat, APIValue, APIMilestone, APILeader, SiteConfig } from "@/lib/api";
 
 interface Props {
@@ -19,7 +20,7 @@ interface Props {
 }
 
 export default function AboutClient({ stats, valuesData, milestonesData, guides, teamMembers, siteConfig }: Props) {
-  const { t } = useTranslation();
+  const { t, lang } = useTranslation();
 
   const trekFeatures = [
     { emoji: "🗺️", title: t("about.feature1_title"), desc: t("about.feature1_desc") },
@@ -50,7 +51,7 @@ export default function AboutClient({ stats, valuesData, milestonesData, guides,
               {stats.map((s, i) => (
                 <div key={s.label} className={`py-8 px-6 text-center relative ${i < stats.length - 1 ? "after:absolute after:right-0 after:top-4 after:bottom-4 after:w-px after:bg-white/10" : ""}`}>
                   <p className="text-4xl sm:text-5xl font-black text-white tracking-tight">{s.value}</p>
-                  <p className="text-brand-orange/80 text-[0.65rem] sm:text-xs mt-2 font-bold uppercase tracking-[0.22em]">{s.label}</p>
+                  <p className="text-brand-orange/80 text-[0.65rem] sm:text-xs mt-2 font-bold uppercase tracking-[0.22em]">{tr(s, lang, "label")}</p>
                 </div>
               ))}
             </div>
@@ -103,19 +104,19 @@ export default function AboutClient({ stats, valuesData, milestonesData, guides,
             <MotionWrapper>
               <p className="inline-flex items-center gap-2 text-brand-red text-[0.68rem] font-black tracking-[0.28em] uppercase mb-4">
                 <span className="w-5 h-px bg-brand-red inline-block" />
-                {siteConfig?.about_eyebrow || "Who We Are"}
+                {siteConfig ? tr(siteConfig, lang, "about_eyebrow") || siteConfig.about_eyebrow || "Who We Are" : "Who We Are"}
               </p>
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-brand-navy leading-[1.05] tracking-[-0.04em] mb-7">
                 <span className="relative inline-block">
-                  {siteConfig?.about_title || "We Make Every Trek Meaningful"}
+                  {siteConfig ? tr(siteConfig, lang, "about_title") || siteConfig.about_title || "We Make Every Trek Meaningful" : "We Make Every Trek Meaningful"}
                   <span className="absolute -bottom-1 left-0 right-0 h-[3px] bg-gradient-to-r from-brand-red to-brand-orange rounded-full" />
                 </span>
               </h2>
               <p className="text-slate-500 leading-relaxed mb-5 text-base sm:text-lg">
-                {siteConfig?.about_paragraph_1 || "Get Tours was founded in 2018 with a simple mission: make Nepal's incredible mountain trails accessible to everyone, while uplifting the communities that call those mountains home."}
+                {siteConfig ? tr(siteConfig, lang, "about_paragraph_1") || siteConfig.about_paragraph_1 || "Get Tours was founded in 2018 with a simple mission: make Nepal's incredible mountain trails accessible to everyone, while uplifting the communities that call those mountains home." : "Get Tours was founded in 2018 with a simple mission: make Nepal's incredible mountain trails accessible to everyone, while uplifting the communities that call those mountains home."}
               </p>
               <p className="text-slate-500 leading-relaxed mb-10 text-base sm:text-lg">
-                {siteConfig?.about_paragraph_2 || "We believe trekking should be more than reaching a summit — it should be transformative. Every trail we chart connects you with real mountain people, ancient culture, and raw adventure."}
+                {siteConfig ? tr(siteConfig, lang, "about_paragraph_2") || siteConfig.about_paragraph_2 || "We believe trekking should be more than reaching a summit — it should be transformative. Every trail we chart connects you with real mountain people, ancient culture, and raw adventure." : "We believe trekking should be more than reaching a summit — it should be transformative. Every trail we chart connects you with real mountain people, ancient culture, and raw adventure."}
               </p>
 
               {stats.length > 0 && (
@@ -131,7 +132,7 @@ export default function AboutClient({ stats, valuesData, milestonesData, guides,
                     return (
                       <div key={s.label} className={`${c.bg} rounded-2xl p-5 border border-white`}>
                         <p className={`text-2xl font-black ${c.color} leading-none`}>{s.value}</p>
-                        <p className="text-slate-500 text-xs font-medium mt-1.5">{s.label}</p>
+                        <p className="text-slate-500 text-xs font-medium mt-1.5">{tr(s, lang, "label")}</p>
                       </div>
                     );
                   })}
@@ -212,8 +213,8 @@ export default function AboutClient({ stats, valuesData, milestonesData, guides,
                         </svg>
                       )}
                     </div>
-                    <h3 className="text-lg font-bold text-white mb-3">{v.title}</h3>
-                    <p className="text-white/50 text-sm leading-relaxed">{v.description}</p>
+                    <h3 className="text-lg font-bold text-white mb-3">{tr(v, lang, "title")}</h3>
+                    <p className="text-white/50 text-sm leading-relaxed">{tr(v, lang, "description")}</p>
                   </div>
                 </StaggerItem>
               ))}
@@ -246,7 +247,7 @@ export default function AboutClient({ stats, valuesData, milestonesData, guides,
                       <div className="absolute left-[1.125rem] sm:left-1/2 w-5 h-5 bg-brand-red rounded-full -translate-x-1/2 ring-4 ring-white z-10 shadow-[0_0_12px_rgba(214,28,29,0.4)] mt-1" />
                       <div className={`ml-11 sm:ml-0 sm:w-[46%] bg-white rounded-2xl border border-slate-100 p-6 shadow-[0_8px_30px_-10px_rgba(15,23,42,0.1)] hover:shadow-[0_16px_40px_-12px_rgba(15,23,42,0.14)] transition-shadow duration-300 ${i % 2 === 0 ? "sm:mr-auto" : "sm:ml-auto"}`}>
                         <span className="inline-block bg-brand-red text-white font-black text-xs px-3 py-1 rounded-full mb-3 shadow-sm shadow-brand-red/30">{m.year}</span>
-                        <p className="text-slate-600 text-sm leading-relaxed">{m.text}</p>
+                        <p className="text-slate-600 text-sm leading-relaxed">{tr(m, lang, "text")}</p>
                       </div>
                       <div className="hidden sm:block sm:w-[46%]" />
                     </div>
@@ -294,17 +295,17 @@ export default function AboutClient({ stats, valuesData, milestonesData, guides,
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/5 to-transparent" />
                       <div className="absolute inset-x-0 bottom-0 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out bg-brand-navy/96 px-6 py-5">
-                        <p className="text-white/65 text-xs leading-relaxed">{t_.bio || "Expert guide with years of Himalayan experience."}</p>
+                        <p className="text-white/65 text-xs leading-relaxed">{tr(t_, lang, "bio") || "Expert guide with years of Himalayan experience."}</p>
                       </div>
                       <div className="absolute bottom-0 inset-x-0 px-5 pb-4 group-hover:opacity-0 transition-opacity duration-200">
                         <h3 className="text-white font-bold text-base leading-tight">{t_.name}</h3>
-                        <p className="text-brand-orange text-xs font-semibold mt-0.5">{t_.role}</p>
+                        <p className="text-brand-orange text-xs font-semibold mt-0.5">{tr(t_, lang, "role")}</p>
                       </div>
                     </div>
                     <div className="px-5 py-4 flex items-center justify-between bg-white">
                       <div>
                         <h3 className="font-bold text-brand-navy text-sm leading-tight">{t_.name}</h3>
-                        <p className="text-slate-400 text-xs mt-0.5">{t_.role}</p>
+                        <p className="text-slate-400 text-xs mt-0.5">{tr(t_, lang, "role")}</p>
                       </div>
                       <div className="w-9 h-9 rounded-full bg-brand-red/8 flex items-center justify-center group-hover:bg-brand-red transition-all duration-300 shrink-0">
                         <svg className="w-4 h-4 text-brand-red group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -356,17 +357,17 @@ export default function AboutClient({ stats, valuesData, milestonesData, guides,
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/5 to-transparent" />
                       <div className="absolute inset-x-0 bottom-0 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out bg-brand-navy/96 px-6 py-5">
-                        <p className="text-white/65 text-xs leading-relaxed">{t_.bio || "Member of our office team."}</p>
+                        <p className="text-white/65 text-xs leading-relaxed">{tr(t_, lang, "bio") || "Member of our office team."}</p>
                       </div>
                       <div className="absolute bottom-0 inset-x-0 px-5 pb-4 group-hover:opacity-0 transition-opacity duration-200">
                         <h3 className="text-white font-bold text-base leading-tight">{t_.name}</h3>
-                        <p className="text-brand-orange text-xs font-semibold mt-0.5">{t_.role}</p>
+                        <p className="text-brand-orange text-xs font-semibold mt-0.5">{tr(t_, lang, "role")}</p>
                       </div>
                     </div>
                     <div className="px-5 py-4 flex items-center justify-between bg-white">
                       <div>
                         <h3 className="font-bold text-brand-navy text-sm leading-tight">{t_.name}</h3>
-                        <p className="text-slate-400 text-xs mt-0.5">{t_.role}</p>
+                        <p className="text-slate-400 text-xs mt-0.5">{tr(t_, lang, "role")}</p>
                       </div>
                       <div className="w-9 h-9 rounded-full bg-brand-orange/10 flex items-center justify-center group-hover:bg-brand-orange transition-all duration-300 shrink-0">
                         <svg className="w-4 h-4 text-brand-orange group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

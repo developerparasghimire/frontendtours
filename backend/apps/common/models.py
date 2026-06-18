@@ -86,11 +86,38 @@ class SiteConfig(models.Model):
     about_paragraph_1 = models.TextField(blank=True, default="", help_text="First paragraph under the About heading.")
     about_paragraph_2 = models.TextField(blank=True, default="", help_text="Second paragraph under the About heading.")
 
+    # Auto-generated translations for all text fields above (home about + about page)
+    translations = models.JSONField(default=dict, blank=True, help_text="Auto-filled: translations of all editable text fields into supported languages.")
+
     updated_at = models.DateTimeField(auto_now=True)
-    
+
+    _TRANSLATE_FIELDS = [
+        "home_about_heading", "home_about_eyebrow", "home_about_paragraph_1", "home_about_paragraph_2",
+        "about_eyebrow", "about_title", "about_paragraph_1", "about_paragraph_2",
+    ]
+
+    def save(self, *args, **kwargs):
+        needs = self.pk is None
+        if not needs:
+            try:
+                old = SiteConfig.objects.get(pk=self.pk)
+                needs = any(getattr(old, f) != getattr(self, f) for f in self._TRANSLATE_FIELDS)
+            except SiteConfig.DoesNotExist:
+                needs = True
+        super().save(*args, **kwargs)
+        if needs:
+            from .translation_utils import auto_translate
+            try:
+                fields = {f: getattr(self, f) for f in self._TRANSLATE_FIELDS if getattr(self, f)}
+                if fields:
+                    self.translations = auto_translate(fields)
+                    SiteConfig.objects.filter(pk=self.pk).update(translations=self.translations)
+            except Exception:
+                pass
+
     def __str__(self):
         return self.site_name
-    
+
     class Meta:
         verbose_name = "Site Configuration"
         verbose_name_plural = "Site Configuration"
@@ -133,12 +160,30 @@ class AboutStat(models.Model):
     label = models.CharField(max_length=120)
     value = models.CharField(max_length=120)
     order = models.PositiveIntegerField(default=0)
+    translations = models.JSONField(default=dict, blank=True, help_text="Auto-filled: translations of 'label' into all supported languages.")
 
     class Meta:
         ordering = ["order"]
 
     def __str__(self):
         return f"{self.value} — {self.label}"
+
+    def save(self, *args, **kwargs):
+        needs = self.pk is None
+        if not needs:
+            try:
+                old = AboutStat.objects.get(pk=self.pk)
+                needs = old.label != self.label
+            except AboutStat.DoesNotExist:
+                needs = True
+        super().save(*args, **kwargs)
+        if needs and self.label:
+            from .translation_utils import auto_translate
+            try:
+                self.translations = auto_translate({"label": self.label})
+                AboutStat.objects.filter(pk=self.pk).update(translations=self.translations)
+            except Exception:
+                pass
 
 
 class Value(models.Model):
@@ -148,12 +193,30 @@ class Value(models.Model):
     icon_svg_path = models.TextField(blank=True, help_text="Optional SVG path for icon")
     order = models.PositiveIntegerField(default=0)
     is_active = models.BooleanField(default=True)
+    translations = models.JSONField(default=dict, blank=True, help_text="Auto-filled: translations of title & description.")
 
     class Meta:
         ordering = ["order"]
 
     def __str__(self):
         return self.title
+
+    def save(self, *args, **kwargs):
+        needs = self.pk is None
+        if not needs:
+            try:
+                old = Value.objects.get(pk=self.pk)
+                needs = old.title != self.title or old.description != self.description
+            except Value.DoesNotExist:
+                needs = True
+        super().save(*args, **kwargs)
+        if needs:
+            from .translation_utils import auto_translate
+            try:
+                self.translations = auto_translate({"title": self.title, "description": self.description})
+                Value.objects.filter(pk=self.pk).update(translations=self.translations)
+            except Exception:
+                pass
 
 
 class Leader(models.Model):
@@ -175,6 +238,7 @@ class Leader(models.Model):
     )
     order = models.PositiveIntegerField(default=0)
     is_active = models.BooleanField(default=True)
+    translations = models.JSONField(default=dict, blank=True, help_text="Auto-filled: translations of role & bio.")
 
     class Meta:
         ordering = ["order"]
@@ -182,18 +246,58 @@ class Leader(models.Model):
     def __str__(self):
         return self.name
 
+    def save(self, *args, **kwargs):
+        needs = self.pk is None
+        if not needs:
+            try:
+                old = Leader.objects.get(pk=self.pk)
+                needs = old.role != self.role or old.bio != self.bio
+            except Leader.DoesNotExist:
+                needs = True
+        super().save(*args, **kwargs)
+        if needs and (self.role or self.bio):
+            from .translation_utils import auto_translate
+            try:
+                fields = {}
+                if self.role:
+                    fields["role"] = self.role
+                if self.bio:
+                    fields["bio"] = self.bio
+                self.translations = auto_translate(fields)
+                Leader.objects.filter(pk=self.pk).update(translations=self.translations)
+            except Exception:
+                pass
+
 
 class Milestone(models.Model):
     year = models.CharField(max_length=20)
     text = models.CharField(max_length=255)
     order = models.PositiveIntegerField(default=0)
     is_active = models.BooleanField(default=True)
+    translations = models.JSONField(default=dict, blank=True, help_text="Auto-filled: translations of 'text'.")
 
     class Meta:
         ordering = ["order"]
 
     def __str__(self):
         return f"{self.year}: {self.text}"
+
+    def save(self, *args, **kwargs):
+        needs = self.pk is None
+        if not needs:
+            try:
+                old = Milestone.objects.get(pk=self.pk)
+                needs = old.text != self.text
+            except Milestone.DoesNotExist:
+                needs = True
+        super().save(*args, **kwargs)
+        if needs and self.text:
+            from .translation_utils import auto_translate
+            try:
+                self.translations = auto_translate({"text": self.text})
+                Milestone.objects.filter(pk=self.pk).update(translations=self.translations)
+            except Exception:
+                pass
 
 
 class Partner(models.Model):

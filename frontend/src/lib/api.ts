@@ -928,6 +928,7 @@ export interface SiteConfig {
   tiktok_url: string;
   privacy_policy_url: string;
   terms_of_service_url: string;
+  translations?: Record<string, Record<string, string>>;
   updated_at: string;
 }
 
@@ -1070,6 +1071,7 @@ export interface APIAboutStat {
   value: string;
   label: string;
   order: number;
+  translations?: Record<string, Record<string, string>>;
 }
 
 export interface APIValue {
@@ -1078,6 +1080,7 @@ export interface APIValue {
   description: string;
   icon_svg_path: string | null;
   order: number;
+  translations?: Record<string, Record<string, string>>;
 }
 
 export interface APILeader {
@@ -1088,6 +1091,7 @@ export interface APILeader {
   image: string | null;
   category: "guide" | "team";
   order: number;
+  translations?: Record<string, Record<string, string>>;
 }
 
 export interface APIMilestone {
@@ -1095,6 +1099,7 @@ export interface APIMilestone {
   year: string;
   text: string;
   order: number;
+  translations?: Record<string, Record<string, string>>;
 }
 
 export async function getAboutStats(): Promise<APIAboutStat[]> {

@@ -68,7 +68,7 @@ class SiteConfigSerializer(serializers.ModelSerializer):
             'home_gallery_image_11_upload', 'home_gallery_image_12_upload',
             'home_about_heading', 'home_about_eyebrow', 'home_about_paragraph_1', 'home_about_paragraph_2',
             'about_eyebrow', 'about_title', 'about_paragraph_1', 'about_paragraph_2',
-            'privacy_policy_url', 'terms_of_service_url', 'updated_at'
+            'privacy_policy_url', 'terms_of_service_url', 'translations', 'updated_at'
         ]
         read_only_fields = ['updated_at']
     
@@ -137,13 +137,13 @@ class NewsletterSubscriptionSerializer(serializers.ModelSerializer):
 class AboutStatSerializer(serializers.ModelSerializer):
     class Meta:
         model = AboutStat
-        fields = ['id', 'value', 'label', 'order']
+        fields = ['id', 'value', 'label', 'order', 'translations']
 
 
 class ValueSerializer(serializers.ModelSerializer):
     class Meta:
         model = Value
-        fields = ['id', 'title', 'description', 'icon_svg_path', 'order']
+        fields = ['id', 'title', 'description', 'icon_svg_path', 'order', 'translations']
 
 
 class LeaderSerializer(serializers.ModelSerializer):
@@ -152,7 +152,7 @@ class LeaderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Leader
-        fields = ['id', 'name', 'role', 'bio', 'image', 'image_file', 'category', 'order']
+        fields = ['id', 'name', 'role', 'bio', 'image', 'image_file', 'category', 'order', 'translations']
 
     def get_image(self, obj):
         if obj.image:
@@ -166,7 +166,7 @@ class LeaderSerializer(serializers.ModelSerializer):
 class MilestoneSerializer(serializers.ModelSerializer):
     class Meta:
         model = Milestone
-        fields = ['id', 'year', 'text', 'order']
+        fields = ['id', 'year', 'text', 'order', 'translations']
 
 
 class PartnerSerializer(serializers.ModelSerializer):
