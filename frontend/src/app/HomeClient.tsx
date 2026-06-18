@@ -16,6 +16,7 @@ import { sectionImages } from "@/lib/sectionImages";
 import { useCurrency } from "@/context/CurrencyContext";
 import { useTranslation } from "@/context/TranslationContext";
 import { isSafeExternalUrl } from "@/lib/urlutils";
+import { tr } from "@/lib/langContent";
 
 const categories = [
   { icon: "🏔️", label: "Trekking", count: 12 },
@@ -980,7 +981,7 @@ function CertificatesPartnersSection({ partners }: { partners: APIPartner[] }) {
 
 export default function HomeClient({ tours, events, testimonials, siteConfig, partners = [], featuredCategories = [], aboutStats = [] }: HomeClientProps) {
   const { formatPrice } = useCurrency();
-  const { t } = useTranslation();
+  const { t, lang } = useTranslation();
   const trustReasons = [
     {
       icon: "M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z",
@@ -1032,17 +1033,17 @@ export default function HomeClient({ tours, events, testimonials, siteConfig, pa
             {/* ── [Mobile order 1] Label + Heading + Description ── */}
             <div className="flex flex-col gap-4 lg:hidden">
               <div className="inline-flex items-center gap-2 self-start bg-brand-orange/10 text-brand-orange rounded-full px-4 py-2">
-                {siteConfig?.home_about_eyebrow || "About Us"}
+                {siteConfig ? tr(siteConfig, lang, "home_about_eyebrow") || siteConfig.home_about_eyebrow || "About Us" : "About Us"}
               </div>
               <h2 className="text-3xl font-extrabold text-brand-navy leading-[1.1] tracking-tight">
-                {siteConfig?.home_about_heading || "Your Himalayan Adventure Awaits"}
+                {siteConfig ? tr(siteConfig, lang, "home_about_heading") || siteConfig.home_about_heading || "Your Himalayan Adventure Awaits" : "Your Himalayan Adventure Awaits"}
               </h2>
               <p className="text-slate-500 text-sm leading-relaxed">
-                {siteConfig?.home_about_paragraph_1 || "Founded in the heart of Kathmandu, our team brings 25+ years of firsthand expertise across Nepal's mountains, monasteries, and hidden valleys."}
+                {siteConfig ? tr(siteConfig, lang, "home_about_paragraph_1") || siteConfig.home_about_paragraph_1 || "Founded in the heart of Kathmandu, our team brings 25+ years of firsthand expertise across Nepal's mountains, monasteries, and hidden valleys." : "Founded in the heart of Kathmandu, our team brings 25+ years of firsthand expertise across Nepal's mountains, monasteries, and hidden valleys."}
               </p>
               {siteConfig?.home_about_paragraph_2 && (
                 <p className="text-slate-500 text-sm leading-relaxed">
-                  {siteConfig.home_about_paragraph_2}
+                  {tr(siteConfig, lang, "home_about_paragraph_2") || siteConfig.home_about_paragraph_2}
                 </p>
               )}
             </div>
@@ -1098,17 +1099,17 @@ export default function HomeClient({ tours, events, testimonials, siteConfig, pa
               {/* Label + heading + desc — desktop only (shown above image on mobile) */}
               <div className="hidden lg:flex flex-col gap-5">
                 <div className="inline-flex items-center gap-2 self-start bg-brand-orange/10 text-brand-orange rounded-full px-4 py-2">
-                  {siteConfig?.home_about_eyebrow || "About Us"}
+                  {siteConfig ? tr(siteConfig, lang, "home_about_eyebrow") || siteConfig.home_about_eyebrow || "About Us" : "About Us"}
                 </div>
                 <h2 className="text-4xl sm:text-5xl lg:text-[3.5rem] font-extrabold text-brand-navy leading-[1.07] tracking-tight">
-                  {siteConfig?.home_about_heading || "Your Himalayan Adventure Awaits"}
+                  {siteConfig ? tr(siteConfig, lang, "home_about_heading") || siteConfig.home_about_heading || "Your Himalayan Adventure Awaits" : "Your Himalayan Adventure Awaits"}
                 </h2>
                 <p className="text-slate-500 text-base sm:text-lg leading-relaxed max-w-xl">
-                  {siteConfig?.home_about_paragraph_1 || "Founded in the heart of Kathmandu, our team brings 25+ years of firsthand expertise across Nepal's mountains, monasteries, and hidden valleys."}
+                  {siteConfig ? tr(siteConfig, lang, "home_about_paragraph_1") || siteConfig.home_about_paragraph_1 || "Founded in the heart of Kathmandu, our team brings 25+ years of firsthand expertise across Nepal's mountains, monasteries, and hidden valleys." : "Founded in the heart of Kathmandu, our team brings 25+ years of firsthand expertise across Nepal's mountains, monasteries, and hidden valleys."}
                 </p>
                 {siteConfig?.home_about_paragraph_2 && (
                   <p className="text-slate-500 text-base sm:text-lg leading-relaxed max-w-xl">
-                    {siteConfig.home_about_paragraph_2}
+                    {tr(siteConfig, lang, "home_about_paragraph_2") || siteConfig.home_about_paragraph_2}
                   </p>
                 )}
               </div>
@@ -1137,7 +1138,7 @@ export default function HomeClient({ tours, events, testimonials, siteConfig, pa
                       return (
                         <div key={s.id} className={`${c.bg} rounded-2xl p-4 border border-white`}>
                           <p className={`text-2xl font-black ${c.color} leading-none`}>{s.value}</p>
-                          <p className="text-slate-500 text-xs font-medium mt-1.5">{s.label}</p>
+                          <p className="text-slate-500 text-xs font-medium mt-1.5">{tr(s as Parameters<typeof tr>[0], lang, "label") || s.label}</p>
                         </div>
                       );
                     })}
