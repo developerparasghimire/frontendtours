@@ -18,7 +18,7 @@ type Post = { id: string; slug: string; title: string; excerpt: string; image: s
 
 export default function ClientBlogPage() {
   const [apiPosts, setApiPosts] = useState<APIBlogPost[] | null>(null);
-  const { lang } = useTranslation();
+  const { t, lang } = useTranslation();
 
   useEffect(() => {
     getBlogPosts().then(setApiPosts).catch(() => setApiPosts([]));
@@ -48,9 +48,9 @@ export default function ClientBlogPage() {
     <div className="flex flex-col overflow-x-hidden bg-gray-50">
       {/* ═══════════ HERO ═══════════ */}
       <PageHero
-        title="Travel Blog"
-        subtitle="Stories & Guides"
-        description="Trekking guides, cultural stories, and inspiration for your next Nepal adventure."
+        title={t("blog.hero_title")}
+        subtitle={t("blog.hero_subtitle")}
+        description={t("blog.hero_desc")}
         accentColor="brand-green"
         backgroundImage={sectionImages.blogCta}
         compact
@@ -63,7 +63,7 @@ export default function ClientBlogPage() {
       ) : allPosts.length === 0 ? (
         <div className="text-center py-32">
           <p className="text-gray-400 text-6xl mb-4">📝</p>
-          <p className="text-gray-500 text-lg">No posts available yet. Check back soon!</p>
+          <p className="text-gray-500 text-lg">{t("blog.no_posts")}</p>
         </div>
       ) : (
         <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-12 sm:py-20">
@@ -87,7 +87,7 @@ export default function ClientBlogPage() {
                     <BlogImagePlaceholder title={featured.title} />
                   )}
                   <span className="absolute top-4 left-4 bg-brand-red text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">
-                    Featured
+                    {t("blog.featured")}
                   </span>
                 </div>
                 <div className="flex flex-col justify-center p-8 sm:p-12">
@@ -103,9 +103,9 @@ export default function ClientBlogPage() {
                   </h2>
                   <p className="text-slate-600 text-base leading-relaxed mb-8 line-clamp-3">{tr(featured, lang, "excerpt") || featured.excerpt}</p>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-semibold text-slate-700">By {featured.author}</span>
+                    <span className="text-sm font-semibold text-slate-700">{t("blog.by")} {featured.author}</span>
                     <span className="inline-flex items-center gap-2 text-sm font-bold text-brand-red">
-                      Read Article
+                      {t("blog.read_article")}
                       <svg className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                       </svg>
@@ -119,9 +119,9 @@ export default function ClientBlogPage() {
           {/* ── Post count ── */}
           {rest.length > 0 && (
             <div className="flex items-center gap-4 mb-8">
-              <h3 className="text-xl font-bold text-brand-navy">More Stories</h3>
+              <h3 className="text-xl font-bold text-brand-navy">{t("blog.more_stories")}</h3>
               <div className="flex-1 h-px bg-slate-200" />
-              <span className="text-sm text-slate-500 font-medium">{rest.length} article{rest.length !== 1 ? "s" : ""}</span>
+              <span className="text-sm text-slate-500 font-medium">{rest.length} {rest.length !== 1 ? t("blog.articles") : t("blog.article")}</span>
             </div>
           )}
 
@@ -153,16 +153,16 @@ export default function ClientBlogPage() {
         <div className="absolute inset-0 bg-gradient-to-r from-brand-navy/70 via-brand-navy/60 to-brand-navy/70" />
         <MotionWrapper variant="scale-up" className="relative z-10 max-w-4xl mx-auto text-center px-4 sm:px-6">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-3 sm:mb-4">
-            Ready to Experience These Stories Yourself?
+            {t("blog.cta_title")}
           </h2>
           <p className="text-gray-300 text-base sm:text-lg mb-6 sm:mb-8 max-w-xl mx-auto">
-            Talk with Get Tours and start planning the Nepal journey behind your next favorite travel story.
+            {t("blog.cta_desc")}
           </p>
           <a
             href="/contact"
             className="group inline-flex items-center gap-2 bg-brand-red text-white font-semibold px-8 py-3.5 rounded-lg hover:bg-red-700 transition-colors duration-200"
           >
-            Contact Us
+            {t("common.contact")}
             <svg className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
             </svg>

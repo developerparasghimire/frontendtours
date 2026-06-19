@@ -8,27 +8,8 @@ import BlogImagePlaceholder from "@/components/shared/BlogImagePlaceholder";
 import { useTranslation } from "@/context/TranslationContext";
 import { tr } from "@/lib/langContent";
 
-function getBlogDateParts(dateLabel: string) {
-  const parsed = new Date(dateLabel);
-
-  if (Number.isNaN(parsed.getTime())) {
-    return {
-      month: "Story",
-      day: "",
-      year: dateLabel,
-    };
-  }
-
-  return {
-    month: parsed.toLocaleString("en-US", { month: "short" }),
-    day: parsed.toLocaleString("en-US", { day: "2-digit" }),
-    year: parsed.toLocaleString("en-US", { year: "numeric" }),
-  };
-}
-
 export default function BlogCard({ post }: { post: BlogPost & { slug: string } }) {
-  const dateParts = getBlogDateParts(post.date);
-  const { lang } = useTranslation();
+  const { t, lang } = useTranslation();
   const tTitle = tr(post, lang, "title") || post.title;
   const tExcerpt = tr(post, lang, "excerpt") || post.excerpt;
   const tCategory = tr(post, lang, "category") || post.category;
@@ -84,9 +65,9 @@ export default function BlogCard({ post }: { post: BlogPost & { slug: string } }
           </p>
 
           <div className="mt-auto flex items-center justify-between border-t border-slate-100 pt-4">
-            <span className="text-sm font-semibold text-brand-navy">By {post.author}</span>
+            <span className="text-sm font-semibold text-brand-navy">{t("blog.by")} {post.author}</span>
             <span className="inline-flex items-center gap-1.5 text-sm font-bold text-brand-red">
-              Read More
+              {t("blog.read_more")}
               <svg className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
               </svg>

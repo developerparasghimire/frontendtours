@@ -18,6 +18,7 @@ function PDFDownloadModal({ onDownload, onClose }: { onDownload: (email: string)
   const [email, setEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const { t } = useTranslation();
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
@@ -29,7 +30,7 @@ function PDFDownloadModal({ onDownload, onClose }: { onDownload: (email: string)
     e.preventDefault();
     const trimmed = email.trim();
     if (!trimmed || !trimmed.includes("@") || !trimmed.split("@")[1]?.includes(".")) {
-      setError("Please enter a valid email address.");
+      setError(t("pdf.email_error"));
       return;
     }
     setSubmitting(true);
@@ -38,7 +39,7 @@ function PDFDownloadModal({ onDownload, onClose }: { onDownload: (email: string)
       await onDownload(trimmed);
       onClose();
     } catch {
-      setError("Something went wrong. Please try again.");
+      setError(t("pdf.server_error"));
     } finally {
       setSubmitting(false);
     }
@@ -54,18 +55,18 @@ function PDFDownloadModal({ onDownload, onClose }: { onDownload: (email: string)
               <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
             </svg>
           </div>
-          <h3 className="text-xl font-bold text-brand-navy">Download Tour Details</h3>
-          <p className="text-gray-500 text-sm mt-1">Enter your email to download the full tour details PDF.</p>
+          <h3 className="text-xl font-bold text-brand-navy">{t("pdf.download_tour")}</h3>
+          <p className="text-gray-500 text-sm mt-1">{t("pdf.subtitle_tour")}</p>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-semibold text-brand-navy mb-1">Email Address</label>
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com"
+            <label className="block text-sm font-semibold text-brand-navy mb-1">{t("pdf.email_label")}</label>
+            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder={t("pdf.email_placeholder")}
               className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-red/40 text-brand-navy" required autoFocus />
             {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
           </div>
           <button type="submit" disabled={submitting} className="w-full bg-brand-red text-white font-bold py-3 rounded-xl hover:bg-red-700 transition-colors disabled:opacity-60">
-            {submitting ? "Generating PDF…" : "Download PDF"}
+            {submitting ? t("pdf.generating") : t("pdf.download_btn")}
           </button>
         </form>
       </div>

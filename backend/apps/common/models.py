@@ -1,5 +1,23 @@
 from django.db import models
 
+
+class TranslationCache(models.Model):
+    """Persistent cache for Google Translate results.
+    Keyed by SHA-256 hash of source text + target language code.
+    Once a (text, lang) pair is translated it is never re-sent to the API.
+    """
+    source_hash = models.CharField(max_length=64, db_index=True)
+    target_lang = models.CharField(max_length=8)
+    translated_text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = [("source_hash", "target_lang")]
+
+    def __str__(self):
+        return f"{self.target_lang}:{self.source_hash[:8]}…"
+
+
 class TimeStampedModel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

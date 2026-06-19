@@ -3,51 +3,69 @@
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
 import type { CurrencyCode } from "@/context/CurrencyTypes";
 import enStrings from "@/translations/en.json";
+import npStrings from "@/translations/np.json";
 import deStrings from "@/translations/de.json";
 import frStrings from "@/translations/fr.json";
 import esStrings from "@/translations/es.json";
-import itStrings from "@/translations/it.json";
 import jaStrings from "@/translations/ja.json";
-import ruStrings from "@/translations/ru.json";
 import zhStrings from "@/translations/zh.json";
-import hiStrings from "@/translations/hi.json";
 
-export type LangCode = "EN" | "DE" | "FR" | "ES" | "IT" | "JA" | "RU" | "ZH" | "HI";
+export type LangCode = "EN" | "NP" | "FR" | "DE" | "ES" | "ZH" | "JA";
 
 export const LANGUAGES = [
   { code: "EN" as LangCode, label: "English",  flag: "🇬🇧" },
-  { code: "DE" as LangCode, label: "Deutsch",  flag: "🇩🇪" },
-  { code: "FR" as LangCode, label: "Français", flag: "🇫🇷" },
-  { code: "ES" as LangCode, label: "Español",  flag: "🇪🇸" },
-  { code: "IT" as LangCode, label: "Italiano", flag: "🇮🇹" },
-  { code: "JA" as LangCode, label: "日本語",    flag: "🇯🇵" },
-  { code: "RU" as LangCode, label: "Русский",  flag: "🇷🇺" },
-  { code: "ZH" as LangCode, label: "中文",      flag: "🇨🇳" },
-  { code: "HI" as LangCode, label: "हिन्दी",    flag: "🇮🇳" },
+  { code: "NP" as LangCode, label: "नेपाली",   flag: "🇳🇵" },
+  { code: "FR" as LangCode, label: "Français",  flag: "🇫🇷" },
+  { code: "DE" as LangCode, label: "Deutsch",   flag: "🇩🇪" },
+  { code: "ES" as LangCode, label: "Español",   flag: "🇪🇸" },
+  { code: "ZH" as LangCode, label: "中文",       flag: "🇨🇳" },
+  { code: "JA" as LangCode, label: "日本語",     flag: "🇯🇵" },
 ];
 
-const SUPPORTED_LANGS = new Set<LangCode>(["EN", "DE", "FR", "ES", "IT", "JA", "RU", "ZH", "HI"]);
+const SUPPORTED_LANGS = new Set<LangCode>(["EN", "NP", "FR", "DE", "ES", "ZH", "JA"]);
+
+// Locale path prefix → LangCode (for URL routing)
+export const LOCALE_TO_LANG: Record<string, LangCode> = {
+  en: "EN", np: "NP", fr: "FR", de: "DE", es: "ES", zh: "ZH", ja: "JA",
+};
+
+export const LANG_TO_LOCALE: Record<LangCode, string> = {
+  EN: "en", NP: "np", FR: "fr", DE: "de", ES: "es", ZH: "zh", JA: "ja",
+};
+
+// BCP 47 language tags for <html lang> attribute
+const LANG_TO_BCP47: Record<LangCode, string> = {
+  EN: "en", NP: "ne", FR: "fr", DE: "de", ES: "es", ZH: "zh-CN", JA: "ja",
+};
 
 // Browser navigator.language → LangCode
 function getBrowserLang(): LangCode {
   if (typeof navigator === "undefined") return "EN";
-  const code = (navigator.language || "").split("-")[0].toUpperCase() as LangCode;
-  return SUPPORTED_LANGS.has(code) ? code : "EN";
+  const raw = (navigator.language || "").split("-")[0].toUpperCase();
+  // Map browser codes to our LangCode
+  const map: Record<string, LangCode> = {
+    EN: "EN", NE: "NP", FR: "FR", DE: "DE", ES: "ES", ZH: "ZH", JA: "JA",
+  };
+  return map[raw] ?? "EN";
 }
 
 // Country code → LangCode (primary language of country)
 const LANG_MAP: Record<string, LangCode> = {
+  // German-speaking
   DE: "DE", AT: "DE", LI: "DE", CH: "DE",
+  // French-speaking
   FR: "FR", BE: "FR", LU: "FR", MC: "FR",
+  // Spanish-speaking
   ES: "ES", MX: "ES", AR: "ES", CO: "ES", PE: "ES",
   CL: "ES", VE: "ES", EC: "ES", BO: "ES", PY: "ES",
   UY: "ES", CR: "ES", PA: "ES", GT: "ES", HN: "ES",
   SV: "ES", NI: "ES", DO: "ES", CU: "ES",
-  IT: "IT", SM: "IT", VA: "IT",
+  // Japanese
   JP: "JA",
-  RU: "RU", BY: "RU", KZ: "RU",
+  // Chinese
   CN: "ZH", TW: "ZH", HK: "ZH", SG: "ZH",
-  IN: "HI",
+  // Nepali
+  NP: "NP",
 };
 
 // Countries whose default currency is EUR
@@ -77,16 +95,25 @@ type Dict = Record<string, string>;
 
 const T: Record<LangCode, Dict> = {
   EN: enStrings as Dict,
+  NP: npStrings as Dict,
   DE: deStrings as Dict,
   FR: frStrings as Dict,
   ES: esStrings as Dict,
-  IT: itStrings as Dict,
-  JA: jaStrings as Dict,
-  RU: ruStrings as Dict,
   ZH: zhStrings as Dict,
-  HI: hiStrings as Dict,
+  JA: jaStrings as Dict,
 };
 
+// Cookie helpers
+function readCookie(name: string): string | null {
+  if (typeof document === "undefined") return null;
+  const match = document.cookie.match(new RegExp(`(?:^|;\\s*)${name}=([^;]*)`));
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
+function writeCookie(name: string, value: string) {
+  if (typeof document === "undefined") return;
+  document.cookie = `${name}=${encodeURIComponent(value)};path=/;max-age=31536000;SameSite=Lax`;
+}
 
 // ─────────────────────────────────────────────
 // Context
@@ -110,9 +137,16 @@ export function TranslationProvider({ children }: { children: React.ReactNode })
   const [geoCurrency, setGeoCurrency] = useState<CurrencyCode | null>(null);
 
   useEffect(() => {
-    const savedLang = (() => {
+    // Priority: cookie → localStorage → browser lang → IP geo
+    const cookieLang = (() => {
+      const v = readCookie("gt_lang") as LangCode | null;
+      return v && SUPPORTED_LANGS.has(v) ? v : null;
+    })();
+
+    const savedLang = cookieLang ?? (() => {
       try { return localStorage.getItem("gt_lang") as LangCode | null; } catch { return null; }
     })();
+
     const savedCurrency = (() => {
       try { return localStorage.getItem("gt_currency"); } catch { return null; }
     })();
@@ -140,6 +174,7 @@ export function TranslationProvider({ children }: { children: React.ReactNode })
           const detectedLang = countryToLang(country);
           setLangState(detectedLang);
           try { localStorage.setItem("gt_lang", detectedLang); } catch {}
+          writeCookie("gt_lang", detectedLang);
         }
 
         if (!savedCurrency) {
@@ -151,9 +186,17 @@ export function TranslationProvider({ children }: { children: React.ReactNode })
       .catch(() => {});
   }, []);
 
+  // Keep <html lang> in sync with selected language
+  useEffect(() => {
+    if (typeof document !== "undefined") {
+      document.documentElement.lang = LANG_TO_BCP47[lang];
+    }
+  }, [lang]);
+
   const setLang = useCallback((code: LangCode) => {
     setLangState(code);
     try { localStorage.setItem("gt_lang", code); } catch {}
+    writeCookie("gt_lang", code);
   }, []);
 
   const t = useCallback((key: string): string => {

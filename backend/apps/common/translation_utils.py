@@ -12,14 +12,12 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 CONTACT_EMAIL = "technepalaus@gmail.com"
 
 LANG_TO_ISO: dict[str, str] = {
+    "NP": "ne",
     "DE": "de",
     "FR": "fr",
     "ES": "es",
-    "IT": "it",
-    "JA": "ja",
-    "RU": "ru",
     "ZH": "zh-CN",
-    "HI": "hi",
+    "JA": "ja",
 }
 
 

@@ -88,8 +88,21 @@ export default function AdminToursPage() {
   const [form, setForm] = useState<TourForm>(emptyForm);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const [guideModalTour, setGuideModalTour] = useState<APITour | null>(null);
+
+  const filteredTours = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return tours;
+    return tours.filter(
+      (t) =>
+        t.title.toLowerCase().includes(q) ||
+        t.destination?.toLowerCase().includes(q) ||
+        t.category?.toLowerCase().includes(q) ||
+        t.difficulty?.toLowerCase().includes(q)
+    );
+  }, [tours, searchQuery]);
 
   const token = typeof window !== "undefined" ? localStorage.getItem("admin_token") : null;
 
@@ -242,14 +255,42 @@ export default function AdminToursPage() {
           </button>
         </div>
 
+        {/* Search Bar */}
+        <div className="relative">
+          <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 0 5 11a6 6 0 0 0 12 0z" />
+          </svg>
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search tours by title, destination, category or difficulty…"
+            className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-brand-navy/30 focus:border-brand-navy placeholder-gray-400"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-lg leading-none"
+            >
+              ×
+            </button>
+          )}
+        </div>
+        {searchQuery && (
+          <p className="text-xs text-gray-500 -mt-3">
+            {filteredTours.length} of {tours.length} tours
+          </p>
+        )}
+
         {loading ? (
           <div className="flex justify-center py-20">
             <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-brand-navy" />
           </div>
-        ) : tours.length === 0 ? (
+        ) : filteredTours.length === 0 ? (
           <div className="text-center py-16">
             <svg className="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /></svg>
-            <p className="text-gray-500">No tours found. Create one!</p>
+            <p className="text-gray-500">{searchQuery ? `No tours match "${searchQuery}"` : "No tours found. Create one!"}</p>
+            {searchQuery && <button onClick={() => setSearchQuery("")} className="mt-2 text-sm text-brand-navy hover:underline">Clear search</button>}
           </div>
         ) : (
           <>
@@ -271,7 +312,7 @@ export default function AdminToursPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {tours.map((t) => (
+                  {filteredTours.map((t) => (
                     <tr key={t.id} className="hover:bg-gray-50">
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
@@ -339,7 +380,7 @@ export default function AdminToursPage() {
 
             {/* Mobile Cards */}
             <div className="md:hidden space-y-3">
-              {tours.map((t) => (
+              {filteredTours.map((t) => (
                 <div key={t.id} className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
                   <div className="flex items-start gap-3">
                     {t.image ? (

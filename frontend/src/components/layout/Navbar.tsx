@@ -32,7 +32,9 @@ export default function Navbar() {
   const userMenuRef = useRef<HTMLDivElement>(null);
   const currencyMenuRef = useRef<HTMLDivElement>(null);
   const langMenuRef = useRef<HTMLDivElement>(null);
-  const isHome = pathname === "/";
+  // Strip leading locale prefix (e.g. /np/tours → /tours) for active-link checks
+  const strippedPath = pathname.replace(/^\/(en|np|fr|de|es|zh|ja)(\/|$)/, "/");
+  const isHome = strippedPath === "/";
   const isOverlayNav = isHome && !scrolled && !isMobileMenuOpen;
   const showBrandText = !scrolled;
 
@@ -130,7 +132,7 @@ export default function Navbar() {
               }`}
             >
             {NAV_KEYS.map((link) => {
-              const isActive = pathname === link.href || (link.href !== "/" && pathname.startsWith(link.href));
+              const isActive = strippedPath === link.href || (link.href !== "/" && strippedPath.startsWith(link.href));
               return (
                 <Link
                   key={link.href}
@@ -348,7 +350,7 @@ export default function Navbar() {
             <div className="border-t border-white/50 bg-white/92 px-4 py-3 shadow-xl backdrop-blur-xl">
               <div className="space-y-0.5">
             {NAV_KEYS.map((link) => {
-              const isActive = pathname === link.href;
+              const isActive = strippedPath === link.href || (link.href !== "/" && strippedPath.startsWith(link.href));
               return (
                 <Link
                   key={link.href}

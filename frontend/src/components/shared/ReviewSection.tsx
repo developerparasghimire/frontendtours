@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/lib/auth";
+import { useTranslation } from "@/context/TranslationContext";
 import {
   getTourReviews,
   getEventReviews,
@@ -100,16 +101,17 @@ function ReviewForm({
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
   const [error, setError] = useState("");
+  const { t } = useTranslation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     if (rating === 0) {
-      setError("Please select a rating.");
+      setError(t("review.rating_required"));
       return;
     }
     if (comment.trim().length < 10) {
-      setError("Please write at least 10 characters.");
+      setError(t("review.min_chars"));
       return;
     }
     await onSubmit(rating, comment.trim());
@@ -122,19 +124,19 @@ function ReviewForm({
       animate={{ opacity: 1, height: "auto" }}
       className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm space-y-4"
     >
-      <h4 className="font-bold text-brand-navy text-base">Write Your Review</h4>
+      <h4 className="font-bold text-brand-navy text-base">{t("review.write")}</h4>
 
       <div>
-        <label className="text-sm text-gray-600 mb-1.5 block">Your Rating</label>
+        <label className="text-sm text-gray-600 mb-1.5 block">{t("review.your_rating")}</label>
         <StarRating value={rating} onChange={setRating} />
       </div>
 
       <div>
-        <label className="text-sm text-gray-600 mb-1.5 block">Your Review</label>
+        <label className="text-sm text-gray-600 mb-1.5 block">{t("review.your_review")}</label>
         <textarea
           value={comment}
           onChange={(e) => setComment(e.target.value)}
-          placeholder="Share your experience..."
+          placeholder={t("review.placeholder")}
           rows={4}
           maxLength={2000}
           className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-brand-navy focus:outline-none focus:ring-2 focus:ring-brand-blue/30 focus:border-brand-blue/50 resize-none transition-all duration-200"
@@ -151,7 +153,7 @@ function ReviewForm({
         disabled={isSubmitting}
         className="bg-brand-red text-white font-semibold px-6 py-3 rounded-xl text-sm hover:bg-red-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        {isSubmitting ? "Submitting..." : "Submit Review"}
+        {isSubmitting ? t("review.submitting") : t("review.submit")}
       </button>
     </motion.form>
   );
@@ -166,6 +168,7 @@ export default function ReviewSection({
   eventId?: number;
 }) {
   const { user, token, isAuthenticated } = useAuth();
+  const { t } = useTranslation();
   const [reviews, setReviews] = useState<ReviewData[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasBooking, setHasBooking] = useState(false);
@@ -243,7 +246,7 @@ export default function ReviewSection({
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl sm:text-2xl font-bold text-brand-navy">
-            Reviews{" "}
+            {t("review.title")}{" "}
             {reviews.length > 0 && (
               <span className="text-gray-400 text-base font-normal">({reviews.length})</span>
             )}
@@ -251,7 +254,7 @@ export default function ReviewSection({
           {avgRating && (
             <div className="flex items-center gap-2 mt-1">
               <StarRating value={Math.round(Number(avgRating))} readonly size="sm" />
-              <span className="text-sm text-gray-500">{avgRating} average</span>
+              <span className="text-sm text-gray-500">{avgRating} {t("review.average")}</span>
             </div>
           )}
         </div>
@@ -268,9 +271,9 @@ export default function ReviewSection({
           >
             <p className="text-gray-600 text-sm">
               <a href="/dashboard" className="text-brand-blue font-semibold hover:underline">
-                Sign in
+                {t("review.sign_in")}
               </a>{" "}
-              to leave a review.
+              {t("review.sign_in_msg")}
             </p>
           </motion.div>
         ) : submitSuccess ? (
@@ -284,7 +287,7 @@ export default function ReviewSection({
               <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
             </svg>
             <p className="text-brand-green font-semibold text-sm">
-              Thank you! Your review has been submitted and will appear once approved by our team.
+              {t("review.success")}
             </p>
           </motion.div>
         ) : hasReview ? (
@@ -295,7 +298,7 @@ export default function ReviewSection({
             className="bg-brand-blue/5 rounded-2xl p-5 border border-brand-blue/10"
           >
             <p className="text-brand-blue text-sm font-medium">
-              You&apos;ve already reviewed this {tourId ? "tour" : "event"}.
+              {tourId ? t("review.already_tour") : t("review.already_event")}
             </p>
           </motion.div>
         ) : hasBooking ? (
@@ -314,7 +317,7 @@ export default function ReviewSection({
           >
             <p className="text-gray-600 text-sm">
               <span className="text-brand-orange font-semibold">
-                Your booking must be marked completed before you can review this {tourId ? "tour" : "event"}.
+                {tourId ? t("review.no_booking_tour") : t("review.no_booking_event")}
               </span>
             </p>
           </motion.div>
@@ -338,7 +341,7 @@ export default function ReviewSection({
         </div>
       ) : reviews.length === 0 ? (
         <div className="text-center py-8">
-          <p className="text-gray-400 text-sm">No reviews yet. Be the first to share your experience!</p>
+          <p className="text-gray-400 text-sm">{t("review.none")}</p>
         </div>
       ) : (
         <motion.div

@@ -18,6 +18,7 @@ function PDFDownloadModal({ onDownload, onClose }: { onDownload: (email: string)
   const [email, setEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const { t } = useTranslation();
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
@@ -29,7 +30,7 @@ function PDFDownloadModal({ onDownload, onClose }: { onDownload: (email: string)
     e.preventDefault();
     const trimmed = email.trim();
     if (!trimmed || !trimmed.includes("@") || !trimmed.split("@")[1]?.includes(".")) {
-      setError("Please enter a valid email address.");
+      setError(t("pdf.email_error"));
       return;
     }
     setSubmitting(true);
@@ -38,7 +39,7 @@ function PDFDownloadModal({ onDownload, onClose }: { onDownload: (email: string)
       await onDownload(trimmed);
       onClose();
     } catch {
-      setError("Something went wrong. Please try again.");
+      setError(t("pdf.server_error"));
     } finally {
       setSubmitting(false);
     }
@@ -54,18 +55,18 @@ function PDFDownloadModal({ onDownload, onClose }: { onDownload: (email: string)
               <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
             </svg>
           </div>
-          <h3 className="text-xl font-bold text-brand-navy">Download Event Details</h3>
-          <p className="text-gray-500 text-sm mt-1">Enter your email to download the full event details PDF.</p>
+          <h3 className="text-xl font-bold text-brand-navy">{t("pdf.download_event")}</h3>
+          <p className="text-gray-500 text-sm mt-1">{t("pdf.subtitle_event")}</p>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-semibold text-brand-navy mb-1">Email Address</label>
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com"
+            <label className="block text-sm font-semibold text-brand-navy mb-1">{t("pdf.email_label")}</label>
+            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder={t("pdf.email_placeholder")}
               className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-blue/40 text-brand-navy" required autoFocus />
             {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
           </div>
           <button type="submit" disabled={submitting} className="w-full bg-brand-blue text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-60">
-            {submitting ? "Generating PDF…" : "Download PDF"}
+            {submitting ? t("pdf.generating") : t("pdf.download_btn")}
           </button>
         </form>
       </div>
@@ -76,7 +77,7 @@ function PDFDownloadModal({ onDownload, onClose }: { onDownload: (email: string)
 export default function EventDetailClient({ event }: { event: Event & { longDescription?: string; highlights?: string[]; availableTickets?: number; totalTickets?: number; numericId?: number } }) {
   const soldOut = event.availableTickets === 0;
   const { formatPrice } = useCurrency();
-  const { lang } = useTranslation();
+  const { t, lang } = useTranslation();
   const displayPrice = event.basePrice ? formatPrice(event.basePrice) : event.price;
 
   const tTitle = tr(event, lang, "title") || event.title;
@@ -164,7 +165,7 @@ export default function EventDetailClient({ event }: { event: Event & { longDesc
           <div className="lg:col-span-2 space-y-10">
             {/* Description */}
             <MotionWrapper>
-              <h2 className="text-xl sm:text-2xl font-bold text-brand-navy mb-4">About This Event</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-brand-navy mb-4">{t("event.about")}</h2>
               {tDescription && /<[a-z][\s\S]*>/i.test(tDescription) ? (
                 <div
                   className="text-gray-700 leading-relaxed text-base sm:text-lg [&>h1]:text-2xl [&>h1]:font-bold [&>h1]:text-brand-navy [&>h1]:mb-3 [&>h2]:text-xl [&>h2]:font-bold [&>h2]:text-brand-navy [&>h2]:mb-2 [&>h3]:text-lg [&>h3]:font-semibold [&>h3]:text-brand-navy [&>h3]:mb-2 [&>p]:mb-3 [&>ul]:list-disc [&>ul]:pl-5 [&>ul]:mb-3 [&>ol]:list-decimal [&>ol]:pl-5 [&>ol]:mb-3 [&>blockquote]:border-l-4 [&>blockquote]:border-brand-navy/30 [&>blockquote]:pl-4 [&>blockquote]:italic [&>blockquote]:text-gray-600 [&>blockquote]:mb-3 [&>img]:max-w-full [&>img]:rounded-xl [&>img]:my-4"
@@ -180,7 +181,7 @@ export default function EventDetailClient({ event }: { event: Event & { longDesc
             {/* Highlights */}
             {tHighlights.length > 0 && (
               <MotionWrapper delay={0.1}>
-                <h2 className="text-xl sm:text-2xl font-bold text-brand-navy mb-4">Event Highlights</h2>
+                <h2 className="text-xl sm:text-2xl font-bold text-brand-navy mb-4">{t("event.highlights")}</h2>
                 <div className="space-y-3">
                   {tHighlights.map((h, i) => (
                     <div key={i} className="flex items-start gap-3">
@@ -206,7 +207,7 @@ export default function EventDetailClient({ event }: { event: Event & { longDesc
                     </svg>
                   </span>
                   <div>
-                    <p className="text-[11px] text-gray-400 font-medium uppercase tracking-wide">Date</p>
+                    <p className="text-[11px] text-gray-400 font-medium uppercase tracking-wide">{t("event.date")}</p>
                     <p className="text-brand-navy font-semibold text-sm mt-0.5">{event.date}</p>
                   </div>
                 </div>
@@ -217,7 +218,7 @@ export default function EventDetailClient({ event }: { event: Event & { longDesc
                     </svg>
                   </span>
                   <div>
-                    <p className="text-[11px] text-gray-400 font-medium uppercase tracking-wide">Time</p>
+                    <p className="text-[11px] text-gray-400 font-medium uppercase tracking-wide">{t("event.time")}</p>
                     <p className="text-brand-navy font-semibold text-sm mt-0.5">{event.time}</p>
                   </div>
                 </div>
@@ -230,7 +231,7 @@ export default function EventDetailClient({ event }: { event: Event & { longDesc
                       </svg>
                     </span>
                     <div>
-                      <p className="text-[11px] text-gray-400 font-medium uppercase tracking-wide">Venue</p>
+                      <p className="text-[11px] text-gray-400 font-medium uppercase tracking-wide">{t("event.venue")}</p>
                       <p className="text-brand-navy font-semibold text-sm mt-0.5">{tVenue}</p>
                     </div>
                   </div>
@@ -242,7 +243,7 @@ export default function EventDetailClient({ event }: { event: Event & { longDesc
                     </svg>
                   </span>
                   <div>
-                    <p className="text-[11px] text-gray-400 font-medium uppercase tracking-wide">Category</p>
+                    <p className="text-[11px] text-gray-400 font-medium uppercase tracking-wide">{t("event.category")}</p>
                     <p className="text-brand-navy font-semibold text-sm mt-0.5">{tCategory}</p>
                   </div>
                 </div>
@@ -266,17 +267,17 @@ export default function EventDetailClient({ event }: { event: Event & { longDesc
               </div>
               <div className="p-5 sm:p-6 space-y-5">
                 <div>
-                  <p className="text-sm text-gray-500 uppercase tracking-wider">Entry Price</p>
+                  <p className="text-sm text-gray-500 uppercase tracking-wider">{t("event.price")}</p>
                   <p className="text-2xl sm:text-4xl font-extrabold text-brand-green">{displayPrice}</p>
-                  <p className="text-gray-500 text-sm">per ticket</p>
+                  <p className="text-gray-500 text-sm">{t("event.per_ticket")}</p>
                 </div>
 
                 {event.totalTickets !== undefined && (
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm text-gray-700">
-                      <span>Availability</span>
+                      <span>{t("event.availability")}</span>
                       <span className={`font-semibold ${soldOut ? "text-red-500" : "text-brand-green"}`}>
-                        {soldOut ? "Sold Out" : `${event.availableTickets} / ${event.totalTickets} left`}
+                        {soldOut ? t("common.sold_out") : `${event.availableTickets} / ${event.totalTickets} left`}
                       </span>
                     </div>
                     {!soldOut && event.totalTickets > 0 && (
@@ -292,12 +293,12 @@ export default function EventDetailClient({ event }: { event: Event & { longDesc
 
                 {soldOut ? (
                   <button disabled className="w-full bg-gray-200 text-gray-400 font-bold py-4 rounded-xl text-lg cursor-not-allowed">
-                    Sold Out
+                    {t("common.sold_out")}
                   </button>
                 ) : (
                   <Link href={`/booking?type=event&id=${event.id}`}>
                     <button className="w-full bg-brand-red text-white font-bold py-4 rounded-xl text-lg hover:bg-red-700 transition-all duration-300 shadow-lg hover:shadow-xl cursor-pointer active:scale-[0.98]">
-                      Book Tickets
+                      {t("event.book")}
                     </button>
                   </Link>
                 )}
@@ -310,13 +311,13 @@ export default function EventDetailClient({ event }: { event: Event & { longDesc
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                   </svg>
-                  Download Event Details
+                  {t("event.download")}
                 </button>
 
                 <div className="pt-2 border-t border-gray-100 text-center">
-                  <p className="text-gray-500 text-xs">Need help with your booking?</p>
+                  <p className="text-gray-500 text-xs">{t("common.need_help")}</p>
                   <Link href="/contact" className="font-bold text-brand-navy hover:text-brand-orange transition-colors">
-                    Contact Us
+                    {t("common.contact")}
                   </Link>
                 </div>
               </div>
@@ -336,14 +337,14 @@ export default function EventDetailClient({ event }: { event: Event & { longDesc
       {!soldOut && (
         <div className={`fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 px-4 py-3 flex items-center gap-3 shadow-2xl transition-transform duration-300 ${showStickyBar ? "translate-y-0" : "translate-y-full"}`}>
           <div className="flex-1 min-w-0">
-            <p className="text-xs text-gray-400 leading-none">Entry price</p>
+            <p className="text-xs text-gray-400 leading-none">{t("event.price")}</p>
             <p className="text-lg font-extrabold text-brand-green leading-tight">{displayPrice}</p>
           </div>
           <Link
             href={`/booking?type=event&id=${event.id}`}
             className="flex-shrink-0 bg-brand-red text-white font-bold px-5 py-3 rounded-xl hover:bg-red-700 transition-colors active:scale-95 text-sm mr-16"
           >
-            Book Tickets
+            {t("event.book")}
           </Link>
         </div>
       )}
@@ -369,7 +370,7 @@ export default function EventDetailClient({ event }: { event: Event & { longDesc
             <svg className="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
             </svg>
-            Back to All Events
+            {t("event.back")}
           </Link>
         </MotionWrapper>
       </section>

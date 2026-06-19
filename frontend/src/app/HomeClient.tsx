@@ -98,7 +98,7 @@ function LatestEventFeatureCard({ event, index, noStagger }: { event: Event; ind
             <div className="absolute inset-x-6 bottom-5 flex items-end justify-between gap-4 transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:bottom-8">
               <div className="min-w-0">
                 <p className="font-mono text-[10px] uppercase tracking-[0.26em] text-white/45">
-                  {event.location || "Nepal"}
+                  {event.location || t("tour.default_location")}
                 </p>
                 <p className="mt-1 text-sm text-white/75">{event.time}</p>
               </div>
@@ -225,19 +225,19 @@ function LatestEventsSlider({ events }: { events: Event[] }) {
   );
 }
 
-function getTourDurationParts(durationLabel?: string) {
+function getTourDurationParts(durationLabel?: string, defaultLabel = "Journey", defaultDays = "Days") {
   if (!durationLabel) {
-    return { value: "", label: "Journey" };
+    return { value: "", label: defaultLabel };
   }
 
   const match = durationLabel.match(/(\d+)\s*(.*)/);
   if (!match) {
-    return { value: durationLabel, label: "Journey" };
+    return { value: durationLabel, label: defaultLabel };
   }
 
   return {
     value: match[1],
-    label: match[2] || "Days",
+    label: match[2] || defaultDays,
   };
 }
 
@@ -250,12 +250,12 @@ function FeaturedTourCard({
   index: number;
   noStagger?: boolean;
 }) {
-  const durationParts = getTourDurationParts(tour.duration);
   const { formatPrice } = useCurrency();
   const { t, lang } = useTranslation();
+  const durationParts = getTourDurationParts(tour.duration, t("tour.journey"), t("tour.days"));
   const displayPrice = tour.basePrice ? formatPrice(tour.basePrice) : tour.price;
   const tTitle = tr(tour, lang, "title") || tour.title;
-  const tBadge = tr(tour, lang, "badge") || tr(tour, lang, "destination") || tour.badge || tour.category || "Journey";
+  const tBadge = tr(tour, lang, "badge") || tr(tour, lang, "destination") || tour.badge || tour.category || t("tour.journey");
   const staggerClasses = [
     "xl:translate-y-4",
     "xl:-translate-y-6",
@@ -309,9 +309,9 @@ function FeaturedTourCard({
             <div className="absolute inset-x-6 bottom-5 flex items-end justify-between gap-4 transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:bottom-8">
               <div className="min-w-0">
                 <p className="font-mono text-[10px] uppercase tracking-[0.26em] text-white/45">
-                  {tour.location || "Nepal"}
+                  {tour.location || t("tour.default_location")}
                 </p>
-                <p className="mt-1 text-sm text-white/75">{tour.difficulty || "Moderate"}</p>
+                <p className="mt-1 text-sm text-white/75">{tour.difficulty || t("tour.default_difficulty")}</p>
               </div>
               <span className="inline-flex shrink-0 items-center gap-2 font-mono text-[10px] uppercase tracking-[0.22em] text-white/90 sm:text-[11px]">
                 {t("common.explore_tour")}

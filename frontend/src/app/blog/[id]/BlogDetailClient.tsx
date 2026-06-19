@@ -17,7 +17,7 @@ export default function BlogDetailClient({
   post: BlogPost;
   related: BlogPost[];
 }) {
-  const { lang } = useTranslation();
+  const { t, lang } = useTranslation();
   const tTitle = tr(post, lang, "title") || post.title;
   const tExcerpt = tr(post, lang, "excerpt") || post.excerpt;
   const tCategory = tr(post, lang, "category") || post.category;
@@ -66,7 +66,7 @@ export default function BlogDetailClient({
             </div>
             <div>
               <p className="text-white font-semibold text-sm">{post.author}</p>
-              <p className="text-white/50 text-xs">Travel Writer</p>
+              <p className="text-white/50 text-xs">{t("blog.travel_writer")}</p>
             </div>
           </div>
         </div>
@@ -107,7 +107,7 @@ export default function BlogDetailClient({
             {post.tags && post.tags.length > 0 && (
               <MotionWrapper delay={0.1}>
                 <div className="mt-12 pt-8 border-t border-gray-100 flex flex-wrap items-center gap-2">
-                  <span className="text-sm font-bold text-brand-navy mr-1">Tags:</span>
+                  <span className="text-sm font-bold text-brand-navy mr-1">{t("blog.tags")}</span>
                   {post.tags.map((tag) => (
                     <span
                       key={tag}
@@ -128,9 +128,9 @@ export default function BlogDetailClient({
                 </div>
                 <div>
                   <p className="text-white font-bold text-lg">{post.author}</p>
-                  <p className="text-white/60 text-sm mb-3">Travel Writer &amp; Nepal Explorer</p>
+                  <p className="text-white/60 text-sm mb-3">{t("blog.travel_writer_role")}</p>
                   <p className="text-white/80 text-sm leading-relaxed">
-                    Passionate about Nepal&apos;s trails, culture, and cuisine. Has trekked over 2,000km of Himalayan routes and written for leading travel publications.
+                    {t("blog.travel_writer_bio")}
                   </p>
                 </div>
               </div>
@@ -146,7 +146,7 @@ export default function BlogDetailClient({
                   <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
                   </svg>
-                  Back to Blog
+                  {t("blog.back")}
                 </Link>
               </div>
             </MotionWrapper>
@@ -159,22 +159,22 @@ export default function BlogDetailClient({
             <div className="sticky top-24">
               <MotionWrapper delay={0.1}>
                 <div className="bg-brand-navy rounded-2xl p-6 text-center mb-8">
-                  <p className="text-white/60 text-xs uppercase tracking-widest mb-2">Ready to explore?</p>
-                  <h3 className="text-white font-extrabold text-xl mb-3">Book Your Nepal Adventure</h3>
+                  <p className="text-white/60 text-xs uppercase tracking-widest mb-2">{t("blog.ready")}</p>
+                  <h3 className="text-white font-extrabold text-xl mb-3">{t("blog.book_adventure")}</h3>
                   <p className="text-white/70 text-sm mb-5 leading-relaxed">
-                    Let our local experts craft your perfect Nepal itinerary.
+                    {t("blog.book_adventure_desc")}
                   </p>
                   <Link
                     href="/tours"
                     className="block w-full bg-brand-red hover:bg-red-700 text-white font-bold py-3 rounded-xl transition-colors shadow-lg"
                   >
-                    Browse Tours
+                    {t("blog.browse_tours")}
                   </Link>
                   <Link
                     href="/contact"
                     className="block w-full mt-3 bg-white/10 hover:bg-white/20 text-white font-semibold py-3 rounded-xl transition-colors text-sm"
                   >
-                    Contact Us
+                    {t("common.contact")}
                   </Link>
                 </div>
               </MotionWrapper>
@@ -182,7 +182,7 @@ export default function BlogDetailClient({
               {/* Related posts */}
               {related.length > 0 && (
                 <MotionWrapper delay={0.2}>
-                  <h3 className="text-base font-bold text-brand-navy mb-4 uppercase tracking-wider">Related Articles</h3>
+                  <h3 className="text-base font-bold text-brand-navy mb-4 uppercase tracking-wider">{t("blog.related_articles")}</h3>
                   <StaggerContainer className="space-y-4" staggerDelay={0.08}>
                     {related.map((r) => (
                       <StaggerItem key={r.id}>
@@ -202,9 +202,9 @@ export default function BlogDetailClient({
                             )}
                           </div>
                           <div className="flex-1">
-                            <span className="text-xs text-brand-blue font-semibold">{r.category}</span>
+                            <span className="text-xs text-brand-blue font-semibold">{tr(r, lang, "category") || r.category}</span>
                             <p className="text-sm font-bold text-brand-navy group-hover:text-brand-blue transition-colors line-clamp-2 mt-0.5">
-                              {r.title}
+                              {tr(r, lang, "title") || r.title}
                             </p>
                             <p className="text-xs text-gray-400 mt-1">{r.readTime}</p>
                           </div>
