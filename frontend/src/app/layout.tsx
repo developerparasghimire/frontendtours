@@ -157,6 +157,22 @@ export default function RootLayout({
             gtag('config', '${GA_ID}');
           `}
         </Script>
+        {/* Google Translate — initialized once, hidden element */}
+        <div id="google_translate_element" style={{ display: "none" }} />
+        <Script id="google-translate-init" strategy="afterInteractive">
+          {`
+            window.googleTranslateElementInit = function() {
+              new google.translate.TranslateElement(
+                { pageLanguage: 'en', autoDisplay: false },
+                'google_translate_element'
+              );
+            };
+          `}
+        </Script>
+        <Script
+          src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   );

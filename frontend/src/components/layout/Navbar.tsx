@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/lib/auth";
 import { useCurrency, CURRENCIES } from "@/context/CurrencyContext";
 import { useTranslation } from "@/context/TranslationContext";
-import GoogleTranslate from "@/components/shared/GoogleTranslate";
+import TranslateButton from "@/components/shared/TranslateButton";
 
 const NAV_LINKS = [
   { href: "/",        label: "Home"    },
@@ -145,10 +145,8 @@ export default function Navbar() {
               })}
             </div>
 
-            {/* Google Translate */}
-            <div className={`gt-nav-wrapper mr-1 ${isOverlayNav ? "gt-overlay" : "gt-solid"}`}>
-              <GoogleTranslate />
-            </div>
+            {/* Language Selector */}
+            <TranslateButton isOverlayNav={isOverlayNav} />
 
             {/* Currency Selector */}
             <div className="relative ml-1" ref={currencyMenuRef}>
@@ -335,9 +333,9 @@ export default function Navbar() {
                     </button>
                   ))}
                 </div>
-                <p className="px-4 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-gray-400">Translate</p>
-                <div className="px-4 pb-3 gt-mobile-wrapper">
-                  <GoogleTranslate />
+                <p className="px-4 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-gray-400">Language</p>
+                <div className="px-4 pb-3">
+                  <TranslateButton isOverlayNav={false} />
                 </div>
               </div>
 
