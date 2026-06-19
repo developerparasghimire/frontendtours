@@ -7,46 +7,53 @@ import enStrings from "@/translations/en.json";
 import deStrings from "@/translations/de.json";
 import frStrings from "@/translations/fr.json";
 import esStrings from "@/translations/es.json";
+import itStrings from "@/translations/it.json";
 import jaStrings from "@/translations/ja.json";
 import zhStrings from "@/translations/zh.json";
+import hiStrings from "@/translations/hi.json";
+import ruStrings from "@/translations/ru.json";
 
-export type LangCode = "EN" | "FR" | "DE" | "ES" | "ZH" | "JA";
+export type LangCode = "EN" | "FR" | "DE" | "ES" | "IT" | "ZH" | "JA" | "HI" | "RU";
 
 export const LANGUAGES = [
-  { code: "EN" as LangCode, label: "English",  flag: "🇬🇧" },
+  { code: "EN" as LangCode, label: "English",   flag: "🇬🇧" },
   { code: "FR" as LangCode, label: "Français",  flag: "🇫🇷" },
   { code: "DE" as LangCode, label: "Deutsch",   flag: "🇩🇪" },
   { code: "ES" as LangCode, label: "Español",   flag: "🇪🇸" },
+  { code: "IT" as LangCode, label: "Italiano",  flag: "🇮🇹" },
   { code: "ZH" as LangCode, label: "中文",       flag: "🇨🇳" },
   { code: "JA" as LangCode, label: "日本語",     flag: "🇯🇵" },
+  { code: "HI" as LangCode, label: "हिन्दी",    flag: "🇮🇳" },
+  { code: "RU" as LangCode, label: "Русский",   flag: "🇷🇺" },
 ];
 
-const SUPPORTED_LANGS = new Set<LangCode>(["EN", "FR", "DE", "ES", "ZH", "JA"]);
+const SUPPORTED_LANGS = new Set<LangCode>(["EN", "FR", "DE", "ES", "IT", "ZH", "JA", "HI", "RU"]);
 
 export const LOCALE_TO_LANG: Record<string, LangCode> = {
-  en: "EN", fr: "FR", de: "DE", es: "ES", zh: "ZH", ja: "JA",
+  en: "EN", fr: "FR", de: "DE", es: "ES", it: "IT",
+  zh: "ZH", ja: "JA", hi: "HI", ru: "RU",
 };
 
 export const LANG_TO_LOCALE: Record<LangCode, string> = {
-  EN: "en", FR: "fr", DE: "de", ES: "es", ZH: "zh", JA: "ja",
+  EN: "en", FR: "fr", DE: "de", ES: "es", IT: "it",
+  ZH: "zh", JA: "ja", HI: "hi", RU: "ru",
 };
 
-// BCP 47 language tags for <html lang> attribute
 const LANG_TO_BCP47: Record<LangCode, string> = {
-  EN: "en", FR: "fr", DE: "de", ES: "es", ZH: "zh-CN", JA: "ja",
+  EN: "en", FR: "fr", DE: "de", ES: "es", IT: "it",
+  ZH: "zh-CN", JA: "ja", HI: "hi", RU: "ru",
 };
 
-// Browser navigator.language → LangCode
 function getBrowserLang(): LangCode {
   if (typeof navigator === "undefined") return "EN";
   const raw = (navigator.language || "").split("-")[0].toUpperCase();
   const map: Record<string, LangCode> = {
-    EN: "EN", FR: "FR", DE: "DE", ES: "ES", ZH: "ZH", JA: "JA",
+    EN: "EN", FR: "FR", DE: "DE", ES: "ES", IT: "IT",
+    ZH: "ZH", JA: "JA", HI: "HI", RU: "RU",
   };
   return map[raw] ?? "EN";
 }
 
-// Country code → LangCode
 const LANG_MAP: Record<string, LangCode> = {
   DE: "DE", AT: "DE", LI: "DE", CH: "DE",
   FR: "FR", BE: "FR", LU: "FR", MC: "FR",
@@ -54,11 +61,13 @@ const LANG_MAP: Record<string, LangCode> = {
   CL: "ES", VE: "ES", EC: "ES", BO: "ES", PY: "ES",
   UY: "ES", CR: "ES", PA: "ES", GT: "ES", HN: "ES",
   SV: "ES", NI: "ES", DO: "ES", CU: "ES",
+  IT: "IT", SM: "IT", VA: "IT",
   JP: "JA",
   CN: "ZH", TW: "ZH", HK: "ZH", SG: "ZH",
+  IN: "HI",
+  RU: "RU", BY: "RU", KZ: "RU",
 };
 
-// Countries whose default currency is EUR
 const EUR_COUNTRIES = new Set([
   "DE","AT","FR","ES","IT","BE","NL","PT","FI","IE","LU",
   "SK","SI","LT","LV","EE","CY","MT","MC","SM","VA","LI","GR","HR",
@@ -80,9 +89,6 @@ export function countryToLang(country: string): LangCode {
   return LANG_MAP[country] ?? "EN";
 }
 
-// ─────────────────────────────────────────────
-// Translation dictionary
-// ─────────────────────────────────────────────
 type Dict = Record<string, string>;
 
 const T: Record<LangCode, Dict> = {
@@ -90,11 +96,13 @@ const T: Record<LangCode, Dict> = {
   DE: deStrings as Dict,
   FR: frStrings as Dict,
   ES: esStrings as Dict,
+  IT: itStrings as Dict,
   ZH: zhStrings as Dict,
   JA: jaStrings as Dict,
+  HI: hiStrings as Dict,
+  RU: ruStrings as Dict,
 };
 
-// Cookie helpers
 function readCookie(name: string): string | null {
   if (typeof document === "undefined") return null;
   const match = document.cookie.match(new RegExp(`(?:^|;\\s*)${name}=([^;]*)`));
@@ -106,9 +114,6 @@ function writeCookie(name: string, value: string) {
   document.cookie = `${name}=${encodeURIComponent(value)};path=/;max-age=31536000;SameSite=Lax`;
 }
 
-// ─────────────────────────────────────────────
-// Context
-// ─────────────────────────────────────────────
 interface TranslationContextValue {
   lang: LangCode;
   setLang: (code: LangCode) => void;
@@ -126,7 +131,6 @@ const TranslationContext = createContext<TranslationContextValue>({
 export function TranslationProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
-  // Derive lang from URL locale segment: /ja → "JA", /de → "DE", / → "EN"
   const lang: LangCode = useMemo(() => {
     const seg = pathname?.split("/")[1]?.toLowerCase() ?? "";
     return LOCALE_TO_LANG[seg] ?? "EN";
@@ -153,7 +157,7 @@ export function TranslationProvider({ children }: { children: React.ReactNode })
   }, []);
 
   const setLang = useCallback((_code: LangCode) => {
-    // Language switching handled by Google Translate via TranslateButton
+    // Language switching is handled via URL locale + Google Translate
   }, []);
 
   const t = useCallback((key: string): string => {

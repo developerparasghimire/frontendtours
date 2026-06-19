@@ -7,7 +7,6 @@ import Footer from "./Footer";
 import { AuthProvider } from "@/lib/auth";
 import { CurrencyProvider } from "@/context/CurrencyContext";
 import { TranslationProvider } from "@/context/TranslationContext";
-import GoogleTranslateProvider from "./GoogleTranslateProvider";
 import ScrollToTop from "@/components/shared/ScrollToTop";
 import WhatsAppWidget from "@/components/shared/WhatsAppWidget";
 import EventPopupBanner from "@/components/shared/EventPopupBanner";
@@ -67,7 +66,6 @@ export default function ClientRootLayout({ children }: { children: React.ReactNo
     <AuthProvider>
       <TranslationProvider>
         <CurrencyProvider>
-          <GoogleTranslateProvider />
           <LayoutInner>{children}</LayoutInner>
         </CurrencyProvider>
       </TranslationProvider>

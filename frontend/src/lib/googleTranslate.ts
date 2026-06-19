@@ -6,21 +6,15 @@ export const GT_LANG_COOKIE = "gt_lang";     // cookie readable by middleware
 export const GT_DEFAULT   = "en";
 
 export const LANGUAGES = [
-  { code: "en",    locale: "en", label: "English",    flag: "🇬🇧" },
-  { code: "ja",    locale: "ja", label: "日本語",      flag: "🇯🇵" },
-  { code: "zh-CN", locale: "zh", label: "中文",        flag: "🇨🇳" },
-  { code: "hi",    locale: "hi", label: "हिन्दी",     flag: "🇮🇳" },
-  { code: "ru",    locale: "ru", label: "Русский",    flag: "🇷🇺" },
-  { code: "fr",    locale: "fr", label: "Français",   flag: "🇫🇷" },
-  { code: "de",    locale: "de", label: "Deutsch",    flag: "🇩🇪" },
-  { code: "es",    locale: "es", label: "Español",    flag: "🇪🇸" },
-  { code: "ar",    locale: "ar", label: "العربية",    flag: "🇸🇦" },
-  { code: "ko",    locale: "ko", label: "한국어",     flag: "🇰🇷" },
-  { code: "pt",    locale: "pt", label: "Português",  flag: "🇧🇷" },
-  { code: "it",    locale: "it", label: "Italiano",   flag: "🇮🇹" },
-  { code: "tr",    locale: "tr", label: "Türkçe",     flag: "🇹🇷" },
-  { code: "th",    locale: "th", label: "ไทย",        flag: "🇹🇭" },
-  { code: "nl",    locale: "nl", label: "Nederlands", flag: "🇳🇱" },
+  { code: "en",    locale: "en", label: "English",   flag: "🇬🇧" },
+  { code: "fr",    locale: "fr", label: "Français",  flag: "🇫🇷" },
+  { code: "de",    locale: "de", label: "Deutsch",   flag: "🇩🇪" },
+  { code: "es",    locale: "es", label: "Español",   flag: "🇪🇸" },
+  { code: "it",    locale: "it", label: "Italiano",  flag: "🇮🇹" },
+  { code: "zh-CN", locale: "zh", label: "中文",       flag: "🇨🇳" },
+  { code: "ja",    locale: "ja", label: "日本語",     flag: "🇯🇵" },
+  { code: "hi",    locale: "hi", label: "हिन्दी",    flag: "🇮🇳" },
+  { code: "ru",    locale: "ru", label: "Русский",   flag: "🇷🇺" },
 ] as const;
 
 export type LangEntry = (typeof LANGUAGES)[number];

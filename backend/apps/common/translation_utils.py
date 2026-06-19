@@ -1,27 +1,67 @@
-"""Auto-translate text fields using the MyMemory free API.
+"""Auto-translate text fields using the MyMemory free API with DB caching.
 
-Called from model save() hooks. All languages are fetched in parallel via
-ThreadPoolExecutor so a full re-translation takes ~1-2 s instead of ~10 s.
+MyMemory is completely free — no API key, no signup required.
+Providing a contact email bumps the daily limit from 500 → 1000 words/day.
+Results are cached in TranslationCache so each unique text is only ever
+sent to the API once, keeping usage well within free limits.
+
+Called from model save() hooks. All languages are translated in parallel via
+ThreadPoolExecutor so a full translation takes ~1-2 s regardless of language count.
 """
+import hashlib
 import json
 import re
 import urllib.parse
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-CONTACT_EMAIL = "technepalaus@gmail.com"
+CONTACT_EMAIL = "technepalaus@gmail.com"   # raises free daily limit to 1000 words
 
 LANG_TO_ISO: dict[str, str] = {
-    "DE": "de",
     "FR": "fr",
+    "DE": "de",
     "ES": "es",
+    "IT": "it",
     "ZH": "zh-CN",
     "JA": "ja",
+    "HI": "hi",
+    "RU": "ru",
 }
 
+MYMEMORY_URL = "https://api.mymemory.translated.net/get"
+
+
+# ─── DB cache helpers ─────────────────────────────────────────────────────────
+
+def _cache_key(text: str) -> str:
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+def _cache_get(source_hash: str, target_lang: str) -> str | None:
+    try:
+        from apps.common.models import TranslationCache
+        obj = TranslationCache.objects.get(source_hash=source_hash, target_lang=target_lang)
+        return obj.translated_text
+    except Exception:
+        return None
+
+
+def _cache_set(source_hash: str, target_lang: str, translated_text: str) -> None:
+    try:
+        from apps.common.models import TranslationCache
+        TranslationCache.objects.update_or_create(
+            source_hash=source_hash,
+            target_lang=target_lang,
+            defaults={"translated_text": translated_text},
+        )
+    except Exception:
+        pass
+
+
+# ─── Translation ──────────────────────────────────────────────────────────────
 
 def _chunk_text(text: str, max_chars: int = 450) -> list[str]:
-    """Split text at sentence boundaries so each chunk fits the API limit."""
+    """Split at sentence boundaries so each chunk fits the 500-char API limit."""
     if len(text) <= max_chars:
         return [text]
     chunks: list[str] = []
@@ -41,8 +81,8 @@ def _chunk_text(text: str, max_chars: int = 450) -> list[str]:
     return chunks or [text[:max_chars]]
 
 
-def _translate_one(text: str, iso: str) -> str:
-    """Single API call — returns original text on any failure."""
+def _translate_mymemory(text: str, iso: str) -> str:
+    """Call the MyMemory API. Returns original text on any failure."""
     if not text or not text.strip():
         return text
     parts = []
@@ -51,8 +91,8 @@ def _translate_one(text: str, iso: str) -> str:
             params = urllib.parse.urlencode(
                 {"q": chunk, "langpair": f"en|{iso}", "de": CONTACT_EMAIL}
             )
-            url = f"https://api.mymemory.translated.net/get?{params}"
-            with urllib.request.urlopen(url, timeout=8) as resp:
+            url = f"{MYMEMORY_URL}?{params}"
+            with urllib.request.urlopen(url, timeout=10) as resp:
                 data = json.loads(resp.read())
             if data.get("responseStatus") == 200:
                 parts.append(data["responseData"]["translatedText"])
@@ -62,6 +102,25 @@ def _translate_one(text: str, iso: str) -> str:
             parts.append(chunk)
     return " ".join(parts)
 
+
+def _translate_one(text: str, iso: str) -> str:
+    """Translate text: check DB cache first, then call MyMemory API."""
+    if not text or not text.strip():
+        return text
+
+    h = _cache_key(text)
+    cached = _cache_get(h, iso)
+    if cached is not None:
+        return cached
+
+    result = _translate_mymemory(text, iso)
+
+    if result and result != text:
+        _cache_set(h, iso, result)
+    return result or text
+
+
+# ─── Public API ───────────────────────────────────────────────────────────────
 
 def auto_translate(fields: dict[str, str]) -> dict[str, dict[str, str]]:
     """Translate {field: text} to all supported languages in parallel.
