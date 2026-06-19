@@ -99,11 +99,22 @@ export function setGTCookie(lang: string): void {
 
 // ─── Widget control ───────────────────────────────────────────────────────────
 
+// Wait for the combo to exist AND have options loaded (GT populates them async)
 function getCombo(): HTMLSelectElement | null {
-  return document.querySelector<HTMLSelectElement>(".goog-te-combo");
+  const combo = document.querySelector<HTMLSelectElement>(".goog-te-combo");
+  return combo && combo.options.length > 1 ? combo : null;
 }
 
 export function applyTranslation(lang: string): void {
+  // Method 1: doGTranslate — GT's internal function used by its own toolbar links
+  type GTWindow = typeof window & { doGTranslate?: (pair: string) => void };
+  const doGT = (window as GTWindow).doGTranslate;
+  if (typeof doGT === "function") {
+    doGT(lang === GT_DEFAULT ? "en|en" : `en|${lang}`);
+    return;
+  }
+
+  // Method 2: combo select manipulation
   const combo = getCombo();
   if (!combo) return;
   combo.value = lang === GT_DEFAULT ? "" : lang;
