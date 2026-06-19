@@ -123,67 +123,35 @@ const TranslationContext = createContext<TranslationContextValue>({
 });
 
 export function TranslationProvider({ children }: { children: React.ReactNode }) {
-  const [lang, setLangState] = useState<LangCode>("EN");
+  const lang: LangCode = "EN";
   const [geoCurrency, setGeoCurrency] = useState<CurrencyCode | null>(null);
 
+  // Only detect geo-currency (language switching is handled by Google Translate)
   useEffect(() => {
-    const cookieLang = (() => {
-      const v = readCookie("gt_lang") as LangCode | null;
-      return v && SUPPORTED_LANGS.has(v) ? v : null;
-    })();
-
-    const savedLang = cookieLang ?? (() => {
-      try { return localStorage.getItem("gt_lang") as LangCode | null; } catch { return null; }
-    })();
-
     const savedCurrency = (() => {
       try { return localStorage.getItem("gt_currency"); } catch { return null; }
     })();
-
-    if (savedLang && SUPPORTED_LANGS.has(savedLang)) {
-      setLangState(savedLang);
-    } else {
-      const browserLang = getBrowserLang();
-      if (browserLang !== "EN") setLangState(browserLang);
-    }
-
-    if (savedLang && savedCurrency) return;
+    if (savedCurrency) return;
 
     fetch("https://ipapi.co/json/")
       .then((r) => r.json())
       .then((data) => {
         const country: string = data?.country_code ?? "";
         if (!country) return;
-        if (!savedLang) {
-          const detectedLang = countryToLang(country);
-          setLangState(detectedLang);
-          try { localStorage.setItem("gt_lang", detectedLang); } catch {}
-          writeCookie("gt_lang", detectedLang);
-        }
-        if (!savedCurrency) {
-          const detectedCurrency = countryToCurrency(country);
-          setGeoCurrency(detectedCurrency);
-          try { localStorage.setItem("gt_currency", detectedCurrency); } catch {}
-        }
+        const detectedCurrency = countryToCurrency(country);
+        setGeoCurrency(detectedCurrency);
+        try { localStorage.setItem("gt_currency", detectedCurrency); } catch {}
       })
       .catch(() => {});
   }, []);
 
-  useEffect(() => {
-    if (typeof document !== "undefined") {
-      document.documentElement.lang = LANG_TO_BCP47[lang];
-    }
-  }, [lang]);
-
-  const setLang = useCallback((code: LangCode) => {
-    setLangState(code);
-    try { localStorage.setItem("gt_lang", code); } catch {}
-    writeCookie("gt_lang", code);
+  const setLang = useCallback((_code: LangCode) => {
+    // Language switching handled by Google Translate via TranslateButton
   }, []);
 
   const t = useCallback((key: string): string => {
-    return T[lang]?.[key] ?? T.EN[key] ?? key;
-  }, [lang]);
+    return T.EN[key] ?? key;
+  }, []);
 
   return (
     <TranslationContext.Provider value={{ lang, setLang, t, geoCurrency }}>
