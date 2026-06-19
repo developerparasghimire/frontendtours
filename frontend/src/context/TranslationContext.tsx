@@ -1,6 +1,7 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, useCallback } from "react";
+import { createContext, useContext, useState, useEffect, useCallback, useMemo } from "react";
+import { usePathname } from "next/navigation";
 import type { CurrencyCode } from "@/context/CurrencyTypes";
 import enStrings from "@/translations/en.json";
 import deStrings from "@/translations/de.json";
@@ -123,10 +124,16 @@ const TranslationContext = createContext<TranslationContextValue>({
 });
 
 export function TranslationProvider({ children }: { children: React.ReactNode }) {
-  const lang: LangCode = "EN";
+  const pathname = usePathname();
+
+  // Derive lang from URL locale segment: /ja → "JA", /de → "DE", / → "EN"
+  const lang: LangCode = useMemo(() => {
+    const seg = pathname?.split("/")[1]?.toLowerCase() ?? "";
+    return LOCALE_TO_LANG[seg] ?? "EN";
+  }, [pathname]);
+
   const [geoCurrency, setGeoCurrency] = useState<CurrencyCode | null>(null);
 
-  // Only detect geo-currency (language switching is handled by Google Translate)
   useEffect(() => {
     const savedCurrency = (() => {
       try { return localStorage.getItem("gt_currency"); } catch { return null; }
@@ -150,8 +157,8 @@ export function TranslationProvider({ children }: { children: React.ReactNode })
   }, []);
 
   const t = useCallback((key: string): string => {
-    return T.EN[key] ?? key;
-  }, []);
+    return T[lang]?.[key] ?? T.EN[key] ?? key;
+  }, [lang]);
 
   return (
     <TranslationContext.Provider value={{ lang, setLang, t, geoCurrency }}>
