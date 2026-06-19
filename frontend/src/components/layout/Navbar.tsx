@@ -11,13 +11,13 @@ import { useTranslation } from "@/context/TranslationContext";
 import TranslateButton from "@/components/shared/TranslateButton";
 import { getPathLocale, stripLocale } from "@/lib/googleTranslate";
 
-const NAV_LINKS = [
-  { href: "/",        label: "Home"    },
-  { href: "/about",   label: "About"   },
-  { href: "/events",  label: "Events"  },
-  { href: "/tours",   label: "Tours"   },
-  { href: "/blog",    label: "Blogs"   },
-  { href: "/contact", label: "Contact" },
+const NAV_LINK_KEYS = [
+  { href: "/",        key: "nav.home"    },
+  { href: "/about",   key: "nav.about"   },
+  { href: "/events",  key: "nav.events"  },
+  { href: "/tours",   key: "nav.tours"   },
+  { href: "/blog",    key: "nav.blogs"   },
+  { href: "/contact", key: "nav.contact" },
 ];
 
 export default function Navbar() {
@@ -124,7 +124,7 @@ export default function Navbar() {
                 isOverlayNav ? "bg-transparent px-0 py-0 backdrop-blur-0" : "bg-brand-navy/[0.035]"
               }`}
             >
-              {NAV_LINKS.map((link) => {
+              {NAV_LINK_KEYS.map((link) => {
                 const isActive = cleanPath === link.href || (link.href !== "/" && cleanPath.startsWith(link.href));
                 const linkHref = currentLocale && currentLocale !== "en" ? `/${currentLocale}${link.href === "/" ? "" : link.href}` : link.href;
                 return (
@@ -138,7 +138,7 @@ export default function Navbar() {
                         : isActive ? "text-brand-red" : "text-gray-600 hover:text-brand-navy"
                     }`}
                   >
-                    {link.label}
+                    {t(link.key)}
                     <span
                       className={`absolute bottom-0 left-1/2 -translate-x-1/2 h-0.5 rounded-full transition-all duration-300 ${
                         isOverlayNav ? "bg-white" : "bg-[linear-gradient(90deg,var(--color-brand-red),var(--color-brand-orange))]"
@@ -308,7 +308,7 @@ export default function Navbar() {
           >
             <div className="border-t border-white/50 bg-white/92 px-4 py-3 shadow-xl backdrop-blur-xl">
               <div className="space-y-0.5">
-                {NAV_LINKS.map((link) => {
+                {NAV_LINK_KEYS.map((link) => {
                   const isActive = cleanPath === link.href || (link.href !== "/" && cleanPath.startsWith(link.href));
                   const linkHref = currentLocale && currentLocale !== "en" ? `/${currentLocale}${link.href === "/" ? "" : link.href}` : link.href;
                   return (
@@ -320,7 +320,7 @@ export default function Navbar() {
                         isActive ? "text-brand-red bg-brand-red/5" : "text-gray-700 hover:bg-gray-50 hover:text-brand-navy"
                       }`}
                     >
-                      {link.label}
+                      {t(link.key)}
                       {isActive && <span className="w-1.5 h-1.5 rounded-full bg-brand-red" />}
                     </Link>
                   );
