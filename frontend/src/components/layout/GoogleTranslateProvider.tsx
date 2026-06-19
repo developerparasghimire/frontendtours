@@ -1,8 +1,9 @@
 "use client";
 
 // Invisible component — renders nothing, handles all GT side effects:
-//  1. Initial translation on mount (syncs path locale → storage, then translates)
-//  2. Re-translation on every Next.js route change
+//  1. Initial translation on mount (syncs path locale → storage, triggers translation,
+//     with a one-shot reload fallback if GT doesn't initialize within 4s)
+//  2. Re-translation on Next.js route changes (client-side navigation)
 //  3. MutationObserver re-translation when Django API data loads into DOM
 
 import { useEffect, useRef } from "react";
@@ -29,24 +30,44 @@ export default function GoogleTranslateProvider() {
 
   // ── 1. Initial mount ─────────────────────────────────────────────────────
   useEffect(() => {
-    // If the URL has a locale prefix (/de, /fr, etc.), that wins
+    // Path locale (e.g. /zh → "zh" → "zh-CN") takes priority over localStorage
     const pathLocale = getPathLocale(window.location.pathname);
     const pathCode = pathLocale ? (LOCALE_TO_CODE[pathLocale] ?? pathLocale) : null;
 
     let lang: string;
     if (pathCode && pathCode !== GT_DEFAULT) {
-      storeLang(pathCode);   // sync URL locale into localStorage + cookie
+      storeLang(pathCode);
       lang = pathCode;
     } else {
       lang = getStoredLang();
     }
 
     if (lang === GT_DEFAULT) return;
-    cancelRef.current = translateWhenReady(lang);
-    return () => { if (cancelRef.current) cancelRef.current(); };
+
+    // Primary: poll for GT combo element, then trigger translation
+    cancelRef.current = translateWhenReady(lang, 6000);
+
+    // Fallback: if the page is still untranslated after 4s, reload once.
+    // GT reliably reads the googtrans cookie on a fresh page load.
+    const reloadKey = `gt_reloaded_${lang}_${window.location.pathname}`;
+    const fallback = setTimeout(() => {
+      if (sessionStorage.getItem(reloadKey)) return;
+      const translated =
+        document.body.classList.contains("translated-ltr") ||
+        document.body.classList.contains("translated-rtl");
+      if (!translated) {
+        sessionStorage.setItem(reloadKey, "1");
+        window.location.reload();
+      }
+    }, 4000);
+
+    return () => {
+      if (cancelRef.current) cancelRef.current();
+      clearTimeout(fallback);
+    };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── 2. Route change ──────────────────────────────────────────────────────
+  // ── 2. Route change (client-side navigation) ─────────────────────────────
   useEffect(() => {
     if (pathname.startsWith("/gettoursadmin")) return;
 

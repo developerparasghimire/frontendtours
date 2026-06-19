@@ -1,28 +1,30 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { useState, useEffect, useCallback } from "react";
 import {
   LANGUAGES, GT_DEFAULT, GT_LANG_KEY,
-  getStoredLang, storeLang, setGTCookie, translateWhenReady, applyTranslation,
-  localePath,
+  getStoredLang, storeLang, setGTCookie, localePath,
+  getPathLocale, LOCALE_TO_CODE,
 } from "@/lib/googleTranslate";
+import { usePathname } from "next/navigation";
 
 export default function TranslateButton({ isOverlayNav }: { isOverlayNav: boolean }) {
   const [open, setOpen] = useState(false);
   const [currentLang, setCurrentLang] = useState(GT_DEFAULT);
-  const ref = useRef<HTMLDivElement>(null);
-  const cancelRef = useRef<(() => void) | null>(null);
   const pathname = usePathname();
-  const router = useRouter();
 
+  // On mount: read locale from URL path first, fall back to localStorage
   useEffect(() => {
-    setCurrentLang(getStoredLang());
+    const pathLocale = getPathLocale(window.location.pathname);
+    const pathCode = pathLocale ? (LOCALE_TO_CODE[pathLocale] ?? pathLocale) : null;
+    setCurrentLang(pathCode ?? getStoredLang());
   }, []);
 
+  // Close dropdown on outside click
   useEffect(() => {
     const h = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+      const el = document.getElementById("translate-btn-root");
+      if (el && !el.contains(e.target as Node)) setOpen(false);
     };
     document.addEventListener("mousedown", h);
     return () => document.removeEventListener("mousedown", h);
@@ -32,30 +34,15 @@ export default function TranslateButton({ isOverlayNav }: { isOverlayNav: boolea
     setOpen(false);
     if (code === currentLang) return;
 
-    setCurrentLang(code);
+    // Persist choice
     storeLang(code);
     setGTCookie(code);
     localStorage.setItem(GT_LANG_KEY, code);
 
-    if (cancelRef.current) cancelRef.current();
-
-    if (code === GT_DEFAULT) {
-      applyTranslation(GT_DEFAULT);
-    } else {
-      const combo = document.querySelector<HTMLSelectElement>(".goog-te-combo");
-      if (combo) {
-        applyTranslation(code);
-      } else {
-        cancelRef.current = translateWhenReady(code, 3000);
-      }
-    }
-
-    // Navigate to the locale-prefixed URL
+    // Full reload to locale URL — GT reads googtrans cookie on fresh init (most reliable)
     const target = localePath(code, pathname);
-    if (target !== pathname) {
-      router.push(target);
-    }
-  }, [currentLang, pathname, router]);
+    window.location.href = target;
+  }, [currentLang, pathname]);
 
   const current = LANGUAGES.find((l) => l.code === currentLang) ?? LANGUAGES[0];
   const displayCode =
@@ -64,7 +51,7 @@ export default function TranslateButton({ isOverlayNav }: { isOverlayNav: boolea
     : currentLang.toUpperCase();
 
   return (
-    <div className="relative" ref={ref}>
+    <div className="relative" id="translate-btn-root">
       <button
         onClick={() => setOpen((o) => !o)}
         className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
