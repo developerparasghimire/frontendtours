@@ -157,13 +157,16 @@ export default function RootLayout({
             gtag('config', '${GA_ID}');
           `}
         </Script>
-        {/* Google Translate — initialized once, hidden element */}
-        <div id="google_translate_element" style={{ display: "none" }} />
+        {/* Google Translate — off-screen so widget initializes properly */}
+        <div
+          id="google_translate_element"
+          style={{ position: "fixed", top: "-9999px", left: "-9999px", width: "1px", height: "1px", overflow: "hidden" }}
+        />
         <Script id="google-translate-init" strategy="afterInteractive">
           {`
             window.googleTranslateElementInit = function() {
               new google.translate.TranslateElement(
-                { pageLanguage: 'en', autoDisplay: false },
+                { pageLanguage: 'en', layout: google.translate.TranslateElement.InlineLayout.SIMPLE },
                 'google_translate_element'
               );
             };

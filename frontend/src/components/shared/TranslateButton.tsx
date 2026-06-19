@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 
 const LANGUAGES = [
   { code: "en",    label: "English",    flag: "🇬🇧" },
@@ -20,26 +20,35 @@ const LANGUAGES = [
   { code: "nl",    label: "Nederlands", flag: "🇳🇱" },
 ];
 
-function readCurrentLang(): string {
-  if (typeof document === "undefined") return "en";
-  const m = document.cookie.match(/(?:^|;\s*)googtrans=\/en\/([^;]+)/);
-  return m ? m[1] : "en";
-}
+const LS_KEY = "gt_selected_lang";
 
-function applyTranslation(code: string) {
-  const exp = "Thu, 01 Jan 1970 00:00:00 UTC";
+function setGoogTransCookie(code: string) {
   const host = window.location.hostname;
-  // Clear existing cookie on all variants
-  document.cookie = `googtrans=; expires=${exp}; path=/;`;
-  document.cookie = `googtrans=; expires=${exp}; path=/; domain=${host};`;
-  document.cookie = `googtrans=; expires=${exp}; path=/; domain=.${host};`;
-
+  const exp = "expires=Thu, 01 Jan 1970 00:00:00 UTC";
+  // Clear old cookie on all domain variants
+  document.cookie = `googtrans=; ${exp}; path=/;`;
+  document.cookie = `googtrans=; ${exp}; path=/; domain=${host};`;
+  document.cookie = `googtrans=; ${exp}; path=/; domain=.${host};`;
   if (code !== "en") {
     const val = `/en/${code}`;
-    document.cookie = `googtrans=${val}; path=/;`;
-    document.cookie = `googtrans=${val}; path=/; domain=${host};`;
+    document.cookie = `googtrans=${val}; path=/; SameSite=Lax`;
+    document.cookie = `googtrans=${val}; path=/; domain=${host}; SameSite=Lax`;
   }
-  window.location.reload();
+}
+
+function triggerCombo(code: string): boolean {
+  const combo = document.querySelector<HTMLSelectElement>(".goog-te-combo");
+  if (!combo) return false;
+  combo.value = code === "en" ? "" : code;
+  combo.dispatchEvent(new Event("change", { bubbles: true }));
+  return true;
+}
+
+function waitAndTrigger(code: string, attempts = 0) {
+  if (triggerCombo(code)) return;
+  if (attempts < 20) {
+    setTimeout(() => waitAndTrigger(code, attempts + 1), 200);
+  }
 }
 
 export default function TranslateButton({ isOverlayNav }: { isOverlayNav: boolean }) {
@@ -47,12 +56,13 @@ export default function TranslateButton({ isOverlayNav }: { isOverlayNav: boolea
   const [currentLang, setCurrentLang] = useState("en");
   const ref = useRef<HTMLDivElement>(null);
 
-  // Read active language from googtrans cookie on mount
   useEffect(() => {
-    setCurrentLang(readCurrentLang());
+    try {
+      const saved = localStorage.getItem(LS_KEY);
+      if (saved) setCurrentLang(saved);
+    } catch {}
   }, []);
 
-  // Close on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
@@ -61,14 +71,35 @@ export default function TranslateButton({ isOverlayNav }: { isOverlayNav: boolea
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  const current = LANGUAGES.find((l) => l.code === currentLang) ?? LANGUAGES[0];
-
-  function handleSelect(lang: (typeof LANGUAGES)[number]) {
+  const handleSelect = useCallback((lang: (typeof LANGUAGES)[number]) => {
     setOpen(false);
     if (lang.code === currentLang) return;
-    applyTranslation(lang.code);
-  }
 
+    setCurrentLang(lang.code);
+    try { localStorage.setItem(LS_KEY, lang.code); } catch {}
+
+    // Set cookie so translation persists across page navigations
+    setGoogTransCookie(lang.code);
+
+    // Try to trigger the live Google Translate widget immediately
+    // (works if the widget has already loaded on this page)
+    if (!triggerCombo(lang.code)) {
+      // Widget not ready yet — reload so the cookie is picked up on next load
+      window.location.reload();
+    }
+  }, [currentLang]);
+
+  // On mount, if a non-English lang is stored, trigger the widget once it loads
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(LS_KEY);
+      if (saved && saved !== "en") {
+        waitAndTrigger(saved);
+      }
+    } catch {}
+  }, []);
+
+  const current = LANGUAGES.find((l) => l.code === currentLang) ?? LANGUAGES[0];
   const displayCode = currentLang === "en" ? "EN"
     : currentLang === "zh-CN" ? "ZH"
     : currentLang.toUpperCase();
