@@ -1,9 +1,11 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import {
   LANGUAGES, GT_DEFAULT, GT_LANG_KEY,
   getStoredLang, storeLang, setGTCookie, translateWhenReady, applyTranslation,
+  localePath,
 } from "@/lib/googleTranslate";
 
 export default function TranslateButton({ isOverlayNav }: { isOverlayNav: boolean }) {
@@ -11,13 +13,13 @@ export default function TranslateButton({ isOverlayNav }: { isOverlayNav: boolea
   const [currentLang, setCurrentLang] = useState(GT_DEFAULT);
   const ref = useRef<HTMLDivElement>(null);
   const cancelRef = useRef<(() => void) | null>(null);
+  const pathname = usePathname();
+  const router = useRouter();
 
-  // Sync button label to stored lang on mount
   useEffect(() => {
     setCurrentLang(getStoredLang());
   }, []);
 
-  // Close dropdown on outside click
   useEffect(() => {
     const h = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
@@ -32,25 +34,28 @@ export default function TranslateButton({ isOverlayNav }: { isOverlayNav: boolea
 
     setCurrentLang(code);
     storeLang(code);
-    setGTCookie(code);          // persist across full reloads
-    localStorage.setItem(GT_LANG_KEY, code); // redundant-but-safe
+    setGTCookie(code);
+    localStorage.setItem(GT_LANG_KEY, code);
 
     if (cancelRef.current) cancelRef.current();
 
     if (code === GT_DEFAULT) {
-      // Restore English — combo value "" triggers GT to show original
       applyTranslation(GT_DEFAULT);
     } else {
-      // Try live widget first; if not ready (first visit) reload so cookie kicks in
       const combo = document.querySelector<HTMLSelectElement>(".goog-te-combo");
       if (combo) {
         applyTranslation(code);
       } else {
         cancelRef.current = translateWhenReady(code, 3000);
-        // If still not ready after 3s, the cookie will handle it on next full load
       }
     }
-  }, [currentLang]);
+
+    // Navigate to the locale-prefixed URL
+    const target = localePath(code, pathname);
+    if (target !== pathname) {
+      router.push(target);
+    }
+  }, [currentLang, pathname, router]);
 
   const current = LANGUAGES.find((l) => l.code === currentLang) ?? LANGUAGES[0];
   const displayCode =

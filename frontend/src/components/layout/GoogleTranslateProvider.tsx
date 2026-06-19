@@ -1,13 +1,16 @@
 "use client";
 
 // Invisible component — renders nothing, handles all GT side effects:
-//  1. Initial translation on mount (reads localStorage)
+//  1. Initial translation on mount (syncs path locale → storage, then translates)
 //  2. Re-translation on every Next.js route change
 //  3. MutationObserver re-translation when Django API data loads into DOM
 
 import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
-import { getStoredLang, translateWhenReady, applyTranslation, GT_DEFAULT } from "@/lib/googleTranslate";
+import {
+  getStoredLang, storeLang, translateWhenReady, applyTranslation,
+  GT_DEFAULT, getPathLocale, LOCALE_TO_CODE,
+} from "@/lib/googleTranslate";
 
 export default function GoogleTranslateProvider() {
   const pathname = usePathname();
@@ -16,7 +19,6 @@ export default function GoogleTranslateProvider() {
   const mutationTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isBusy = useRef(false);
 
-  // ── Helper: cancel pending + schedule translation ────────────────────────
   const schedule = (delayMs: number, lang: string) => {
     if (cancelRef.current) { cancelRef.current(); cancelRef.current = null; }
     const t = setTimeout(() => {
@@ -27,7 +29,18 @@ export default function GoogleTranslateProvider() {
 
   // ── 1. Initial mount ─────────────────────────────────────────────────────
   useEffect(() => {
-    const lang = getStoredLang();
+    // If the URL has a locale prefix (/de, /fr, etc.), that wins
+    const pathLocale = getPathLocale(window.location.pathname);
+    const pathCode = pathLocale ? (LOCALE_TO_CODE[pathLocale] ?? pathLocale) : null;
+
+    let lang: string;
+    if (pathCode && pathCode !== GT_DEFAULT) {
+      storeLang(pathCode);   // sync URL locale into localStorage + cookie
+      lang = pathCode;
+    } else {
+      lang = getStoredLang();
+    }
+
     if (lang === GT_DEFAULT) return;
     cancelRef.current = translateWhenReady(lang);
     return () => { if (cancelRef.current) cancelRef.current(); };
@@ -35,14 +48,12 @@ export default function GoogleTranslateProvider() {
 
   // ── 2. Route change ──────────────────────────────────────────────────────
   useEffect(() => {
-    // Skip admin pages
     if (pathname.startsWith("/gettoursadmin")) return;
 
     const lang = getStoredLang();
     if (lang === GT_DEFAULT) return;
 
     if (prevPath.current !== null && prevPath.current !== pathname) {
-      // New route: new content rendered — wait a tick then re-translate
       const cancel = schedule(120, lang);
       prevPath.current = pathname;
       return cancel;
@@ -70,7 +81,6 @@ export default function GoogleTranslateProvider() {
     const observer = new MutationObserver((mutations) => {
       if (isBusy.current) return;
 
-      // Only react if a real (non-GT) element was added
       const hasNewContent = mutations.some(
         (m) => m.type === "childList" && Array.from(m.addedNodes).some((n) => !isGTNode(n) && n.nodeType === Node.ELEMENT_NODE)
       );
@@ -80,12 +90,10 @@ export default function GoogleTranslateProvider() {
       mutationTimer.current = setTimeout(() => {
         isBusy.current = true;
         applyTranslation(lang);
-        // Hold busy flag so GT's own DOM changes don't re-trigger immediately
         setTimeout(() => { isBusy.current = false; }, 1200);
       }, 350);
     });
 
-    // Watch the <main> element where page content lives
     const root = document.querySelector("main") ?? document.body;
     observer.observe(root, { childList: true, subtree: true });
 

@@ -9,6 +9,7 @@ import { useAuth } from "@/lib/auth";
 import { useCurrency, CURRENCIES } from "@/context/CurrencyContext";
 import { useTranslation } from "@/context/TranslationContext";
 import TranslateButton from "@/components/shared/TranslateButton";
+import { getPathLocale, stripLocale } from "@/lib/googleTranslate";
 
 const NAV_LINKS = [
   { href: "/",        label: "Home"    },
@@ -31,7 +32,9 @@ export default function Navbar() {
   const { t } = useTranslation();
   const userMenuRef = useRef<HTMLDivElement>(null);
   const currencyMenuRef = useRef<HTMLDivElement>(null);
-  const isHome = pathname === "/";
+  const cleanPath = stripLocale(pathname);
+  const currentLocale = getPathLocale(pathname);
+  const isHome = cleanPath === "/";
   const isOverlayNav = isHome && !scrolled && !isMobileMenuOpen;
   const showBrandText = !scrolled;
 
@@ -122,11 +125,12 @@ export default function Navbar() {
               }`}
             >
               {NAV_LINKS.map((link) => {
-                const isActive = pathname === link.href || (link.href !== "/" && pathname.startsWith(link.href));
+                const isActive = cleanPath === link.href || (link.href !== "/" && cleanPath.startsWith(link.href));
+                const linkHref = currentLocale && currentLocale !== "en" ? `/${currentLocale}${link.href === "/" ? "" : link.href}` : link.href;
                 return (
                   <Link
                     key={link.href}
-                    href={link.href}
+                    href={linkHref}
                     onClick={closeMenus}
                     className={`relative rounded-full px-4 py-2 text-sm font-medium transition-all duration-300 group ${
                       isOverlayNav
@@ -305,11 +309,12 @@ export default function Navbar() {
             <div className="border-t border-white/50 bg-white/92 px-4 py-3 shadow-xl backdrop-blur-xl">
               <div className="space-y-0.5">
                 {NAV_LINKS.map((link) => {
-                  const isActive = pathname === link.href || (link.href !== "/" && pathname.startsWith(link.href));
+                  const isActive = cleanPath === link.href || (link.href !== "/" && cleanPath.startsWith(link.href));
+                  const linkHref = currentLocale && currentLocale !== "en" ? `/${currentLocale}${link.href === "/" ? "" : link.href}` : link.href;
                   return (
                     <Link
                       key={link.href}
-                      href={link.href}
+                      href={linkHref}
                       onClick={closeMenus}
                       className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
                         isActive ? "text-brand-red bg-brand-red/5" : "text-gray-700 hover:bg-gray-50 hover:text-brand-navy"
