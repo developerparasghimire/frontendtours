@@ -1,106 +1,60 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-
-const LANGUAGES = [
-  { code: "en",    label: "English",    flag: "🇬🇧" },
-  { code: "ja",    label: "日本語",      flag: "🇯🇵" },
-  { code: "zh-CN", label: "中文",        flag: "🇨🇳" },
-  { code: "hi",    label: "हिन्दी",     flag: "🇮🇳" },
-  { code: "ru",    label: "Русский",    flag: "🇷🇺" },
-  { code: "fr",    label: "Français",   flag: "🇫🇷" },
-  { code: "de",    label: "Deutsch",    flag: "🇩🇪" },
-  { code: "es",    label: "Español",    flag: "🇪🇸" },
-  { code: "ar",    label: "العربية",    flag: "🇸🇦" },
-  { code: "ko",    label: "한국어",     flag: "🇰🇷" },
-  { code: "pt",    label: "Português",  flag: "🇧🇷" },
-  { code: "it",    label: "Italiano",   flag: "🇮🇹" },
-  { code: "tr",    label: "Türkçe",     flag: "🇹🇷" },
-  { code: "th",    label: "ไทย",        flag: "🇹🇭" },
-  { code: "nl",    label: "Nederlands", flag: "🇳🇱" },
-];
-
-const LS_KEY = "gt_selected_lang";
-
-function setGoogTransCookie(code: string) {
-  const host = window.location.hostname;
-  const exp = "expires=Thu, 01 Jan 1970 00:00:00 UTC";
-  // Clear old cookie on all domain variants
-  document.cookie = `googtrans=; ${exp}; path=/;`;
-  document.cookie = `googtrans=; ${exp}; path=/; domain=${host};`;
-  document.cookie = `googtrans=; ${exp}; path=/; domain=.${host};`;
-  if (code !== "en") {
-    const val = `/en/${code}`;
-    document.cookie = `googtrans=${val}; path=/; SameSite=Lax`;
-    document.cookie = `googtrans=${val}; path=/; domain=${host}; SameSite=Lax`;
-  }
-}
-
-function triggerCombo(code: string): boolean {
-  const combo = document.querySelector<HTMLSelectElement>(".goog-te-combo");
-  if (!combo) return false;
-  combo.value = code === "en" ? "" : code;
-  combo.dispatchEvent(new Event("change", { bubbles: true }));
-  return true;
-}
-
-function waitAndTrigger(code: string, attempts = 0) {
-  if (triggerCombo(code)) return;
-  if (attempts < 20) {
-    setTimeout(() => waitAndTrigger(code, attempts + 1), 200);
-  }
-}
+import {
+  LANGUAGES, GT_DEFAULT, GT_LANG_KEY,
+  getStoredLang, storeLang, setGTCookie, translateWhenReady, applyTranslation,
+} from "@/lib/googleTranslate";
 
 export default function TranslateButton({ isOverlayNav }: { isOverlayNav: boolean }) {
   const [open, setOpen] = useState(false);
-  const [currentLang, setCurrentLang] = useState("en");
+  const [currentLang, setCurrentLang] = useState(GT_DEFAULT);
   const ref = useRef<HTMLDivElement>(null);
+  const cancelRef = useRef<(() => void) | null>(null);
 
+  // Sync button label to stored lang on mount
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(LS_KEY);
-      if (saved) setCurrentLang(saved);
-    } catch {}
+    setCurrentLang(getStoredLang());
   }, []);
 
+  // Close dropdown on outside click
   useEffect(() => {
-    const handler = (e: MouseEvent) => {
+    const h = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
     };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
+    document.addEventListener("mousedown", h);
+    return () => document.removeEventListener("mousedown", h);
   }, []);
 
-  const handleSelect = useCallback((lang: (typeof LANGUAGES)[number]) => {
+  const handleSelect = useCallback((code: string) => {
     setOpen(false);
-    if (lang.code === currentLang) return;
+    if (code === currentLang) return;
 
-    setCurrentLang(lang.code);
-    try { localStorage.setItem(LS_KEY, lang.code); } catch {}
+    setCurrentLang(code);
+    storeLang(code);
+    setGTCookie(code);          // persist across full reloads
+    localStorage.setItem(GT_LANG_KEY, code); // redundant-but-safe
 
-    // Set cookie so translation persists across page navigations
-    setGoogTransCookie(lang.code);
+    if (cancelRef.current) cancelRef.current();
 
-    // Try to trigger the live Google Translate widget immediately
-    // (works if the widget has already loaded on this page)
-    if (!triggerCombo(lang.code)) {
-      // Widget not ready yet — reload so the cookie is picked up on next load
-      window.location.reload();
+    if (code === GT_DEFAULT) {
+      // Restore English — combo value "" triggers GT to show original
+      applyTranslation(GT_DEFAULT);
+    } else {
+      // Try live widget first; if not ready (first visit) reload so cookie kicks in
+      const combo = document.querySelector<HTMLSelectElement>(".goog-te-combo");
+      if (combo) {
+        applyTranslation(code);
+      } else {
+        cancelRef.current = translateWhenReady(code, 3000);
+        // If still not ready after 3s, the cookie will handle it on next full load
+      }
     }
   }, [currentLang]);
 
-  // On mount, if a non-English lang is stored, trigger the widget once it loads
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem(LS_KEY);
-      if (saved && saved !== "en") {
-        waitAndTrigger(saved);
-      }
-    } catch {}
-  }, []);
-
   const current = LANGUAGES.find((l) => l.code === currentLang) ?? LANGUAGES[0];
-  const displayCode = currentLang === "en" ? "EN"
+  const displayCode =
+    currentLang === "en" ? "EN"
     : currentLang === "zh-CN" ? "ZH"
     : currentLang.toUpperCase();
 
@@ -130,7 +84,7 @@ export default function TranslateButton({ isOverlayNav }: { isOverlayNav: boolea
           {LANGUAGES.map((l) => (
             <button
               key={l.code}
-              onClick={() => handleSelect(l)}
+              onClick={() => handleSelect(l.code)}
               className={`w-full flex items-center gap-2.5 px-4 py-2.5 text-sm transition-colors ${
                 currentLang === l.code
                   ? "bg-brand-navy/5 text-brand-navy font-bold"
