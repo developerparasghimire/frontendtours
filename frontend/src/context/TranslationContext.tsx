@@ -65,6 +65,9 @@ const EUR_COUNTRIES = new Set([
 
 const CURRENCY_MAP: Record<string, CurrencyCode> = {
   NP: "NPR", IN: "INR", GB: "GBP", AU: "AUD", NZ: "AUD",
+  CN: "CNY", TW: "CNY", HK: "CNY",
+  RU: "RUB",
+  JP: "JPY",
 };
 
 export function countryToCurrency(country: string): CurrencyCode {

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-const FALLBACK = { USD: 1, INR: 84.5, EUR: 0.92, NPR: 135.0, GBP: 0.79, AUD: 1.54 };
+const FALLBACK = { USD: 1, INR: 84.5, EUR: 0.92, NPR: 135.0, GBP: 0.79, AUD: 1.54, CNY: 7.25, RUB: 90.0, JPY: 155.0 };
 
 async function fetchRates(url: string) {
   const res = await fetch(url, { next: { revalidate: 1800 }, cache: "no-store" });
@@ -28,6 +28,9 @@ export async function GET() {
         NPR: Number(r.NPR) || FALLBACK.NPR,
         GBP: Number(r.GBP) || FALLBACK.GBP,
         AUD: Number(r.AUD) || FALLBACK.AUD,
+        CNY: Number(r.CNY) || FALLBACK.CNY,
+        RUB: Number(r.RUB) || FALLBACK.RUB,
+        JPY: Number(r.JPY) || FALLBACK.JPY,
       };
       return NextResponse.json(rates, {
         headers: { "Cache-Control": "public, s-maxage=1800, stale-while-revalidate=300" },

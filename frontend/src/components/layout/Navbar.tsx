@@ -7,15 +7,16 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/lib/auth";
 import { useCurrency, CURRENCIES } from "@/context/CurrencyContext";
-import { useTranslation, LANGUAGES } from "@/context/TranslationContext";
+import { useTranslation } from "@/context/TranslationContext";
+import GoogleTranslate from "@/components/shared/GoogleTranslate";
 
-const NAV_KEYS = [
-  { href: "/",        key: "nav.home"    },
-  { href: "/about",   key: "nav.about"   },
-  { href: "/events",  key: "nav.events"  },
-  { href: "/tours",   key: "nav.tours"   },
-  { href: "/blog",    key: "nav.blogs"   },
-  { href: "/contact", key: "nav.contact" },
+const NAV_LINKS = [
+  { href: "/",        label: "Home"    },
+  { href: "/about",   label: "About"   },
+  { href: "/events",  label: "Events"  },
+  { href: "/tours",   label: "Tours"   },
+  { href: "/blog",    label: "Blogs"   },
+  { href: "/contact", label: "Contact" },
 ];
 
 export default function Navbar() {
@@ -27,28 +28,20 @@ export default function Navbar() {
   const pathname = usePathname();
   const { user, isAuthenticated, logout, loading } = useAuth();
   const { currency, setCurrency, currencyInfo } = useCurrency();
-  const { lang, setLang, t } = useTranslation();
-  const [langMenuOpen, setLangMenuOpen] = useState(false);
+  const { t } = useTranslation();
   const userMenuRef = useRef<HTMLDivElement>(null);
   const currencyMenuRef = useRef<HTMLDivElement>(null);
-  const langMenuRef = useRef<HTMLDivElement>(null);
-  // Strip leading locale prefix (e.g. /np/tours → /tours) for active-link checks
-  const strippedPath = pathname.replace(/^\/(en|np|fr|de|es|zh|ja)(\/|$)/, "/");
-  const isHome = strippedPath === "/";
+  const isHome = pathname === "/";
   const isOverlayNav = isHome && !scrolled && !isMobileMenuOpen;
   const showBrandText = !scrolled;
 
   useEffect(() => {
-    const onScroll = () => {
-      setScrolled(window.scrollY > 20);
-    };
-
+    const onScroll = () => { setScrolled(window.scrollY > 20); };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Close menus on outside click
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
       if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
@@ -56,9 +49,6 @@ export default function Navbar() {
       }
       if (currencyMenuRef.current && !currencyMenuRef.current.contains(e.target as Node)) {
         setCurrencyMenuOpen(false);
-      }
-      if (langMenuRef.current && !langMenuRef.current.contains(e.target as Node)) {
-        setLangMenuOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClick);
@@ -68,6 +58,7 @@ export default function Navbar() {
   const userInitials = user
     ? `${user.first_name?.[0] || ""}${user.last_name?.[0] || ""}`.toUpperCase() || user.username[0].toUpperCase()
     : "";
+
   const closeMenus = () => {
     setIsMobileMenuOpen(false);
     setUserMenuOpen(false);
@@ -78,7 +69,6 @@ export default function Navbar() {
       const h = navRef.current?.offsetHeight ?? 64;
       document.documentElement.style.setProperty("--nav-height", `${h}px`);
     };
-
     setNavHeight();
     window.addEventListener("resize", setNavHeight);
     return () => window.removeEventListener("resize", setNavHeight);
@@ -98,7 +88,7 @@ export default function Navbar() {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
-          {/* Logo — no wrapper, no background */}
+          {/* Logo */}
           <Link
             href="/"
             onClick={closeMenus}
@@ -131,38 +121,37 @@ export default function Navbar() {
                 isOverlayNav ? "bg-transparent px-0 py-0 backdrop-blur-0" : "bg-brand-navy/[0.035]"
               }`}
             >
-            {NAV_KEYS.map((link) => {
-              const isActive = strippedPath === link.href || (link.href !== "/" && strippedPath.startsWith(link.href));
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={closeMenus}
-                  className={`relative rounded-full px-4 py-2 text-sm font-medium transition-all duration-300 group ${
-                    isOverlayNav
-                      ? isActive
-                        ? "text-white"
-                        : "text-white/70 hover:text-white"
-                      : isActive
-                        ? "text-brand-red"
-                        : "text-gray-600 hover:text-brand-navy"
-                  }`}
-                >
-                  {t(link.key)}
-                  <span
-                    className={`absolute bottom-0 left-1/2 -translate-x-1/2 h-0.5 rounded-full transition-all duration-300 ${
-                      isOverlayNav ? "bg-white" : "bg-[linear-gradient(90deg,var(--color-brand-red),var(--color-brand-orange))]"
-                    } ${
-                      isActive ? "w-5" : "w-0 group-hover:w-5"
+              {NAV_LINKS.map((link) => {
+                const isActive = pathname === link.href || (link.href !== "/" && pathname.startsWith(link.href));
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={closeMenus}
+                    className={`relative rounded-full px-4 py-2 text-sm font-medium transition-all duration-300 group ${
+                      isOverlayNav
+                        ? isActive ? "text-white" : "text-white/70 hover:text-white"
+                        : isActive ? "text-brand-red" : "text-gray-600 hover:text-brand-navy"
                     }`}
-                  />
-                </Link>
-              );
-            })}
+                  >
+                    {link.label}
+                    <span
+                      className={`absolute bottom-0 left-1/2 -translate-x-1/2 h-0.5 rounded-full transition-all duration-300 ${
+                        isOverlayNav ? "bg-white" : "bg-[linear-gradient(90deg,var(--color-brand-red),var(--color-brand-orange))]"
+                      } ${isActive ? "w-5" : "w-0 group-hover:w-5"}`}
+                    />
+                  </Link>
+                );
+              })}
+            </div>
+
+            {/* Google Translate */}
+            <div className={`gt-nav-wrapper mr-1 ${isOverlayNav ? "gt-overlay" : "gt-solid"}`}>
+              <GoogleTranslate />
             </div>
 
             {/* Currency Selector */}
-            <div className="relative ml-2" ref={currencyMenuRef}>
+            <div className="relative ml-1" ref={currencyMenuRef}>
               <button
                 onClick={() => setCurrencyMenuOpen((o) => !o)}
                 className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
@@ -178,15 +167,13 @@ export default function Navbar() {
                 </svg>
               </button>
               {currencyMenuOpen && (
-                <div className="absolute right-0 top-full mt-2 w-40 bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden z-50">
+                <div className="absolute right-0 top-full mt-2 w-40 bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden z-50 max-h-72 overflow-y-auto">
                   {CURRENCIES.map((c) => (
                     <button
                       key={c.code}
                       onClick={() => { setCurrency(c.code); setCurrencyMenuOpen(false); }}
                       className={`w-full flex items-center justify-between px-4 py-2.5 text-sm transition-colors ${
-                        currency === c.code
-                          ? "bg-brand-navy/5 text-brand-navy font-bold"
-                          : "text-gray-700 hover:bg-gray-50"
+                        currency === c.code ? "bg-brand-navy/5 text-brand-navy font-bold" : "text-gray-700 hover:bg-gray-50"
                       }`}
                     >
                       <span>{c.label}</span>
@@ -195,34 +182,6 @@ export default function Navbar() {
                           <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                         </svg>
                       )}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Language Selector */}
-            <div className="relative ml-1" ref={langMenuRef}>
-              <button
-                onClick={() => setLangMenuOpen((o) => !o)}
-                className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-colors ${
-                  isOverlayNav ? "text-white/80 hover:bg-white/10" : "text-brand-navy hover:bg-brand-navy/5 border border-gray-200"
-                }`}
-                aria-label="Select language"
-              >
-                {LANGUAGES.find((l) => l.code === lang)?.flag} {lang}
-                <svg className={`w-3 h-3 transition-transform ${langMenuOpen ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-              {langMenuOpen && (
-                <div className="absolute right-0 top-full mt-2 w-44 bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden z-50">
-                  {LANGUAGES.map((l) => (
-                    <button key={l.code} onClick={() => { setLang(l.code); setLangMenuOpen(false); }}
-                      className={`w-full flex items-center gap-2.5 px-4 py-2.5 text-sm transition-colors ${lang === l.code ? "bg-brand-navy/5 text-brand-navy font-bold" : "text-gray-700 hover:bg-gray-50"}`}>
-                      <span className="text-base">{l.flag}</span>
-                      <span>{l.label}</span>
-                      {lang === l.code && <svg className="w-3.5 h-3.5 text-brand-navy ml-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/></svg>}
                     </button>
                   ))}
                 </div>
@@ -252,7 +211,6 @@ export default function Navbar() {
                     </svg>
                   </button>
 
-                  {/* User Dropdown */}
                   {userMenuOpen && (
                     <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden animate-fade-in z-50">
                       <div className="px-5 py-4 bg-gray-50 border-b border-gray-100">
@@ -289,7 +247,6 @@ export default function Navbar() {
                 </div>
               ) : (
                 <>
-                 
                   <Link
                     href="/login"
                     onClick={closeMenus}
@@ -349,92 +306,85 @@ export default function Navbar() {
           >
             <div className="border-t border-white/50 bg-white/92 px-4 py-3 shadow-xl backdrop-blur-xl">
               <div className="space-y-0.5">
-            {NAV_KEYS.map((link) => {
-              const isActive = strippedPath === link.href || (link.href !== "/" && strippedPath.startsWith(link.href));
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={closeMenus}
-                  className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
-                    isActive
-                      ? "text-brand-red bg-brand-red/5"
-                      : "text-gray-700 hover:bg-gray-50 hover:text-brand-navy"
-                  }`}
-                >
-                  {t(link.key)}
-                  {isActive && <span className="w-1.5 h-1.5 rounded-full bg-brand-red" />}
-                </Link>
-              );
-            })}
-          </div>
+                {NAV_LINKS.map((link) => {
+                  const isActive = pathname === link.href || (link.href !== "/" && pathname.startsWith(link.href));
+                  return (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      onClick={closeMenus}
+                      className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
+                        isActive ? "text-brand-red bg-brand-red/5" : "text-gray-700 hover:bg-gray-50 hover:text-brand-navy"
+                      }`}
+                    >
+                      {link.label}
+                      {isActive && <span className="w-1.5 h-1.5 rounded-full bg-brand-red" />}
+                    </Link>
+                  );
+                })}
+              </div>
 
-          {/* Mobile Language + Currency Selectors */}
-          <div className="border-t border-gray-100 mt-3 pt-3">
-            <p className="px-4 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-gray-400">{t("nav.language")}</p>
-            <div className="flex flex-wrap gap-2 px-4 pb-3">
-              {LANGUAGES.map((l) => (
-                <button key={l.code} onClick={() => { setLang(l.code); closeMenus(); }}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors ${lang === l.code ? "bg-brand-navy text-white border-brand-navy" : "border-gray-200 text-gray-600 hover:border-brand-navy hover:text-brand-navy"}`}>
-                  {l.flag} {l.code}
-                </button>
-              ))}
-            </div>
-            <p className="px-4 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-gray-400">{t("nav.currency")}</p>
-            <div className="flex flex-wrap gap-2 px-4 pb-2">
-              {CURRENCIES.map((c) => (
-                <button key={c.code} onClick={() => { setCurrency(c.code); closeMenus(); }}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors ${currency === c.code ? "bg-brand-navy text-white border-brand-navy" : "border-gray-200 text-gray-600 hover:border-brand-navy hover:text-brand-navy"}`}>
-                  {c.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Mobile Auth Section */}
-          <div className="border-t border-gray-100 mt-3 pt-3">
-            {isAuthenticated && user ? (
-              <>
-                <div className="px-4 py-2.5 mb-1 bg-gray-50 rounded-xl">
-                  <p className="font-semibold text-brand-navy text-sm">{user.first_name} {user.last_name}</p>
-                  <p className="text-gray-400 text-xs mt-0.5">{user.email}</p>
+              {/* Mobile Currency + Translate */}
+              <div className="border-t border-gray-100 mt-3 pt-3">
+                <p className="px-4 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-gray-400">Currency</p>
+                <div className="flex flex-wrap gap-2 px-4 pb-3">
+                  {CURRENCIES.map((c) => (
+                    <button key={c.code} onClick={() => { setCurrency(c.code); closeMenus(); }}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors ${currency === c.code ? "bg-brand-navy text-white border-brand-navy" : "border-gray-200 text-gray-600 hover:border-brand-navy hover:text-brand-navy"}`}>
+                      {c.label}
+                    </button>
+                  ))}
                 </div>
-                <Link href="/dashboard" onClick={closeMenus} className="flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50">
-                  <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                  </svg>
-                  {t("nav.dashboard")}
-                </Link>
-                <Link href="/dashboard#bookings" onClick={closeMenus} className="flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50">
-                  <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                  </svg>
-                  {t("nav.my_bookings")}
-                </Link>
-                <button
-                  onClick={logout}
-                  className="flex items-center gap-2.5 w-full px-4 py-3 rounded-xl text-sm font-medium text-red-600 hover:bg-red-50"
-                >
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                  </svg>
-                  {t("nav.sign_out")}
-                </button>
-              </>
-            ) : (
-              <Link
-                href="/login"
-                onClick={closeMenus}
-                className="flex items-center justify-center gap-1.5 w-full py-3 rounded-xl text-sm font-semibold bg-brand-red text-white hover:bg-red-700 transition-colors"
-              >
-                {t("nav.sign_in")}
-                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-            )}
-          </div>
-        </div>
+                <p className="px-4 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-gray-400">Translate</p>
+                <div className="px-4 pb-3 gt-mobile-wrapper">
+                  <GoogleTranslate />
+                </div>
+              </div>
+
+              {/* Mobile Auth Section */}
+              <div className="border-t border-gray-100 mt-3 pt-3">
+                {isAuthenticated && user ? (
+                  <>
+                    <div className="px-4 py-2.5 mb-1 bg-gray-50 rounded-xl">
+                      <p className="font-semibold text-brand-navy text-sm">{user.first_name} {user.last_name}</p>
+                      <p className="text-gray-400 text-xs mt-0.5">{user.email}</p>
+                    </div>
+                    <Link href="/dashboard" onClick={closeMenus} className="flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50">
+                      <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                      </svg>
+                      Dashboard
+                    </Link>
+                    <Link href="/dashboard#bookings" onClick={closeMenus} className="flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50">
+                      <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                      </svg>
+                      My Bookings
+                    </Link>
+                    <button
+                      onClick={logout}
+                      className="flex items-center gap-2.5 w-full px-4 py-3 rounded-xl text-sm font-medium text-red-600 hover:bg-red-50"
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                      </svg>
+                      Sign Out
+                    </button>
+                  </>
+                ) : (
+                  <Link
+                    href="/login"
+                    onClick={closeMenus}
+                    className="flex items-center justify-center gap-1.5 w-full py-3 rounded-xl text-sm font-semibold bg-brand-red text-white hover:bg-red-700 transition-colors"
+                  >
+                    Sign In
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                    </svg>
+                  </Link>
+                )}
+              </div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

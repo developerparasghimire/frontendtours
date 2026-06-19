@@ -19,6 +19,9 @@ export const CURRENCIES: CurrencyInfo[] = [
   { code: "NPR", symbol: "Rs.", label: "NPR (Rs.)" },
   { code: "GBP", symbol: "£",   label: "GBP (£)"   },
   { code: "AUD", symbol: "A$",  label: "AUD (A$)"  },
+  { code: "CNY", symbol: "¥",   label: "CNY (¥)"   },
+  { code: "RUB", symbol: "₽",   label: "RUB (₽)"   },
+  { code: "JPY", symbol: "¥",   label: "JPY (¥)"   },
 ];
 
 const FALLBACK_RATES: Record<CurrencyCode, number> = {
@@ -28,10 +31,13 @@ const FALLBACK_RATES: Record<CurrencyCode, number> = {
   NPR: 135.0,
   GBP: 0.79,
   AUD: 1.54,
+  CNY: 7.25,
+  RUB: 90.0,
+  JPY: 155.0,
 };
 
-const CACHE_KEY    = "gt_fx_rates_v2";
-const CACHE_TS_KEY = "gt_fx_rates_ts_v2";
+const CACHE_KEY    = "gt_fx_rates_v3";
+const CACHE_TS_KEY = "gt_fx_rates_ts_v3";
 const CACHE_TTL    = 30 * 60 * 1000; // 30 minutes
 
 interface CurrencyContextValue {
