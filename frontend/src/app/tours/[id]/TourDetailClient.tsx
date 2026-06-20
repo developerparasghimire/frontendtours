@@ -86,7 +86,7 @@ export default function TourDetailClient({ tour }: { tour: Tour }) {
   const displayPrice = tour.basePrice ? formatPrice(tour.basePrice) : tour.price;
 
   const tTitle = tr(tour, lang, "title") || tour.title;
-  const tDescription = tr(tour, lang, "long_description") || tr(tour, lang, "description") || tour.longDescription || tour.description;
+  const tDescription = tr(tour, lang, "long_description") || tour.longDescription || tr(tour, lang, "description") || tour.description;
   const tBadge = tr(tour, lang, "badge") || tour.badge;
   const tBestSeason = tr(tour, lang, "best_season") || tour.bestSeason;
   const tDestination = tr(tour, lang, "destination") || tour.location;

@@ -83,7 +83,7 @@ export default function EventDetailClient({ event }: { event: Event & { longDesc
   const tTitle = tr(event, lang, "title") || event.title;
   const tCategory = tr(event, lang, "category") || event.category;
   const tVenue = tr(event, lang, "venue") || event.location;
-  const tDescription = tr(event, lang, "long_description") || tr(event, lang, "description") || event.longDescription || event.description;
+  const tDescription = tr(event, lang, "long_description") || event.longDescription || tr(event, lang, "description") || event.description;
   const tHighlightsRaw = lang !== "EN" ? tr(event, lang, "highlights") : "";
   const tHighlights = tHighlightsRaw ? tHighlightsRaw.split("\n").filter(Boolean) : (event.highlights || []);
   const [pdfModalOpen, setPdfModalOpen] = useState(false);
