@@ -58,9 +58,14 @@ def _save_gallery_files(files, upload_to='tours/gallery/'):
 
 
 class TourFAQSerializer(serializers.ModelSerializer):
+    tour = serializers.PrimaryKeyRelatedField(
+        queryset=Tour.objects.all(), write_only=True, required=False
+    )
+
     class Meta:
         model = TourFAQ
-        fields = ['id', 'question', 'answer', 'order', 'translations']
+        fields = ['id', 'tour', 'question', 'answer', 'order', 'translations']
+        read_only_fields = ['translations']
 
 
 class TourSerializer(serializers.ModelSerializer):

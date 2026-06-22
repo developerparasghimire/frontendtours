@@ -858,6 +858,40 @@ export async function deleteGuideLanguage(id: number, token: string): Promise<vo
   return fetchDelete(`/tours/guide-languages/${id}/`, token);
 }
 
+// Tour FAQ CRUD (admin)
+export async function getTourFAQs(tourSlug: string): Promise<APITourFAQ[]> {
+  return fetchAPI<APITourFAQ[]>(`/tours/faqs/?tour_slug=${encodeURIComponent(tourSlug)}`);
+}
+
+export async function createTourFAQ(data: { tour: number; question: string; answer: string; order: number }, token: string): Promise<APITourFAQ> {
+  return fetchAPI<APITourFAQ>("/tours/faqs/", { method: "POST", body: JSON.stringify(data), headers: { Authorization: `Bearer ${token}` } });
+}
+
+export async function updateTourFAQ(id: number, data: { question?: string; answer?: string; order?: number }, token: string): Promise<APITourFAQ> {
+  return fetchAPI<APITourFAQ>(`/tours/faqs/${id}/`, { method: "PATCH", body: JSON.stringify(data), headers: { Authorization: `Bearer ${token}` } });
+}
+
+export async function deleteTourFAQ(id: number, token: string): Promise<void> {
+  return fetchDelete(`/tours/faqs/${id}/`, token);
+}
+
+// Event FAQ CRUD (admin)
+export async function getEventFAQs(eventSlug: string): Promise<APIEventFAQ[]> {
+  return fetchAPI<APIEventFAQ[]>(`/events/faqs/?event_slug=${encodeURIComponent(eventSlug)}`);
+}
+
+export async function createEventFAQ(data: { event: number; question: string; answer: string; order: number }, token: string): Promise<APIEventFAQ> {
+  return fetchAPI<APIEventFAQ>("/events/faqs/", { method: "POST", body: JSON.stringify(data), headers: { Authorization: `Bearer ${token}` } });
+}
+
+export async function updateEventFAQ(id: number, data: { question?: string; answer?: string; order?: number }, token: string): Promise<APIEventFAQ> {
+  return fetchAPI<APIEventFAQ>(`/events/faqs/${id}/`, { method: "PATCH", body: JSON.stringify(data), headers: { Authorization: `Bearer ${token}` } });
+}
+
+export async function deleteEventFAQ(id: number, token: string): Promise<void> {
+  return fetchDelete(`/events/faqs/${id}/`, token);
+}
+
 // Event CRUD (admin) — uses FormData to support image file uploads
 export async function createEvent(data: FormData, token: string): Promise<APIEvent> {
   return fetchFormData<APIEvent>("/events/", "POST", data, token);

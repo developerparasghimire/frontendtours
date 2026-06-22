@@ -54,9 +54,14 @@ def _save_gallery_files(files, upload_to='events/gallery/'):
 
 
 class EventFAQSerializer(serializers.ModelSerializer):
+    event = serializers.PrimaryKeyRelatedField(
+        queryset=Event.objects.all(), write_only=True, required=False
+    )
+
     class Meta:
         model = EventFAQ
-        fields = ['id', 'question', 'answer', 'order', 'translations']
+        fields = ['id', 'event', 'question', 'answer', 'order', 'translations']
+        read_only_fields = ['translations']
 
 
 class EventSerializer(serializers.ModelSerializer):

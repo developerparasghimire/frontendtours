@@ -11,8 +11,13 @@ import {
   updateEvent,
   deleteEvent,
   getCategories,
+  getEventFAQs,
+  createEventFAQ,
+  updateEventFAQ,
+  deleteEventFAQ,
   type APIEvent,
   type APICategory,
+  type APIEventFAQ,
 } from "@/lib/api";
 import { shouldUseUnoptimizedImage } from "@/lib/images";
 
@@ -66,6 +71,7 @@ export default function AdminEventsPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [faqModalEvent, setFaqModalEvent] = useState<APIEvent | null>(null);
 
   const token = typeof window !== "undefined" ? localStorage.getItem("admin_token") : null;
 
@@ -300,6 +306,13 @@ export default function AdminEventsPage() {
                       </td>
                       <td className="px-4 py-3 text-right">
                         <div className="flex items-center justify-end gap-2">
+                          <button
+                            onClick={() => setFaqModalEvent(evt)}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border border-purple-200 bg-purple-50 text-purple-700 hover:bg-purple-600 hover:text-white hover:border-purple-600 transition-all"
+                          >
+                            <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            FAQ
+                          </button>
                           <EditButton onClick={() => openEdit(evt)} />
                           <DeleteButton onClick={() => handleDelete(evt.slug)} />
                         </div>
@@ -346,6 +359,10 @@ export default function AdminEventsPage() {
                     </div>
                   </div>
                   <div className="flex gap-2 mt-3 pt-3 border-t border-gray-100">
+                    <button onClick={() => setFaqModalEvent(evt)} className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 text-sm font-medium text-purple-600 border border-purple-200 rounded-lg hover:bg-purple-50 transition-colors">
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                      FAQ
+                    </button>
                     <EditButton onClick={() => openEdit(evt)} className="flex-1 justify-center" />
                     <DeleteButton onClick={() => handleDelete(evt.slug)} className="flex-1 justify-center" />
                   </div>
@@ -580,7 +597,139 @@ export default function AdminEventsPage() {
           </div>
         </div>
       )}
+      {/* FAQ Modal */}
+      {faqModalEvent && (
+        <EventFaqModal
+          event={faqModalEvent}
+          token={token}
+          onClose={() => setFaqModalEvent(null)}
+        />
+      )}
     </AdminShell>
+  );
+}
+
+/* ═══════════════════ EVENT FAQ MODAL ═══════════════════ */
+function EventFaqModal({ event, token, onClose }: { event: APIEvent; token: string | null; onClose: () => void }) {
+  const [faqs, setFaqs] = useState<APIEventFAQ[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [editing, setEditing] = useState<APIEventFAQ | null>(null);
+  const [form, setForm] = useState({ question: "", answer: "", order: 0 });
+  const inputCls = "w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none";
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await getEventFAQs(event.slug);
+      setFaqs(data);
+    } catch { /* empty */ } finally {
+      setLoading(false);
+    }
+  }, [event.slug]);
+
+  useEffect(() => { load(); }, [load]);
+
+  const resetForm = () => { setForm({ question: "", answer: "", order: faqs.length }); setEditing(null); };
+
+  const handleSave = async () => {
+    if (!token || !form.question.trim() || !form.answer.trim()) return;
+    setSaving(true);
+    try {
+      if (editing) {
+        await updateEventFAQ(editing.id, { question: form.question, answer: form.answer, order: form.order }, token);
+      } else {
+        await createEventFAQ({ event: event.id, question: form.question, answer: form.answer, order: form.order }, token);
+      }
+      resetForm();
+      await load();
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "Failed to save FAQ");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!token || !confirm("Delete this FAQ?")) return;
+    try {
+      await deleteEventFAQ(id, token);
+      await load();
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "Failed to delete FAQ");
+    }
+  };
+
+  const startEdit = (faq: APIEventFAQ) => {
+    setEditing(faq);
+    setForm({ question: faq.question, answer: faq.answer, order: faq.order });
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+        <div className="sticky top-0 bg-white flex items-center justify-between px-6 py-4 border-b border-gray-100 z-10">
+          <div>
+            <h3 className="text-base font-bold text-brand-navy">FAQ Management</h3>
+            <p className="text-xs text-gray-400 truncate max-w-[280px]">{event.title}</p>
+          </div>
+          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-500 transition-colors text-lg">×</button>
+        </div>
+
+        <div className="p-6 space-y-6">
+          {loading ? (
+            <p className="text-gray-400 text-center py-4">Loading…</p>
+          ) : faqs.length > 0 ? (
+            <div className="space-y-2">
+              <h4 className="text-sm font-semibold text-brand-navy">Current FAQs ({faqs.length})</h4>
+              {faqs.map((faq) => (
+                <div key={faq.id} className={`rounded-xl border p-3 ${editing?.id === faq.id ? "border-purple-300 bg-purple-50" : "border-gray-100 bg-gray-50"}`}>
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-brand-navy line-clamp-2">{faq.question}</p>
+                      <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">{faq.answer}</p>
+                      <p className="text-[10px] text-gray-400 mt-1">Order: {faq.order}</p>
+                    </div>
+                    <div className="flex gap-1.5 flex-shrink-0">
+                      <button onClick={() => startEdit(faq)} className="text-purple-600 hover:text-purple-800 text-xs font-semibold px-2 py-1 rounded-lg hover:bg-purple-100 transition-colors">Edit</button>
+                      <button onClick={() => handleDelete(faq.id)} className="text-red-500 hover:text-red-700 text-xs font-semibold px-2 py-1 rounded-lg hover:bg-red-50 transition-colors">×</button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-gray-400 text-center py-2">No FAQs yet. Add one below.</p>
+          )}
+
+          <div className="bg-gray-50 rounded-xl p-4 space-y-3 border border-gray-100">
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{editing ? "Edit FAQ" : "Add FAQ"}</p>
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Question</label>
+              <input value={form.question} onChange={(e) => setForm({ ...form, question: e.target.value })} placeholder="e.g. What is included in this event?" className={inputCls} />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Answer</label>
+              <textarea rows={3} value={form.answer} onChange={(e) => setForm({ ...form, answer: e.target.value })} placeholder="Provide a clear, helpful answer…" className={inputCls} />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Display Order <span className="text-gray-400 font-normal">(lower = first)</span></label>
+              <input type="number" min={0} value={form.order} onChange={(e) => setForm({ ...form, order: Number(e.target.value) })} className={`${inputCls} w-24`} />
+            </div>
+            <div className="flex gap-2">
+              <button onClick={handleSave} disabled={saving || !form.question.trim() || !form.answer.trim()} className="px-4 py-2 bg-purple-600 text-white text-xs font-semibold rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50">
+                {saving ? "Saving…" : editing ? "Update FAQ" : "Add FAQ"}
+              </button>
+              {editing && (
+                <button onClick={resetForm} className="px-4 py-2 text-gray-500 text-xs font-semibold rounded-lg hover:bg-gray-100 transition-colors">
+                  Cancel
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 

@@ -4,8 +4,8 @@ from rest_framework import viewsets, permissions, filters, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
-from .models import Tour, TourGuide, TourGuideLanguage, TourPDFLead
-from .serializers import TourSerializer, TourGuideSerializer, TourGuideLanguageSerializer
+from .models import Tour, TourGuide, TourGuideLanguage, TourPDFLead, TourFAQ
+from .serializers import TourSerializer, TourGuideSerializer, TourGuideLanguageSerializer, TourFAQSerializer
 from apps.common.permissions import IsAdminOrStaff
 
 
@@ -104,4 +104,20 @@ class TourGuideLanguageViewSet(viewsets.ModelViewSet):
         guide_id = self.request.query_params.get('guide')
         if guide_id:
             qs = qs.filter(guide_id=guide_id)
+        return qs
+
+
+class TourFAQViewSet(viewsets.ModelViewSet):
+    serializer_class = TourFAQSerializer
+
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            return [permissions.AllowAny()]
+        return [IsAdminOrStaff()]
+
+    def get_queryset(self):
+        qs = TourFAQ.objects.all()
+        tour_slug = self.request.query_params.get('tour_slug')
+        if tour_slug:
+            qs = qs.filter(tour__slug=tour_slug)
         return qs

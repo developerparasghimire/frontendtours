@@ -4,8 +4,8 @@ from rest_framework import viewsets, permissions, filters, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
-from .models import Event, EventPDFLead
-from .serializers import EventSerializer
+from .models import Event, EventFAQ, EventPDFLead
+from .serializers import EventSerializer, EventFAQSerializer
 from apps.common.permissions import IsAdminOrStaff
 
 
@@ -65,3 +65,19 @@ class EventViewSet(viewsets.ModelViewSet):
             )
 
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class EventFAQViewSet(viewsets.ModelViewSet):
+    serializer_class = EventFAQSerializer
+
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            return [permissions.AllowAny()]
+        return [IsAdminOrStaff()]
+
+    def get_queryset(self):
+        qs = EventFAQ.objects.all()
+        event_slug = self.request.query_params.get('event_slug')
+        if event_slug:
+            qs = qs.filter(event__slug=event_slug)
+        return qs
