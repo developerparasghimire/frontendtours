@@ -3,8 +3,32 @@
 import { useState, useEffect, useCallback } from "react";
 import {
   LANGUAGES, GT_DEFAULT, GT_LANG_KEY,
-  getStoredLang, storeLang, setGTCookie, applyTranslation,
+  getStoredLang, storeLang, setGTCookie,
 } from "@/lib/googleTranslate";
+
+type GTWindow = typeof window & { doGTranslate?: (pair: string) => void };
+
+function triggerTranslation(code: string) {
+  const pair = code === GT_DEFAULT ? "en|en" : `en|${code}`;
+
+  // Method 1: doGTranslate (instant — available once GT has booted)
+  const doGT = (window as GTWindow).doGTranslate;
+  if (typeof doGT === "function") {
+    doGT(pair);
+    return;
+  }
+
+  // Method 2: manipulate the hidden combo select
+  const combo = document.querySelector<HTMLSelectElement>(".goog-te-combo");
+  if (combo && combo.options.length > 1) {
+    combo.value = code === GT_DEFAULT ? "" : code;
+    combo.dispatchEvent(new Event("change", { bubbles: true }));
+    return;
+  }
+
+  // Method 3: GT not ready yet — cookie is already set, reload will auto-translate
+  window.location.reload();
+}
 
 export default function TranslateButton({ isOverlayNav }: { isOverlayNav: boolean }) {
   const [open, setOpen] = useState(false);
@@ -30,7 +54,7 @@ export default function TranslateButton({ isOverlayNav }: { isOverlayNav: boolea
     storeLang(code);
     setGTCookie(code);
     localStorage.setItem(GT_LANG_KEY, code);
-    applyTranslation(code);
+    triggerTranslation(code);
   }, [currentLang]);
 
   const current = LANGUAGES.find((l) => l.code === currentLang) ?? LANGUAGES[0];

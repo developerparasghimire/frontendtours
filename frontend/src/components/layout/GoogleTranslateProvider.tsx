@@ -1,128 +1,94 @@
 "use client";
 
-// Invisible component — renders nothing, handles all GT side effects:
-//  1. Initial translation on mount (syncs path locale → storage, triggers translation,
-//     with a one-shot reload fallback if GT doesn't initialize within 4s)
-//  2. Re-translation on Next.js route changes (client-side navigation)
-//  3. MutationObserver re-translation when Django API data loads into DOM
-
 import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
-import {
-  getStoredLang, storeLang, translateWhenReady, applyTranslation,
-  GT_DEFAULT, getPathLocale, LOCALE_TO_CODE,
-} from "@/lib/googleTranslate";
+import { getStoredLang, GT_DEFAULT } from "@/lib/googleTranslate";
+
+type GTWindow = typeof window & { doGTranslate?: (pair: string) => void };
+
+function applyStored() {
+  const lang = getStoredLang();
+  if (lang === GT_DEFAULT) return;
+  const pair = `en|${lang}`;
+
+  const doGT = (window as GTWindow).doGTranslate;
+  if (typeof doGT === "function") { doGT(pair); return; }
+
+  const combo = document.querySelector<HTMLSelectElement>(".goog-te-combo");
+  if (combo && combo.options.length > 1) {
+    combo.value = lang;
+    combo.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+}
 
 export default function GoogleTranslateProvider() {
   const pathname = usePathname();
   const prevPath = useRef<string | null>(null);
-  const cancelRef = useRef<(() => void) | null>(null);
   const mutationTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isBusy = useRef(false);
 
-  const schedule = (delayMs: number, lang: string) => {
-    if (cancelRef.current) { cancelRef.current(); cancelRef.current = null; }
-    const t = setTimeout(() => {
-      cancelRef.current = translateWhenReady(lang);
-    }, delayMs);
-    return () => clearTimeout(t);
-  };
-
-  // ── 1. Initial mount ─────────────────────────────────────────────────────
+  // On mount: apply stored language once GT boots
   useEffect(() => {
-    // Path locale (e.g. /zh → "zh" → "zh-CN") takes priority over localStorage
-    const pathLocale = getPathLocale(window.location.pathname);
-    const pathCode = pathLocale ? (LOCALE_TO_CODE[pathLocale] ?? pathLocale) : null;
-
-    let lang: string;
-    if (pathCode && pathCode !== GT_DEFAULT) {
-      storeLang(pathCode);
-      lang = pathCode;
-    } else {
-      lang = getStoredLang();
-    }
-
+    const lang = getStoredLang();
     if (lang === GT_DEFAULT) return;
 
-    // Primary: poll for GT combo element, then trigger translation
-    cancelRef.current = translateWhenReady(lang, 6000);
-
-    // Fallback: if the page is still untranslated after 4s, reload once.
-    // GT reliably reads the googtrans cookie on a fresh page load.
-    const reloadKey = `gt_reloaded_${lang}_${window.location.pathname}`;
-    const fallback = setTimeout(() => {
-      if (sessionStorage.getItem(reloadKey)) return;
-      const translated =
-        document.body.classList.contains("translated-ltr") ||
-        document.body.classList.contains("translated-rtl");
-      if (!translated) {
-        sessionStorage.setItem(reloadKey, "1");
-        window.location.reload();
+    // Poll until doGTranslate or combo is available (max 8s)
+    const start = Date.now();
+    const tick = () => {
+      const doGT = (window as GTWindow).doGTranslate;
+      const combo = document.querySelector<HTMLSelectElement>(".goog-te-combo");
+      if (typeof doGT === "function" || (combo && combo.options.length > 1)) {
+        applyStored();
+        return;
       }
-    }, 4000);
-
-    return () => {
-      if (cancelRef.current) cancelRef.current();
-      clearTimeout(fallback);
+      if (Date.now() - start < 8000) setTimeout(tick, 200);
     };
+    const t = setTimeout(tick, 500); // give GT script 500ms head-start
+    return () => clearTimeout(t);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── 2. Route change (client-side navigation) ─────────────────────────────
+  // Re-apply on client-side navigation
   useEffect(() => {
     if (pathname.startsWith("/gettoursadmin")) return;
-
-    const lang = getStoredLang();
-    if (lang === GT_DEFAULT) return;
-
     if (prevPath.current !== null && prevPath.current !== pathname) {
-      const cancel = schedule(120, lang);
-      prevPath.current = pathname;
-      return cancel;
+      const t = setTimeout(applyStored, 150);
+      return () => clearTimeout(t);
     }
     prevPath.current = pathname;
-  }, [pathname]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [pathname]);
 
-  // ── 3. MutationObserver — catches async API data (Django responses) ──────
+  // Re-apply when dynamic content (API data) appears in DOM
   useEffect(() => {
     const lang = getStoredLang();
     if (lang === GT_DEFAULT) return;
     if (pathname.startsWith("/gettoursadmin")) return;
 
-    const isGTNode = (n: Node): boolean => {
+    const isGTNode = (n: Node) => {
       if (n.nodeType !== Node.ELEMENT_NODE) return false;
       const el = n as Element;
-      return (
-        el.classList?.contains("skiptranslate") ||
-        el.tagName === "FONT" ||
-        el.id === "google_translate_element" ||
-        !!el.closest?.("#google_translate_element")
-      );
+      return el.classList?.contains("skiptranslate") || el.tagName === "FONT" || !!el.closest?.("#google_translate_element");
     };
 
     const observer = new MutationObserver((mutations) => {
       if (isBusy.current) return;
-
-      const hasNewContent = mutations.some(
+      const hasNew = mutations.some(
         (m) => m.type === "childList" && Array.from(m.addedNodes).some((n) => !isGTNode(n) && n.nodeType === Node.ELEMENT_NODE)
       );
-      if (!hasNewContent) return;
-
+      if (!hasNew) return;
       if (mutationTimer.current) clearTimeout(mutationTimer.current);
       mutationTimer.current = setTimeout(() => {
         isBusy.current = true;
-        applyTranslation(lang);
+        applyStored();
         setTimeout(() => { isBusy.current = false; }, 1200);
       }, 350);
     });
 
-    const root = document.querySelector("main") ?? document.body;
-    observer.observe(root, { childList: true, subtree: true });
-
+    observer.observe(document.querySelector("main") ?? document.body, { childList: true, subtree: true });
     return () => {
       observer.disconnect();
       if (mutationTimer.current) clearTimeout(mutationTimer.current);
     };
-  }, [pathname]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [pathname]);
 
   return null;
 }

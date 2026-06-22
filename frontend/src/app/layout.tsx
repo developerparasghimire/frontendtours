@@ -144,13 +144,14 @@ export default function RootLayout({
         />
       </head>
       <body className={`${inter.className} antialiased`}>
-        <div id="google_translate_element" className="hidden absolute" />
+        <div id="google_translate_element" style={{ position: "absolute", top: "-9999px", left: "-9999px", visibility: "hidden" }} />
         <ClientRootLayout>{children}</ClientRootLayout>
         <Script id="google-translate-cb" strategy="afterInteractive">{`
           function googleTranslateElementInit() {
             new google.translate.TranslateElement({
               pageLanguage: 'en',
               includedLanguages: 'fr,de,es,it,zh-CN,ja,hi,ru',
+              layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
               autoDisplay: false,
             }, 'google_translate_element');
           }
