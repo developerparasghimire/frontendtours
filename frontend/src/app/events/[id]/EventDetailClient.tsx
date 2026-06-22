@@ -88,6 +88,7 @@ export default function EventDetailClient({ event }: { event: Event & { longDesc
   const tHighlights = tHighlightsRaw ? tHighlightsRaw.split("\n").filter(Boolean) : (event.highlights || []);
   const [pdfModalOpen, setPdfModalOpen] = useState(false);
   const [showStickyBar, setShowStickyBar] = useState(false);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
   const bookingCardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -191,6 +192,37 @@ export default function EventDetailClient({ event }: { event: Event & { longDesc
                         </svg>
                       </div>
                       <span className="text-gray-700 text-base">{h}</span>
+                    </div>
+                  ))}
+                </div>
+              </MotionWrapper>
+            )}
+
+            {/* FAQ Accordion */}
+            {event.faqs && event.faqs.length > 0 && (
+              <MotionWrapper delay={0.15}>
+                <h2 className="text-xl sm:text-2xl font-bold text-brand-navy mb-4">{t("tour.faq")}</h2>
+                <div className="space-y-3">
+                  {event.faqs.map((faq, i) => (
+                    <div key={faq.id} className="border border-gray-100 rounded-xl overflow-hidden">
+                      <button
+                        type="button"
+                        onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                        className="w-full flex items-center justify-between gap-4 px-5 py-4 text-left bg-white hover:bg-gray-50 transition-colors"
+                      >
+                        <span className="font-semibold text-brand-navy text-sm sm:text-base">{tr(faq, lang, "question") || faq.question}</span>
+                        <svg
+                          className={`w-5 h-5 text-brand-navy flex-shrink-0 transition-transform duration-200 ${openFaq === i ? "rotate-180" : ""}`}
+                          fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </button>
+                      {openFaq === i && (
+                        <div className="px-5 pb-4 text-gray-600 text-sm leading-relaxed border-t border-gray-100 pt-3 bg-gray-50">
+                          {tr(faq, lang, "answer") || faq.answer}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>

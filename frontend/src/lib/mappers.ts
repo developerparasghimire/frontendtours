@@ -1,4 +1,4 @@
-import type { Tour, Event, TourFAQ } from "@/types";
+import type { Tour, Event, TourFAQ, EventFAQ } from "@/types";
 import type { APITour, APIEvent } from "./api";
 
 const eventFallbackImages: Record<string, string> = {
@@ -69,6 +69,7 @@ export function mapAPIEvent(e: APIEvent): Event {
     highlights: e.highlights || [],
     availableTickets: e.available_tickets,
     totalTickets: e.total_tickets,
+    faqs: (e.faqs ?? []) as EventFAQ[],
     translations: e.translations,
   };
 }

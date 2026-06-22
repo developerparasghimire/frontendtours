@@ -3,7 +3,7 @@ import os
 from django.core.files.storage import default_storage
 from django.core.validators import FileExtensionValidator
 from rest_framework import serializers
-from .models import Event, EventPDFLead
+from .models import Event, EventFAQ, EventPDFLead
 
 MAX_IMAGE_BYTES = 5 * 1024 * 1024  # 5 MB
 ALLOWED_IMAGE_EXTS = ['jpg', 'jpeg', 'png', 'webp', 'gif']
@@ -51,6 +51,12 @@ def _save_gallery_files(files, upload_to='events/gallery/'):
         path = default_storage.save(f'{upload_to}{os.path.basename(f.name)}', f)
         urls.append(default_storage.url(path))
     return urls
+
+
+class EventFAQSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EventFAQ
+        fields = ['id', 'question', 'answer', 'order', 'translations']
 
 
 class EventSerializer(serializers.ModelSerializer):
@@ -101,6 +107,7 @@ class EventSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data['gallery'] = self._get_absolute_gallery(instance.gallery or [])
+        data['faqs'] = EventFAQSerializer(instance.faqs.all(), many=True).data
         return data
 
     def validate_highlights(self, value):

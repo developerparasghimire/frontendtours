@@ -49,6 +49,14 @@ export interface Tour {
   translations?: Translations;
 }
 
+export interface EventFAQ {
+  id: number;
+  question: string;
+  answer: string;
+  order: number;
+  translations?: Translations;
+}
+
 export interface Event {
   id: string;
   numericId?: number;
@@ -65,6 +73,7 @@ export interface Event {
   highlights?: string[];
   availableTickets?: number;
   totalTickets?: number;
+  faqs?: EventFAQ[];
   translations?: Translations;
 }
 

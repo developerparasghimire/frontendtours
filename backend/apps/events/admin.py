@@ -1,5 +1,13 @@
 from django.contrib import admin
-from .models import Event, EventPDFLead
+from .models import Event, EventFAQ, EventPDFLead
+
+
+class EventFAQInline(admin.TabularInline):
+    model = EventFAQ
+    extra = 3
+    fields = ("order", "question", "answer")
+    verbose_name = "FAQ"
+    verbose_name_plural = "FAQs (Frequently Asked Questions)"
 
 
 @admin.register(Event)
@@ -11,6 +19,7 @@ class EventAdmin(admin.ModelAdmin):
     list_editable = ("is_active", "is_latest", "base_price", "category")
     ordering = ("-event_date",)
     readonly_fields = ("created_at", "updated_at")
+    inlines = [EventFAQInline]
     fieldsets = (
         (None, {"fields": ("title", "slug", "description", "long_description")}),
         ("Media", {"fields": ("image",)}),

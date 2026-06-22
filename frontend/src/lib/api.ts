@@ -475,6 +475,14 @@ export async function tourPdfLead(email: string, tourId: number): Promise<void> 
 
 /* ──────────────── Event API ──────────────── */
 
+export interface APIEventFAQ {
+  id: number;
+  question: string;
+  answer: string;
+  order: number;
+  translations?: Record<string, Record<string, string>>;
+}
+
 export interface APIEvent {
   id: number;
   title: string;
@@ -494,6 +502,7 @@ export interface APIEvent {
   is_active: boolean;
   is_latest: boolean;
   booking_count?: number;
+  faqs?: APIEventFAQ[];
   translations?: Record<string, Record<string, string>>;
   created_at: string;
   updated_at: string;
