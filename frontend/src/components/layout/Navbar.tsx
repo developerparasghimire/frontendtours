@@ -9,6 +9,7 @@ import { useAuth } from "@/lib/auth";
 import { useCurrency, CURRENCIES } from "@/context/CurrencyContext";
 import { useTranslation } from "@/context/TranslationContext";
 import { stripLocale } from "@/lib/googleTranslate";
+import TranslateButton from "@/components/shared/TranslateButton";
 
 const NAV_LINK_KEYS = [
   { href: "/",        key: "nav.home"    },
@@ -186,6 +187,11 @@ export default function Navbar() {
               )}
             </div>
 
+            {/* Language Switcher */}
+            <div className="relative ml-1">
+              <TranslateButton isOverlayNav={isOverlayNav} />
+            </div>
+
             {/* Separator + Auth */}
             <div className={`flex items-center gap-3 ml-4 pl-4 border-l ${isOverlayNav ? "border-white/20" : "border-gray-200"}`}>
               {loading ? (
@@ -333,6 +339,10 @@ export default function Navbar() {
                       {c.label}
                     </button>
                   ))}
+                </div>
+                <p className="px-4 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-gray-400">Language</p>
+                <div className="px-4 pb-3">
+                  <TranslateButton isOverlayNav={false} />
                 </div>
               </div>
 

@@ -3,24 +3,17 @@
 import { useState, useEffect, useCallback } from "react";
 import {
   LANGUAGES, GT_DEFAULT, GT_LANG_KEY,
-  getStoredLang, storeLang, setGTCookie, localePath,
-  getPathLocale, LOCALE_TO_CODE,
+  getStoredLang, storeLang, setGTCookie, applyTranslation,
 } from "@/lib/googleTranslate";
-import { usePathname } from "next/navigation";
 
 export default function TranslateButton({ isOverlayNav }: { isOverlayNav: boolean }) {
   const [open, setOpen] = useState(false);
   const [currentLang, setCurrentLang] = useState(GT_DEFAULT);
-  const pathname = usePathname();
 
-  // On mount: read locale from URL path first, fall back to localStorage
   useEffect(() => {
-    const pathLocale = getPathLocale(window.location.pathname);
-    const pathCode = pathLocale ? (LOCALE_TO_CODE[pathLocale] ?? pathLocale) : null;
-    setCurrentLang(pathCode ?? getStoredLang());
+    setCurrentLang(getStoredLang());
   }, []);
 
-  // Close dropdown on outside click
   useEffect(() => {
     const h = (e: MouseEvent) => {
       const el = document.getElementById("translate-btn-root");
@@ -33,16 +26,12 @@ export default function TranslateButton({ isOverlayNav }: { isOverlayNav: boolea
   const handleSelect = useCallback((code: string) => {
     setOpen(false);
     if (code === currentLang) return;
-
-    // Persist choice
+    setCurrentLang(code);
     storeLang(code);
     setGTCookie(code);
     localStorage.setItem(GT_LANG_KEY, code);
-
-    // Full reload to locale URL — GT reads googtrans cookie on fresh init (most reliable)
-    const target = localePath(code, pathname);
-    window.location.href = target;
-  }, [currentLang, pathname]);
+    applyTranslation(code);
+  }, [currentLang]);
 
   const current = LANGUAGES.find((l) => l.code === currentLang) ?? LANGUAGES[0];
   const displayCode =

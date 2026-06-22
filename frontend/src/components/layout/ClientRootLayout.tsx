@@ -10,6 +10,7 @@ import { TranslationProvider } from "@/context/TranslationContext";
 import ScrollToTop from "@/components/shared/ScrollToTop";
 import WhatsAppWidget from "@/components/shared/WhatsAppWidget";
 import EventPopupBanner from "@/components/shared/EventPopupBanner";
+import GoogleTranslateProvider from "./GoogleTranslateProvider";
 import useSmoothScroll from "@/hooks/useSmoothScroll";
 
 function useStaleServiceWorkerCleanup() {
@@ -57,6 +58,7 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
       <ScrollToTop />
       {showChrome && <WhatsAppWidget />}
       {showChrome && <EventPopupBanner />}
+      {showChrome && <GoogleTranslateProvider />}
     </>
   );
 }
