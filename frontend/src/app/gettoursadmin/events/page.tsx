@@ -65,6 +65,7 @@ export default function AdminEventsPage() {
   const [events, setEvents] = useState<APIEvent[]>([]);
   const [categories, setCategories] = useState<APICategory[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState<APIEvent | null>(null);
   const [form, setForm] = useState<EventForm>(emptyForm);
@@ -76,9 +77,10 @@ export default function AdminEventsPage() {
   const token = typeof window !== "undefined" ? localStorage.getItem("admin_token") : null;
 
   const loadEvents = useCallback(() => {
+    setLoadError("");
     getEvents()
       .then(setEvents)
-      .catch(() => {})
+      .catch(() => setLoadError("Failed to load events. Please check your connection and retry."))
       .finally(() => setLoading(false));
   }, []);
 
@@ -239,6 +241,12 @@ export default function AdminEventsPage() {
         {loading ? (
           <div className="flex justify-center py-20">
             <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-brand-navy" />
+          </div>
+        ) : loadError ? (
+          <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl p-4 flex items-center gap-3">
+            <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+            <span>{loadError}</span>
+            <button onClick={loadEvents} className="ml-auto text-xs font-semibold underline hover:text-red-900">Retry</button>
           </div>
         ) : filteredEvents.length === 0 ? (
           <div className="text-center py-16">

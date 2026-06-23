@@ -5,7 +5,7 @@ import "./globals.css";
 
 import ClientRootLayout from "@/components/layout/ClientRootLayout";
 
-const GA_ID = "G-ZFE4MGBSBZ";
+const GA_ID = process.env.NEXT_PUBLIC_GA_ID || "G-ZFE4MGBSBZ";
 
 const inter = Inter({ subsets: ["latin"] });
 

@@ -9,9 +9,11 @@ from django.db import connections
 from django.db.utils import OperationalError
 from django.core.files.storage import default_storage
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework import status
+
+from .permissions import IsAdminOnly, IsAdminOrStaff
 
 logger = logging.getLogger(__name__)
 from .models import SiteConfig, ContactSubmission, NewsletterSubscription, AboutStat, Value, Leader, Milestone, EventPopup, PageBanner, Partner, Category
@@ -42,12 +44,9 @@ def site_config_view(request):
 
 
 @api_view(['PUT', 'PATCH'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAdminOnly])
 def site_config_update_view(request):
     """Update site configuration — admin only"""
-    if not hasattr(request.user, 'role') or request.user.role not in ('SUPER_ADMIN', 'ADMIN'):
-        return Response({'error': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)
-
     config = SiteConfig.objects.first()
     if not config:
         config = SiteConfig()
@@ -70,11 +69,9 @@ _CLEARABLE_IMAGE_FIELDS = {f'home_gallery_image_{i}' for i in range(1, 13)} | {
 }
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAdminOnly])
 def site_config_clear_image_view(request):
     """Clear a single image field on SiteConfig."""
-    if not hasattr(request.user, 'role') or request.user.role not in ('SUPER_ADMIN', 'ADMIN'):
-        return Response({'error': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)
     field = request.data.get('field', '')
     if field not in _CLEARABLE_IMAGE_FIELDS:
         return Response({'error': 'Invalid field name.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -85,12 +82,9 @@ def site_config_clear_image_view(request):
 
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAdminOrStaff])
 def upload_image_view(request):
     """Upload a single image for use in rich-text editor content."""
-    if not hasattr(request.user, 'role') or request.user.role not in ('SUPER_ADMIN', 'ADMIN', 'STAFF'):
-        return Response({'error': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)
-
     image = request.FILES.get('image')
     if not image:
         return Response({'error': 'No image provided'}, status=status.HTTP_400_BAD_REQUEST)
@@ -186,22 +180,18 @@ def _notify_admins_of_contact(submission):
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAdminOrStaff])
 def contact_list_view(request):
     """List all contact submissions — admin only"""
-    if not hasattr(request.user, 'role') or request.user.role not in ('SUPER_ADMIN', 'ADMIN', 'STAFF'):
-        return Response({'error': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)
     submissions = ContactSubmission.objects.all()
     serializer = ContactSubmissionSerializer(submissions, many=True)
     return Response(serializer.data)
 
 
 @api_view(['PATCH', 'DELETE'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAdminOrStaff])
 def contact_detail_view(request, pk):
     """Mark as read or delete a contact submission — admin only"""
-    if not hasattr(request.user, 'role') or request.user.role not in ('SUPER_ADMIN', 'ADMIN', 'STAFF'):
-        return Response({'error': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)
     try:
         submission = ContactSubmission.objects.get(pk=pk)
     except ContactSubmission.DoesNotExist:
@@ -232,11 +222,9 @@ def newsletter_subscribe_view(request):
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAdminOrStaff])
 def newsletter_list_view(request):
     """List all newsletter subscribers — admin only"""
-    if not hasattr(request.user, 'role') or request.user.role not in ('SUPER_ADMIN', 'ADMIN', 'STAFF'):
-        return Response({'error': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)
     subs = NewsletterSubscription.objects.filter(is_active=True)
     return Response([{'email': s.email, 'subscribed_at': s.subscribed_at} for s in subs])
 
@@ -250,10 +238,8 @@ def about_stats_list_view(request):
 
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAdminOnly])
 def about_stat_create_view(request):
-    if not hasattr(request.user, 'role') or request.user.role not in ('SUPER_ADMIN', 'ADMIN'):
-        return Response({'error': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)
     serializer = AboutStatSerializer(data=request.data)
     if serializer.is_valid():
         serializer.save()
@@ -262,10 +248,8 @@ def about_stat_create_view(request):
 
 
 @api_view(['PATCH', 'DELETE'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAdminOnly])
 def about_stat_detail_view(request, pk):
-    if not hasattr(request.user, 'role') or request.user.role not in ('SUPER_ADMIN', 'ADMIN'):
-        return Response({'error': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)
     try:
         stat = AboutStat.objects.get(pk=pk)
     except AboutStat.DoesNotExist:
@@ -289,10 +273,8 @@ def about_values_list_view(request):
 
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAdminOnly])
 def about_value_create_view(request):
-    if not hasattr(request.user, 'role') or request.user.role not in ('SUPER_ADMIN', 'ADMIN'):
-        return Response({'error': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)
     serializer = ValueSerializer(data=request.data)
     if serializer.is_valid():
         serializer.save()
@@ -301,10 +283,8 @@ def about_value_create_view(request):
 
 
 @api_view(['PATCH', 'DELETE'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAdminOnly])
 def about_value_detail_view(request, pk):
-    if not hasattr(request.user, 'role') or request.user.role not in ('SUPER_ADMIN', 'ADMIN'):
-        return Response({'error': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)
     try:
         value = Value.objects.get(pk=pk)
     except Value.DoesNotExist:
@@ -328,10 +308,8 @@ def about_leaders_list_view(request):
 
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAdminOnly])
 def about_leader_create_view(request):
-    if not hasattr(request.user, 'role') or request.user.role not in ('SUPER_ADMIN', 'ADMIN'):
-        return Response({'error': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)
     serializer = LeaderSerializer(data=request.data, context={'request': request})
     if serializer.is_valid():
         serializer.save()
@@ -340,10 +318,8 @@ def about_leader_create_view(request):
 
 
 @api_view(['PATCH', 'DELETE'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAdminOnly])
 def about_leader_detail_view(request, pk):
-    if not hasattr(request.user, 'role') or request.user.role not in ('SUPER_ADMIN', 'ADMIN'):
-        return Response({'error': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)
     try:
         leader = Leader.objects.get(pk=pk)
     except Leader.DoesNotExist:
@@ -367,10 +343,8 @@ def about_milestones_list_view(request):
 
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAdminOnly])
 def about_milestone_create_view(request):
-    if not hasattr(request.user, 'role') or request.user.role not in ('SUPER_ADMIN', 'ADMIN'):
-        return Response({'error': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)
     serializer = MilestoneSerializer(data=request.data)
     if serializer.is_valid():
         serializer.save()
@@ -379,10 +353,8 @@ def about_milestone_create_view(request):
 
 
 @api_view(['PATCH', 'DELETE'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAdminOnly])
 def about_milestone_detail_view(request, pk):
-    if not hasattr(request.user, 'role') or request.user.role not in ('SUPER_ADMIN', 'ADMIN'):
-        return Response({'error': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)
     try:
         milestone = Milestone.objects.get(pk=pk)
     except Milestone.DoesNotExist:
@@ -421,11 +393,9 @@ def page_banner_by_page_view(request, page):
 
 
 @api_view(['PUT', 'PATCH'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAdminOnly])
 def page_banner_update_view(request, page):
     """Create or update banner for a specific page — admin only."""
-    if not hasattr(request.user, 'role') or request.user.role not in ('SUPER_ADMIN', 'ADMIN'):
-        return Response({'error': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)
     banner, _ = PageBanner.objects.get_or_create(page=page)
     serializer = PageBannerSerializer(banner, data=request.data, partial=True)
     if serializer.is_valid():
@@ -446,11 +416,9 @@ def partners_list_view(request):
 
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAdminOnly])
 def partner_create_view(request):
     """Create a new partner — admin only."""
-    if not hasattr(request.user, 'role') or request.user.role not in ('SUPER_ADMIN', 'ADMIN'):
-        return Response({'error': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)
     serializer = PartnerSerializer(data=request.data, context={'request': request})
     if serializer.is_valid():
         serializer.save()
@@ -459,7 +427,7 @@ def partner_create_view(request):
 
 
 @api_view(['GET', 'PATCH', 'DELETE'])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny])
 def partner_detail_view(request, pk):
     """Get, update, or delete a specific partner — admin only for write operations."""
     try:
@@ -471,7 +439,7 @@ def partner_detail_view(request, pk):
         serializer = PartnerSerializer(partner, context={'request': request})
         return Response(serializer.data)
 
-    if not hasattr(request.user, 'role') or request.user.role not in ('SUPER_ADMIN', 'ADMIN'):
+    if not (request.user.is_authenticated and request.user.role in ('SUPER_ADMIN', 'ADMIN')):
         return Response({'error': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)
 
     if request.method == 'DELETE':
@@ -535,10 +503,8 @@ def categories_list_view(request):
 
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAdminOnly])
 def category_create_view(request):
-    if not hasattr(request.user, 'role') or request.user.role not in ('SUPER_ADMIN', 'ADMIN'):
-        return Response({'error': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)
     serializer = CategorySerializer(data=request.data, context={'request': request})
     if serializer.is_valid():
         serializer.save()
@@ -547,7 +513,7 @@ def category_create_view(request):
 
 
 @api_view(['GET', 'PATCH', 'DELETE'])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny])
 def category_detail_view(request, pk):
     try:
         category = Category.objects.get(pk=pk)
@@ -557,7 +523,7 @@ def category_detail_view(request, pk):
     if request.method == 'GET':
         return Response(CategorySerializer(category, context={'request': request}).data)
 
-    if not hasattr(request.user, 'role') or request.user.role not in ('SUPER_ADMIN', 'ADMIN'):
+    if not (request.user.is_authenticated and request.user.role in ('SUPER_ADMIN', 'ADMIN')):
         return Response({'error': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)
 
     if request.method == 'DELETE':
@@ -582,12 +548,9 @@ def event_popup_view(request):
 
 
 @api_view(['GET', 'PUT', 'PATCH'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAdminOnly])
 def event_popup_admin_view(request):
     """Get or update the event popup — admin only."""
-    if not hasattr(request.user, 'role') or request.user.role not in ('SUPER_ADMIN', 'ADMIN'):
-        return Response({'error': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)
-
     if request.method == 'GET':
         popup = EventPopup.objects.first()
         if not popup:
@@ -608,11 +571,9 @@ def event_popup_admin_view(request):
 
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAdminOnly])
 def event_popup_clear_image_view(request):
     """Clear the event popup image."""
-    if not hasattr(request.user, 'role') or request.user.role not in ('SUPER_ADMIN', 'ADMIN'):
-        return Response({'error': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)
     popup, _ = EventPopup.objects.get_or_create(pk=1)
     popup.image = None
     popup.save(update_fields=['image'])

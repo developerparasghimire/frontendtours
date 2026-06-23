@@ -27,6 +27,7 @@ function timeAgo(iso: string): string {
 export default function AdminTourBookingsPage() {
   const [bookings, setBookings] = useState<AdminTourBooking[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const [filter, setFilter] = useState("");
   const [updatingId, setUpdatingId] = useState<number | null>(null);
 
@@ -34,9 +35,10 @@ export default function AdminTourBookingsPage() {
 
   const loadBookings = useCallback(() => {
     if (!token) return;
+    setLoadError("");
     getAdminTourBookings(token)
       .then(setBookings)
-      .catch(() => {})
+      .catch(() => setLoadError("Failed to load bookings. Please check your connection and retry."))
       .finally(() => setLoading(false));
   }, [token]);
 
@@ -158,6 +160,12 @@ export default function AdminTourBookingsPage() {
         {loading ? (
           <div className="flex justify-center py-20">
             <div className="animate-spin rounded-full h-10 w-10 border-[3px] border-gray-200 border-t-brand-navy" />
+          </div>
+        ) : loadError ? (
+          <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl p-4 flex items-center gap-3">
+            <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+            <span>{loadError}</span>
+            <button onClick={loadBookings} className="ml-auto text-xs font-semibold underline hover:text-red-900">Retry</button>
           </div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-16">
