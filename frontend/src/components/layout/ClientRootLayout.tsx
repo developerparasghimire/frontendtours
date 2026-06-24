@@ -10,8 +10,8 @@ import { TranslationProvider } from "@/context/TranslationContext";
 import ScrollToTop from "@/components/shared/ScrollToTop";
 import WhatsAppWidget from "@/components/shared/WhatsAppWidget";
 import EventPopupBanner from "@/components/shared/EventPopupBanner";
-import GoogleTranslateProvider from "./GoogleTranslateProvider";
 import useSmoothScroll from "@/hooks/useSmoothScroll";
+import { stripLocale } from "@/lib/googleTranslate";
 
 function useStaleServiceWorkerCleanup() {
   useEffect(() => {
@@ -35,14 +35,16 @@ function useStaleServiceWorkerCleanup() {
 
 function LayoutInner({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const isAdmin = pathname?.startsWith("/gettoursadmin");
-  const isDashboard = pathname?.startsWith("/dashboard");
-  const isBookingFlow = pathname?.startsWith("/booking");
+  // Strip locale prefix (/de/tours → /tours) before checking path type
+  const path = stripLocale(pathname ?? "");
+  const isAdmin = path.startsWith("/gettoursadmin");
+  const isDashboard = path.startsWith("/dashboard");
+  const isBookingFlow = path.startsWith("/booking");
   const isAuthPage =
-    pathname === "/login" ||
-    pathname === "/register" ||
-    pathname === "/forgot-password" ||
-    pathname?.startsWith("/reset-password");
+    path === "/login" ||
+    path === "/register" ||
+    path === "/forgot-password" ||
+    path.startsWith("/reset-password");
   const useEnhancedScrolling = !isAdmin && !isDashboard && !isBookingFlow && !isAuthPage;
 
   useStaleServiceWorkerCleanup();
@@ -58,7 +60,6 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
       <ScrollToTop />
       {showChrome && <WhatsAppWidget />}
       {showChrome && <EventPopupBanner />}
-      {showChrome && <GoogleTranslateProvider />}
     </>
   );
 }

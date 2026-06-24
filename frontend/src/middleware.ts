@@ -1,24 +1,29 @@
-import { NextResponse } from "next/server";
+import createMiddleware from "next-intl/middleware";
 import type { NextRequest } from "next/server";
+import { routing } from "./routing";
 
-export function middleware(req: NextRequest) {
-  const res = NextResponse.next();
+const intlMiddleware = createMiddleware(routing);
 
-  // Prevent clickjacking
+export default function middleware(req: NextRequest) {
+  const res = intlMiddleware(req);
+
+  // Security headers on every response
   res.headers.set("X-Frame-Options", "SAMEORIGIN");
-  // Stop MIME-type sniffing
   res.headers.set("X-Content-Type-Options", "nosniff");
-  // Referrer policy (privacy + security balance)
   res.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
-  // Permissions policy — disable unused browser features
-  res.headers.set(
-    "Permissions-Policy",
-    "camera=(), microphone=(), geolocation=(), payment=()"
-  );
+  res.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=(), payment=()");
 
   return res;
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon\\.ico|api/|.*\\..*).*)" ],
+  // Run on all routes except:
+  // - Next.js internals (_next/*)
+  // - Admin panel (gettoursadmin/*)
+  // - OAuth callbacks (auth/*)
+  // - API routes (api/*)
+  // - Static files (favicon, robots, sitemap, any file with extension)
+  matcher: [
+    "/((?!_next/static|_next/image|favicon\\.ico|api/|gettoursadmin|auth/|robots\\.txt|sitemap\\.xml|.*\\..*).*)",
+  ],
 };

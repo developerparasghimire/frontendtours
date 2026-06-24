@@ -1,42 +1,24 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import {
-  LANGUAGES, GT_DEFAULT, GT_LANG_KEY,
-  getStoredLang, storeLang, setGTCookie,
-} from "@/lib/googleTranslate";
+import { usePathname } from "next/navigation";
+import { LANGUAGES, stripLocale, getPathLocale } from "@/lib/googleTranslate";
 
-type GTWindow = typeof window & { doGTranslate?: (pair: string) => void };
+// The cookie name must match what's in src/routing.ts
+const LOCALE_COOKIE = "NEXT_LOCALE";
 
-function triggerTranslation(code: string) {
-  const pair = code === GT_DEFAULT ? "en|en" : `en|${code}`;
-
-  // Method 1: doGTranslate (instant — available once GT has booted)
-  const doGT = (window as GTWindow).doGTranslate;
-  if (typeof doGT === "function") {
-    doGT(pair);
-    return;
-  }
-
-  // Method 2: manipulate the hidden combo select
-  const combo = document.querySelector<HTMLSelectElement>(".goog-te-combo");
-  if (combo && combo.options.length > 1) {
-    combo.value = code === GT_DEFAULT ? "" : code;
-    combo.dispatchEvent(new Event("change", { bubbles: true }));
-    return;
-  }
-
-  // Method 3: GT not ready yet — cookie is already set, reload will auto-translate
-  window.location.reload();
+function setLocaleCookie(locale: string) {
+  const maxAge = 60 * 60 * 24 * 365;
+  document.cookie = `${LOCALE_COOKIE}=${locale}; path=/; max-age=${maxAge}; SameSite=Lax`;
 }
 
 export default function TranslateButton({ isOverlayNav }: { isOverlayNav: boolean }) {
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const [currentLang, setCurrentLang] = useState(GT_DEFAULT);
 
-  useEffect(() => {
-    setCurrentLang(getStoredLang());
-  }, []);
+  // Derive active locale from URL (works SSR + CSR)
+  const activeLocale = getPathLocale(pathname ?? "") ?? "en";
+  const current = LANGUAGES.find((l) => l.locale === activeLocale) ?? LANGUAGES[0];
 
   useEffect(() => {
     const h = (e: MouseEvent) => {
@@ -47,21 +29,22 @@ export default function TranslateButton({ isOverlayNav }: { isOverlayNav: boolea
     return () => document.removeEventListener("mousedown", h);
   }, []);
 
-  const handleSelect = useCallback((code: string) => {
+  const handleSelect = useCallback((locale: string) => {
     setOpen(false);
-    if (code === currentLang) return;
-    setCurrentLang(code);
-    storeLang(code);
-    setGTCookie(code);
-    localStorage.setItem(GT_LANG_KEY, code);
-    triggerTranslation(code);
-  }, [currentLang]);
+    if (locale === activeLocale) return;
 
-  const current = LANGUAGES.find((l) => l.code === currentLang) ?? LANGUAGES[0];
+    // Set cookie so middleware persists the choice across all subsequent requests
+    setLocaleCookie(locale);
+
+    // Navigate to locale-prefixed URL (middleware sets cookie on arrival too)
+    const base = stripLocale(pathname ?? "") || "/";
+    const target = locale === "en" ? base : `/${locale}${base}`;
+    window.location.href = target;
+  }, [activeLocale, pathname]);
+
   const displayCode =
-    currentLang === "en" ? "EN"
-    : currentLang === "zh-CN" ? "ZH"
-    : currentLang.toUpperCase();
+    activeLocale === "zh" ? "ZH"
+    : activeLocale.toUpperCase();
 
   return (
     <div className="relative" id="translate-btn-root">
@@ -88,17 +71,17 @@ export default function TranslateButton({ isOverlayNav }: { isOverlayNav: boolea
         <div className="absolute right-0 top-full mt-2 w-44 bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden z-[200] max-h-80 overflow-y-auto">
           {LANGUAGES.map((l) => (
             <button
-              key={l.code}
-              onClick={() => handleSelect(l.code)}
+              key={l.locale}
+              onClick={() => handleSelect(l.locale)}
               className={`w-full flex items-center gap-2.5 px-4 py-2.5 text-sm transition-colors ${
-                currentLang === l.code
+                activeLocale === l.locale
                   ? "bg-brand-navy/5 text-brand-navy font-bold"
                   : "text-gray-700 hover:bg-gray-50"
               }`}
             >
               <span className="text-base leading-none">{l.flag}</span>
               <span>{l.label}</span>
-              {currentLang === l.code && (
+              {activeLocale === l.locale && (
                 <svg className="w-3.5 h-3.5 text-brand-navy ml-auto shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                 </svg>
