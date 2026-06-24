@@ -11,68 +11,7 @@ import { sanitizeHTML } from "@/lib/sanitize";
 import { useCurrency } from "@/context/CurrencyContext";
 import { useTranslation } from "@/context/TranslationContext";
 import { tr } from "@/lib/langContent";
-import { eventPdfLead } from "@/lib/api";
 import { generateEventPDF } from "@/lib/generateDetailPDF";
-
-function PDFDownloadModal({ onDownload, onClose }: { onDownload: (email: string) => Promise<void>; onClose: () => void }) {
-  const [email, setEmail] = useState("");
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState("");
-  const { t } = useTranslation();
-
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    const trimmed = email.trim();
-    if (!trimmed || !trimmed.includes("@") || !trimmed.split("@")[1]?.includes(".")) {
-      setError(t("pdf.email_error"));
-      return;
-    }
-    setSubmitting(true);
-    setError("");
-    try {
-      await onDownload(trimmed);
-      onClose();
-    } catch {
-      setError(t("pdf.server_error"));
-    } finally {
-      setSubmitting(false);
-    }
-  }
-
-  return (
-    <div role="dialog" aria-modal="true" className="fixed inset-0 z-[110] bg-black/60 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="relative bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl" onClick={(e) => e.stopPropagation()}>
-        <button type="button" onClick={onClose} className="absolute top-3 right-4 text-gray-400 hover:text-gray-600 text-2xl leading-none" aria-label="Close">×</button>
-        <div className="text-center mb-5">
-          <div className="w-12 h-12 bg-brand-blue/10 rounded-full flex items-center justify-center mx-auto mb-3">
-            <svg className="w-6 h-6 text-brand-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-            </svg>
-          </div>
-          <h3 className="text-xl font-bold text-brand-navy">{t("pdf.download_event")}</h3>
-          <p className="text-gray-500 text-sm mt-1">{t("pdf.subtitle_event")}</p>
-        </div>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-semibold text-brand-navy mb-1">{t("pdf.email_label")}</label>
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder={t("pdf.email_placeholder")}
-              className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-blue/40 text-brand-navy" required autoFocus />
-            {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
-          </div>
-          <button type="submit" disabled={submitting} className="w-full bg-brand-blue text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-60">
-            {submitting ? t("pdf.generating") : t("pdf.download_btn")}
-          </button>
-        </form>
-      </div>
-    </div>
-  );
-}
 
 export default function EventDetailClient({ event }: { event: Event & { longDescription?: string; highlights?: string[]; availableTickets?: number; totalTickets?: number; numericId?: number } }) {
   const soldOut = event.availableTickets === 0;
@@ -86,7 +25,17 @@ export default function EventDetailClient({ event }: { event: Event & { longDesc
   const tDescription = tr(event, lang, "long_description") || event.longDescription || tr(event, lang, "description") || event.description;
   const tHighlightsRaw = lang !== "EN" ? tr(event, lang, "highlights") : "";
   const tHighlights = tHighlightsRaw ? tHighlightsRaw.split("\n").filter(Boolean) : (event.highlights || []);
-  const [pdfModalOpen, setPdfModalOpen] = useState(false);
+  const [pdfGenerating, setPdfGenerating] = useState(false);
+
+  async function handlePdfDownload() {
+    if (pdfGenerating) return;
+    setPdfGenerating(true);
+    try {
+      await generateEventPDF(event);
+    } finally {
+      setPdfGenerating(false);
+    }
+  }
   const [showStickyBar, setShowStickyBar] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const bookingCardRef = useRef<HTMLDivElement>(null);
@@ -337,13 +286,16 @@ export default function EventDetailClient({ event }: { event: Event & { longDesc
 
                 <button
                   type="button"
-                  onClick={() => setPdfModalOpen(true)}
-                  className="flex items-center justify-center gap-2 w-full border-2 border-brand-navy text-brand-navy font-bold py-3 rounded-xl hover:bg-brand-navy hover:text-white transition-all duration-200"
+                  onClick={handlePdfDownload}
+                  disabled={pdfGenerating}
+                  className="flex items-center justify-center gap-2 w-full border-2 border-brand-navy text-brand-navy font-bold py-3 rounded-xl hover:bg-brand-navy hover:text-white transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                  </svg>
-                  {t("event.download")}
+                  {pdfGenerating ? (
+                    <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 11-8 8z" /></svg>
+                  ) : (
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                  )}
+                  {pdfGenerating ? t("pdf.generating") : t("event.download")}
                 </button>
 
                 <div className="pt-2 border-t border-gray-100 text-center">
@@ -379,17 +331,6 @@ export default function EventDetailClient({ event }: { event: Event & { longDesc
             {t("event.book")}
           </Link>
         </div>
-      )}
-
-      {/* ═══════════ PDF MODAL ═══════════ */}
-      {pdfModalOpen && (
-        <PDFDownloadModal
-          onClose={() => setPdfModalOpen(false)}
-          onDownload={async (email) => {
-            if (event.numericId) await eventPdfLead(email, event.numericId);
-            await generateEventPDF(event);
-          }}
-        />
       )}
 
       {/* ═══════════ BACK LINK ═══════════ */}
