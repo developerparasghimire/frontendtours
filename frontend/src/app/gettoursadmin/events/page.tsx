@@ -618,12 +618,37 @@ export default function AdminEventsPage() {
 }
 
 /* ═══════════════════ EVENT FAQ MODAL ═══════════════════ */
+function parseBulkFAQs(text: string): { question: string; answer: string }[] {
+  const blocks = text.split(/\n\s*\n/).filter((b) => b.trim());
+  const results: { question: string; answer: string }[] = [];
+  for (const block of blocks) {
+    const lines = block.trim().split("\n");
+    let question = "";
+    const answerLines: string[] = [];
+    for (const line of lines) {
+      if (/^Q[:.)\s]/i.test(line) && !question) {
+        question = line.replace(/^Q[:.)\s]+/i, "").trim();
+      } else if (/^A[:.)\s]/i.test(line)) {
+        answerLines.push(line.replace(/^A[:.)\s]+/i, "").trim());
+      } else if (answerLines.length > 0 && line.trim()) {
+        answerLines.push(line.trim());
+      }
+    }
+    const answer = answerLines.filter(Boolean).join(" ").trim();
+    if (question && answer) results.push({ question, answer });
+  }
+  return results;
+}
+
 function EventFaqModal({ event, token, onClose }: { event: APIEvent; token: string | null; onClose: () => void }) {
   const [faqs, setFaqs] = useState<APIEventFAQ[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [editing, setEditing] = useState<APIEventFAQ | null>(null);
   const [form, setForm] = useState({ question: "", answer: "", order: 0 });
+  const [bulkMode, setBulkMode] = useState(false);
+  const [bulkText, setBulkText] = useState("");
+  const [bulkSaving, setBulkSaving] = useState(false);
   const inputCls = "w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none";
 
   const load = useCallback(async () => {
@@ -670,7 +695,28 @@ function EventFaqModal({ event, token, onClose }: { event: APIEvent; token: stri
 
   const startEdit = (faq: APIEventFAQ) => {
     setEditing(faq);
+    setBulkMode(false);
     setForm({ question: faq.question, answer: faq.answer, order: faq.order });
+  };
+
+  const parsedFAQs = parseBulkFAQs(bulkText);
+
+  const handleBulkImport = async () => {
+    if (!token || parsedFAQs.length === 0) return;
+    setBulkSaving(true);
+    try {
+      let order = faqs.length;
+      for (const item of parsedFAQs) {
+        await createEventFAQ({ event: event.id, question: item.question, answer: item.answer, order: order++ }, token);
+      }
+      setBulkText("");
+      setBulkMode(false);
+      await load();
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "Failed to import FAQs");
+    } finally {
+      setBulkSaving(false);
+    }
   };
 
   return (
@@ -711,29 +757,78 @@ function EventFaqModal({ event, token, onClose }: { event: APIEvent; token: stri
           )}
 
           <div className="bg-gray-50 rounded-xl p-4 space-y-3 border border-gray-100">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{editing ? "Edit FAQ" : "Add FAQ"}</p>
-            <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">Question</label>
-              <input value={form.question} onChange={(e) => setForm({ ...form, question: e.target.value })} placeholder="e.g. What is included in this event?" className={inputCls} />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">Answer</label>
-              <textarea rows={3} value={form.answer} onChange={(e) => setForm({ ...form, answer: e.target.value })} placeholder="Provide a clear, helpful answer…" className={inputCls} />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">Display Order <span className="text-gray-400 font-normal">(lower = first)</span></label>
-              <input type="number" min={0} value={form.order} onChange={(e) => setForm({ ...form, order: Number(e.target.value) })} className={`${inputCls} w-24`} />
-            </div>
-            <div className="flex gap-2">
-              <button onClick={handleSave} disabled={saving || !form.question.trim() || !form.answer.trim()} className="px-4 py-2 bg-purple-600 text-white text-xs font-semibold rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50">
-                {saving ? "Saving…" : editing ? "Update FAQ" : "Add FAQ"}
-              </button>
-              {editing && (
-                <button onClick={resetForm} className="px-4 py-2 text-gray-500 text-xs font-semibold rounded-lg hover:bg-gray-100 transition-colors">
-                  Cancel
-                </button>
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{editing ? "Edit FAQ" : "Add FAQ"}</p>
+              {!editing && (
+                <div className="flex gap-0.5 bg-gray-200 rounded-lg p-0.5">
+                  <button onClick={() => setBulkMode(false)} className={`px-3 py-1 text-xs font-semibold rounded-md transition-colors ${!bulkMode ? "bg-white text-brand-navy shadow-sm" : "text-gray-500 hover:text-gray-700"}`}>Single</button>
+                  <button onClick={() => setBulkMode(true)} className={`px-3 py-1 text-xs font-semibold rounded-md transition-colors ${bulkMode ? "bg-white text-brand-navy shadow-sm" : "text-gray-500 hover:text-gray-700"}`}>Bulk Import</button>
+                </div>
               )}
             </div>
+
+            {!editing && bulkMode ? (
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Paste multiple FAQs</label>
+                  <p className="text-[11px] text-gray-400 mb-2">
+                    Each FAQ must be separated by a blank line. Use <code className="bg-gray-200 px-1 rounded">Q:</code> for the question and <code className="bg-gray-200 px-1 rounded">A:</code> for the answer.
+                  </p>
+                  <textarea
+                    rows={10}
+                    value={bulkText}
+                    onChange={(e) => setBulkText(e.target.value)}
+                    placeholder={"Q: What is included in this event?\nA: Entry, refreshments, and a guided experience are all included.\n\nQ: Is parking available?\nA: Yes, free parking is available on-site.\n\nQ: Can I bring children?\nA: Yes, the event is family-friendly and open to all ages."}
+                    className={`${inputCls} font-mono text-xs leading-relaxed`}
+                  />
+                </div>
+                {parsedFAQs.length > 0 && (
+                  <div className="bg-green-50 rounded-lg p-3 border border-green-100">
+                    <p className="text-xs font-semibold text-green-700 mb-1.5">{parsedFAQs.length} FAQ{parsedFAQs.length !== 1 ? "s" : ""} detected</p>
+                    <ul className="space-y-0.5">
+                      {parsedFAQs.map((f, i) => (
+                        <li key={i} className="text-xs text-green-600 truncate">• {f.question}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {bulkText.trim() && parsedFAQs.length === 0 && (
+                  <p className="text-xs text-amber-600 bg-amber-50 rounded-lg px-3 py-2 border border-amber-100">No FAQs detected. Make sure each block starts with <code className="bg-amber-100 px-1 rounded">Q:</code> and has an <code className="bg-amber-100 px-1 rounded">A:</code> line, with blank lines between each FAQ.</p>
+                )}
+                <button
+                  onClick={handleBulkImport}
+                  disabled={bulkSaving || parsedFAQs.length === 0}
+                  className="px-4 py-2 bg-purple-600 text-white text-xs font-semibold rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50"
+                >
+                  {bulkSaving ? "Importing…" : `Import ${parsedFAQs.length} FAQ${parsedFAQs.length !== 1 ? "s" : ""}`}
+                </button>
+              </div>
+            ) : (
+              <>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Question</label>
+                  <input value={form.question} onChange={(e) => setForm({ ...form, question: e.target.value })} placeholder="e.g. What is included in this event?" className={inputCls} />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Answer</label>
+                  <textarea rows={3} value={form.answer} onChange={(e) => setForm({ ...form, answer: e.target.value })} placeholder="Provide a clear, helpful answer…" className={inputCls} />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Display Order <span className="text-gray-400 font-normal">(lower = first)</span></label>
+                  <input type="number" min={0} value={form.order} onChange={(e) => setForm({ ...form, order: Number(e.target.value) })} className={`${inputCls} w-24`} />
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={handleSave} disabled={saving || !form.question.trim() || !form.answer.trim()} className="px-4 py-2 bg-purple-600 text-white text-xs font-semibold rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50">
+                    {saving ? "Saving…" : editing ? "Update FAQ" : "Add FAQ"}
+                  </button>
+                  {editing && (
+                    <button onClick={resetForm} className="px-4 py-2 text-gray-500 text-xs font-semibold rounded-lg hover:bg-gray-100 transition-colors">
+                      Cancel
+                    </button>
+                  )}
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
