@@ -38,3 +38,29 @@ class BlogPost(TimeStampedModel):
                 BlogPost.objects.filter(pk=self.pk).update(translations=self.translations)
             except Exception:
                 pass
+
+
+class BlogFAQ(models.Model):
+    post = models.ForeignKey(BlogPost, on_delete=models.CASCADE, related_name='faqs')
+    question = models.CharField(max_length=500)
+    answer = models.TextField()
+    order = models.PositiveIntegerField(default=0, help_text="Display order (lower = first)")
+    translations = models.JSONField(default=dict, blank=True)
+
+    class Meta:
+        ordering = ['order']
+
+    def __str__(self):
+        return f"{self.question[:60]} ({self.post.title})"
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        fields = {}
+        if self.question: fields["question"] = self.question
+        if self.answer: fields["answer"] = self.answer
+        if fields:
+            try:
+                self.translations = auto_translate(fields)
+                BlogFAQ.objects.filter(pk=self.pk).update(translations=self.translations)
+            except Exception:
+                pass

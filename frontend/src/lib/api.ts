@@ -1291,6 +1291,32 @@ export async function deleteBlogPost(slug: string, token: string): Promise<void>
   return fetchDelete(`/blog/${slug}/`, token);
 }
 
+// Blog FAQ CRUD (admin)
+export interface APIBlogFAQ {
+  id: number;
+  post: number;
+  question: string;
+  answer: string;
+  order: number;
+  translations: Record<string, Record<string, string>>;
+}
+
+export async function getBlogFAQs(postSlug: string): Promise<APIBlogFAQ[]> {
+  return fetchAPI<APIBlogFAQ[]>(`/blog/faqs/?post_slug=${encodeURIComponent(postSlug)}`);
+}
+
+export async function createBlogFAQ(data: { post: number; question: string; answer: string; order: number }, token: string): Promise<APIBlogFAQ> {
+  return fetchAPI<APIBlogFAQ>("/blog/faqs/", { method: "POST", body: JSON.stringify(data), headers: { Authorization: `Bearer ${token}` } });
+}
+
+export async function updateBlogFAQ(id: number, data: { question?: string; answer?: string; order?: number }, token: string): Promise<APIBlogFAQ> {
+  return fetchAPI<APIBlogFAQ>(`/blog/faqs/${id}/`, { method: "PATCH", body: JSON.stringify(data), headers: { Authorization: `Bearer ${token}` } });
+}
+
+export async function deleteBlogFAQ(id: number, token: string): Promise<void> {
+  return fetchDelete(`/blog/faqs/${id}/`, token);
+}
+
 /* ──────────────── Testimonials API ──────────────── */
 
 export interface APITestimonial {

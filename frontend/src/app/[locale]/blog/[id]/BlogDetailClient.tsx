@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import MotionWrapper, { StaggerContainer, StaggerItem } from "@/components/shared/MotionWrapper";
@@ -9,6 +10,7 @@ import BlogImagePlaceholder from "@/components/shared/BlogImagePlaceholder";
 import { sanitizeHTML } from "@/lib/sanitize";
 import { useTranslation } from "@/context/TranslationContext";
 import { tr } from "@/lib/langContent";
+import { getBlogFAQs, type APIBlogFAQ } from "@/lib/api";
 
 export default function BlogDetailClient({
   post,
@@ -18,6 +20,15 @@ export default function BlogDetailClient({
   related: BlogPost[];
 }) {
   const { t, lang } = useTranslation();
+  const [faqs, setFaqs] = useState<APIBlogFAQ[]>([]);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (post.id) {
+      getBlogFAQs(post.id).then(setFaqs).catch(() => {});
+    }
+  }, [post.id]);
+
   const tTitle = tr(post, lang, "title") || post.title;
   const tExcerpt = tr(post, lang, "excerpt") || post.excerpt;
   const tCategory = tr(post, lang, "category") || post.category;
@@ -116,6 +127,38 @@ export default function BlogDetailClient({
                       #{tag}
                     </span>
                   ))}
+                </div>
+              </MotionWrapper>
+            )}
+
+            {/* FAQ Section */}
+            {faqs.length > 0 && (
+              <MotionWrapper delay={0.12}>
+                <div className="mt-12 pt-8 border-t border-gray-100">
+                  <h2 className="text-xl sm:text-2xl font-bold text-brand-navy mb-6">{t("tour.faq_title")}</h2>
+                  <div className="space-y-3">
+                    {faqs.map((faq, i) => {
+                      const tQuestion = (faq.translations?.[lang]?.question) || faq.question;
+                      const tAnswer = (faq.translations?.[lang]?.answer) || faq.answer;
+                      const isOpen = openFaq === i;
+                      return (
+                        <div key={faq.id} className="rounded-xl border border-gray-200 overflow-hidden">
+                          <button
+                            onClick={() => setOpenFaq(isOpen ? null : i)}
+                            className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-gray-50 transition-colors"
+                          >
+                            <span className="font-semibold text-brand-navy text-sm sm:text-base pr-4">{tQuestion}</span>
+                            <span className={`flex-shrink-0 w-6 h-6 rounded-full bg-brand-navy text-white flex items-center justify-center text-sm font-bold transition-transform ${isOpen ? "rotate-45" : ""}`}>+</span>
+                          </button>
+                          {isOpen && (
+                            <div className="px-5 pb-4 text-gray-600 text-sm sm:text-base leading-relaxed border-t border-gray-100 pt-3">
+                              {tAnswer}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               </MotionWrapper>
             )}

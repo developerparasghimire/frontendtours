@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import BlogPost
+from .models import BlogPost, BlogFAQ
 
 
 def _parse_bool(value):
@@ -34,3 +34,10 @@ class BlogPostSerializer(serializers.ModelSerializer):
 
     def validate_is_published(self, value):
         return _parse_bool(value)
+
+
+class BlogFAQSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BlogFAQ
+        fields = ['id', 'post', 'question', 'answer', 'order', 'translations']
+        read_only_fields = ['id', 'translations']

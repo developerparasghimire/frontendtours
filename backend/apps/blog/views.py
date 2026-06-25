@@ -1,6 +1,6 @@
 from rest_framework import viewsets, permissions, filters
-from .models import BlogPost
-from .serializers import BlogPostSerializer
+from .models import BlogPost, BlogFAQ
+from .serializers import BlogPostSerializer, BlogFAQSerializer
 from apps.common.permissions import IsAdminOrStaff
 
 
@@ -26,3 +26,19 @@ class BlogPostViewSet(viewsets.ModelViewSet):
         context = super().get_serializer_context()
         context['request'] = self.request
         return context
+
+
+class BlogFAQViewSet(viewsets.ModelViewSet):
+    serializer_class = BlogFAQSerializer
+
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            return [permissions.AllowAny()]
+        return [IsAdminOrStaff()]
+
+    def get_queryset(self):
+        qs = BlogFAQ.objects.all()
+        post_slug = self.request.query_params.get('post_slug')
+        if post_slug:
+            qs = qs.filter(post__slug=post_slug)
+        return qs

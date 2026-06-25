@@ -10,7 +10,12 @@ import {
   createBlogPost,
   updateBlogPost,
   deleteBlogPost,
+  getBlogFAQs,
+  createBlogFAQ,
+  updateBlogFAQ,
+  deleteBlogFAQ,
   type APIBlogPost,
+  type APIBlogFAQ,
 } from "@/lib/api";
 import { shouldUseUnoptimizedImage } from "@/lib/images";
 
@@ -67,6 +72,7 @@ export default function AdminBlogPage() {
   const [form, setForm] = useState<BlogForm>(emptyForm);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [faqModalPost, setFaqModalPost] = useState<APIBlogPost | null>(null);
 
   const token =
     typeof window !== "undefined" ? localStorage.getItem("admin_token") : null;
@@ -216,6 +222,10 @@ export default function AdminBlogPage() {
                   </div>
                 </div>
                 <div className="flex gap-2 mt-3 pt-3 border-t border-gray-100">
+                  <button onClick={() => setFaqModalPost(post)} className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 text-sm font-medium text-purple-600 border border-purple-200 rounded-lg hover:bg-purple-50 transition-colors">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    FAQ
+                  </button>
                   <EditButton onClick={() => openEdit(post)} className="flex-1 justify-center" />
                   <DeleteButton onClick={() => handleDelete(post.slug)} className="flex-1 justify-center" />
                 </div>
@@ -357,6 +367,234 @@ export default function AdminBlogPage() {
           </div>
         </div>
       )}
+
+      {/* FAQ Modal */}
+      {faqModalPost && (
+        <BlogFaqModal
+          post={faqModalPost}
+          token={token}
+          onClose={() => setFaqModalPost(null)}
+        />
+      )}
     </AdminShell>
+  );
+}
+
+/* ═══════════════════ BLOG FAQ MODAL ═══════════════════ */
+function parseBulkFAQs(text: string): { question: string; answer: string }[] {
+  const blocks = text.split(/\n\s*\n/).filter((b) => b.trim());
+  const results: { question: string; answer: string }[] = [];
+  for (const block of blocks) {
+    const lines = block.trim().split("\n");
+    let question = "";
+    const answerLines: string[] = [];
+    for (const line of lines) {
+      if (/^Q[:.)\s]/i.test(line) && !question) {
+        question = line.replace(/^Q[:.)\s]+/i, "").trim();
+      } else if (/^A[:.)\s]/i.test(line)) {
+        answerLines.push(line.replace(/^A[:.)\s]+/i, "").trim());
+      } else if (answerLines.length > 0 && line.trim()) {
+        answerLines.push(line.trim());
+      }
+    }
+    const answer = answerLines.filter(Boolean).join(" ").trim();
+    if (question && answer) results.push({ question, answer });
+  }
+  return results;
+}
+
+function BlogFaqModal({ post, token, onClose }: { post: APIBlogPost; token: string | null; onClose: () => void }) {
+  const [faqs, setFaqs] = useState<APIBlogFAQ[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [editing, setEditing] = useState<APIBlogFAQ | null>(null);
+  const [form, setForm] = useState({ question: "", answer: "", order: 0 });
+  const [bulkMode, setBulkMode] = useState(false);
+  const [bulkText, setBulkText] = useState("");
+  const [bulkSaving, setBulkSaving] = useState(false);
+  const inputCls = "w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none";
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await getBlogFAQs(post.slug);
+      setFaqs(data);
+    } catch { /* empty */ } finally {
+      setLoading(false);
+    }
+  }, [post.slug]);
+
+  useEffect(() => { load(); }, [load]);
+
+  const resetForm = () => { setForm({ question: "", answer: "", order: faqs.length }); setEditing(null); };
+
+  const handleSave = async () => {
+    if (!token || !form.question.trim() || !form.answer.trim()) return;
+    setSaving(true);
+    try {
+      if (editing) {
+        await updateBlogFAQ(editing.id, { question: form.question, answer: form.answer, order: form.order }, token);
+      } else {
+        await createBlogFAQ({ post: post.id, question: form.question, answer: form.answer, order: form.order }, token);
+      }
+      resetForm();
+      await load();
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "Failed to save FAQ");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!token || !confirm("Delete this FAQ?")) return;
+    try {
+      await deleteBlogFAQ(id, token);
+      await load();
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "Failed to delete FAQ");
+    }
+  };
+
+  const startEdit = (faq: APIBlogFAQ) => {
+    setEditing(faq);
+    setBulkMode(false);
+    setForm({ question: faq.question, answer: faq.answer, order: faq.order });
+  };
+
+  const parsedFAQs = parseBulkFAQs(bulkText);
+
+  const handleBulkImport = async () => {
+    if (!token || parsedFAQs.length === 0) return;
+    setBulkSaving(true);
+    try {
+      let order = faqs.length;
+      for (const item of parsedFAQs) {
+        await createBlogFAQ({ post: post.id, question: item.question, answer: item.answer, order: order++ }, token);
+      }
+      setBulkText("");
+      setBulkMode(false);
+      await load();
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "Failed to import FAQs");
+    } finally {
+      setBulkSaving(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+        <div className="sticky top-0 bg-white flex items-center justify-between px-6 py-4 border-b border-gray-100 z-10">
+          <div>
+            <h3 className="text-base font-bold text-brand-navy">FAQ Management</h3>
+            <p className="text-xs text-gray-400 truncate max-w-[280px]">{post.title}</p>
+          </div>
+          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-500 transition-colors text-lg">×</button>
+        </div>
+
+        <div className="p-6 space-y-6">
+          {loading ? (
+            <p className="text-gray-400 text-center py-4">Loading…</p>
+          ) : faqs.length > 0 ? (
+            <div className="space-y-2">
+              <h4 className="text-sm font-semibold text-brand-navy">Current FAQs ({faqs.length})</h4>
+              {faqs.map((faq) => (
+                <div key={faq.id} className={`rounded-xl border p-3 ${editing?.id === faq.id ? "border-purple-300 bg-purple-50" : "border-gray-100 bg-gray-50"}`}>
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-brand-navy line-clamp-2">{faq.question}</p>
+                      <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">{faq.answer}</p>
+                      <p className="text-[10px] text-gray-400 mt-1">Order: {faq.order}</p>
+                    </div>
+                    <div className="flex gap-1.5 flex-shrink-0">
+                      <button onClick={() => startEdit(faq)} className="text-purple-600 hover:text-purple-800 text-xs font-semibold px-2 py-1 rounded-lg hover:bg-purple-100 transition-colors">Edit</button>
+                      <button onClick={() => handleDelete(faq.id)} className="text-red-500 hover:text-red-700 text-xs font-semibold px-2 py-1 rounded-lg hover:bg-red-50 transition-colors">×</button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-gray-400 text-center py-2">No FAQs yet. Add one below.</p>
+          )}
+
+          <div className="bg-gray-50 rounded-xl p-4 space-y-3 border border-gray-100">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{editing ? "Edit FAQ" : "Add FAQ"}</p>
+              {!editing && (
+                <div className="flex gap-0.5 bg-gray-200 rounded-lg p-0.5">
+                  <button onClick={() => setBulkMode(false)} className={`px-3 py-1 text-xs font-semibold rounded-md transition-colors ${!bulkMode ? "bg-white text-brand-navy shadow-sm" : "text-gray-500 hover:text-gray-700"}`}>Single</button>
+                  <button onClick={() => setBulkMode(true)} className={`px-3 py-1 text-xs font-semibold rounded-md transition-colors ${bulkMode ? "bg-white text-brand-navy shadow-sm" : "text-gray-500 hover:text-gray-700"}`}>Bulk Import</button>
+                </div>
+              )}
+            </div>
+
+            {!editing && bulkMode ? (
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Paste multiple FAQs</label>
+                  <p className="text-[11px] text-gray-400 mb-2">
+                    Each FAQ must be separated by a blank line. Use <code className="bg-gray-200 px-1 rounded">Q:</code> for the question and <code className="bg-gray-200 px-1 rounded">A:</code> for the answer.
+                  </p>
+                  <textarea
+                    rows={10}
+                    value={bulkText}
+                    onChange={(e) => setBulkText(e.target.value)}
+                    placeholder={"Q: What topics does this article cover?\nA: This article covers travel tips, local culture, and must-see attractions.\n\nQ: Is the information up to date?\nA: Yes, all content is regularly reviewed and updated."}
+                    className={`${inputCls} font-mono text-xs leading-relaxed`}
+                  />
+                </div>
+                {parsedFAQs.length > 0 && (
+                  <div className="bg-green-50 rounded-lg p-3 border border-green-100">
+                    <p className="text-xs font-semibold text-green-700 mb-1.5">{parsedFAQs.length} FAQ{parsedFAQs.length !== 1 ? "s" : ""} detected</p>
+                    <ul className="space-y-0.5">
+                      {parsedFAQs.map((f, i) => (
+                        <li key={i} className="text-xs text-green-600 truncate">• {f.question}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {bulkText.trim() && parsedFAQs.length === 0 && (
+                  <p className="text-xs text-amber-600 bg-amber-50 rounded-lg px-3 py-2 border border-amber-100">No FAQs detected. Make sure each block starts with <code className="bg-amber-100 px-1 rounded">Q:</code> and has an <code className="bg-amber-100 px-1 rounded">A:</code> line, with blank lines between each FAQ.</p>
+                )}
+                <button
+                  onClick={handleBulkImport}
+                  disabled={bulkSaving || parsedFAQs.length === 0}
+                  className="px-4 py-2 bg-purple-600 text-white text-xs font-semibold rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50"
+                >
+                  {bulkSaving ? "Importing…" : `Import ${parsedFAQs.length} FAQ${parsedFAQs.length !== 1 ? "s" : ""}`}
+                </button>
+              </div>
+            ) : (
+              <>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Question</label>
+                  <input value={form.question} onChange={(e) => setForm({ ...form, question: e.target.value })} placeholder="e.g. Is this article suitable for beginners?" className={inputCls} />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Answer</label>
+                  <textarea rows={3} value={form.answer} onChange={(e) => setForm({ ...form, answer: e.target.value })} placeholder="Provide a clear, helpful answer…" className={inputCls} />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Display Order <span className="text-gray-400 font-normal">(lower = first)</span></label>
+                  <input type="number" min={0} value={form.order} onChange={(e) => setForm({ ...form, order: Number(e.target.value) })} className={`${inputCls} w-24`} />
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={handleSave} disabled={saving || !form.question.trim() || !form.answer.trim()} className="px-4 py-2 bg-purple-600 text-white text-xs font-semibold rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50">
+                    {saving ? "Saving…" : editing ? "Update FAQ" : "Add FAQ"}
+                  </button>
+                  {editing && (
+                    <button onClick={resetForm} className="px-4 py-2 text-gray-500 text-xs font-semibold rounded-lg hover:bg-gray-100 transition-colors">
+                      Cancel
+                    </button>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
