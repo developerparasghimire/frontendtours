@@ -68,6 +68,7 @@ export default function AdminBlogPage() {
   const [posts, setPosts] = useState<APIBlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [minimized, setMinimized] = useState(false);
   const [editing, setEditing] = useState<APIBlogPost | null>(null);
   const [form, setForm] = useState<BlogForm>(emptyForm);
   const [saving, setSaving] = useState(false);
@@ -93,6 +94,7 @@ export default function AdminBlogPage() {
     setEditing(null);
     setForm(emptyForm);
     setError("");
+    setMinimized(false);
     setShowModal(true);
   }
 
@@ -112,6 +114,7 @@ export default function AdminBlogPage() {
       is_published: post.is_published,
     });
     setError("");
+    setMinimized(false);
     setShowModal(true);
   }
 
@@ -236,12 +239,26 @@ export default function AdminBlogPage() {
       </div>
 
       {/* Modal */}
-      {showModal && (
+      {showModal && minimized && (
+        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 bg-brand-navy text-white rounded-full shadow-2xl px-5 py-3 flex items-center gap-3">
+          <span className="text-sm font-semibold">{editing ? "Edit Post" : "New Post"}</span>
+          <button onClick={() => setMinimized(false)} className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-white/20 transition-colors" title="Restore">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7"/></svg>
+          </button>
+          <button onClick={() => setShowModal(false)} className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-white/20 transition-colors text-xl leading-none" title="Close">×</button>
+        </div>
+      )}
+      {showModal && !minimized && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6">
-            <h3 className="text-lg font-bold text-brand-navy mb-4">
-              {editing ? "Edit Post" : "Create Post"}
-            </h3>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-brand-navy">
+                {editing ? "Edit Post" : "Create Post"}
+              </h3>
+              <button onClick={() => setMinimized(true)} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-500 transition-colors" title="Minimize">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M20 12H4"/></svg>
+              </button>
+            </div>
             {error && (
               <div className="bg-red-50 text-red-600 text-sm rounded-lg p-3 mb-4">{error}</div>
             )}
