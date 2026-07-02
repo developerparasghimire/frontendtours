@@ -259,6 +259,42 @@ export default function RichTextEditor({
 
         <Divider />
 
+        {/* Link */}
+        <ToolbarButton
+          title="Insert / Edit Link"
+          active={isActive("link")}
+          onClick={() => {
+            const prev = editor.getAttributes("link").href as string | undefined;
+            const url = window.prompt("Enter URL (leave blank to remove link):", prev ?? "https://");
+            if (url === null) return; // cancelled
+            if (url.trim() === "") {
+              editor.chain().focus().unsetLink().run();
+            } else {
+              editor.chain().focus().extendMarkRange("link").setLink({ href: url.trim(), target: "_blank", rel: "noopener noreferrer" }).run();
+            }
+          }}
+        >
+          <span className="flex items-center gap-1">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+            </svg>
+            Link
+          </span>
+        </ToolbarButton>
+        {isActive("link") && (
+          <ToolbarButton
+            title="Remove Link"
+            onClick={() => editor.chain().focus().unsetLink().run()}
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 3l18 18" />
+            </svg>
+          </ToolbarButton>
+        )}
+
+        <Divider />
+
         {/* Image upload */}
         <ToolbarButton
           title="Insert Image"

@@ -135,7 +135,7 @@ export default function BlogDetailClient({
             {faqs.length > 0 && (
               <MotionWrapper delay={0.12}>
                 <div className="mt-12 pt-8 border-t border-gray-100">
-                  <h2 className="text-xl sm:text-2xl font-bold text-brand-navy mb-6">{t("tour.faq_title")}</h2>
+                  <h2 className="text-xl sm:text-2xl font-bold text-brand-navy mb-6">{t("tour.faq")}</h2>
                   <div className="space-y-3">
                     {faqs.map((faq, i) => {
                       const tQuestion = (faq.translations?.[lang]?.question) || faq.question;
