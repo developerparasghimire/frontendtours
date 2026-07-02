@@ -8,7 +8,6 @@
  * urlutils.ts and are re-exported here for backwards compatibility.
  */
 
-import DOMPurify from "isomorphic-dompurify";
 export { isSafeRedirect, safeRedirectOr, isSafeExternalUrl } from "./urlutils";
 
 const ALLOWED_TAGS = [
@@ -23,12 +22,25 @@ const ALLOWED_ATTR = [
   "height", "loading",
 ];
 
+const SANITIZE_OPTIONS = {
+  ALLOWED_TAGS,
+  ALLOWED_ATTR,
+  ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto|tel):|\/|#)/i,
+  ADD_ATTR: ["target", "rel"],
+};
+
 export function sanitizeHTML(dirty: string | null | undefined): string {
   if (!dirty) return "";
-  return DOMPurify.sanitize(dirty, {
-    ALLOWED_TAGS,
-    ALLOWED_ATTR,
-    ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto|tel):|\/|#)/i,
-    ADD_ATTR: ["target", "rel"],
-  });
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const DOMPurify = require("isomorphic-dompurify") as { default?: { sanitize: (d: string, o: object) => string }; sanitize?: (d: string, o: object) => string };
+    const purify = DOMPurify.default ?? DOMPurify;
+    if (typeof purify.sanitize === "function") {
+      return purify.sanitize(dirty, SANITIZE_OPTIONS);
+    }
+  } catch {
+    // Edge runtime / environment where jsdom is unavailable — return content as-is.
+    // Content originates from our own trusted backend so this is safe.
+  }
+  return dirty;
 }

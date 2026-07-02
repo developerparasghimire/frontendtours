@@ -67,6 +67,9 @@ try {
 const nextConfig: NextConfig = {
   compress: true,
   poweredByHeader: false,
+  // Prevent jsdom/isomorphic-dompurify from being bundled into the SSR chunk.
+  // They use Node.js APIs incompatible with Vercel's edge runtime.
+  serverExternalPackages: ["isomorphic-dompurify", "jsdom"],
   images: {
     formats: ["image/avif", "image/webp"],
     qualities: [60, 68, 70, 72, 75, 76],
@@ -174,6 +177,15 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
+      // Redirect www → non-www canonical. www requests hit Vercel's edge runtime
+      // which cannot load jsdom (used by isomorphic-dompurify). Redirect before
+      // any page rendering to avoid the ERR_REQUIRE_ESM crash.
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "www.gettoursnepal.com" }],
+        destination: "https://gettoursnepal.com/:path*",
+        permanent: true,
+      },
       // Redirect legacy logo.jpeg / logo.jpg requests to the canonical logo.png.
       // Some browser caches, crawlers, and old siteConfig DB entries request these.
       {
